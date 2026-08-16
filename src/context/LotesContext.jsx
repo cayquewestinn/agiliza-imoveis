@@ -1,141 +1,116 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { supabase } from '../lib/supabaseClient'
 
 const LotesContext = createContext(null)
 
-const lotesIniciais = [
-  {
-    id: 1,
-    codigo: 'LT-045',
-    titulo: 'Apartamento 3 quartos com varanda',
-    tipoImovel: 'Residencial',
-    endereco: 'Rua Pamplona, 450',
-    bairro: 'Jardim Paulista',
-    cidade: 'São Paulo',
-    uf: 'SP',
-    areaUtil: 98,
-    quartos: 3,
-    banheiros: 2,
-    vagas: 2,
-    valorAvaliacao: 890000,
-    lanceInicial: 534000,
-    status: 'Em Leilão',
-    dataLeilao: '2026-08-22',
-    comitente: 'Banco Ouro Novo S.A.',
-  },
-  {
-    id: 2,
-    codigo: 'LT-012',
-    titulo: 'Casa térrea com quintal amplo',
-    tipoImovel: 'Residencial',
-    endereco: 'Rua Harmonia, 210',
-    bairro: 'Vila Madalena',
-    cidade: 'São Paulo',
-    uf: 'SP',
-    areaUtil: 160,
-    quartos: 4,
-    banheiros: 3,
-    vagas: 3,
-    valorAvaliacao: 1450000,
-    lanceInicial: 870000,
-    status: 'Publicado',
-    dataLeilao: '2026-09-05',
-    comitente: 'Espólio de Antônio Carlos Ferreira',
-  },
-  {
-    id: 3,
-    codigo: 'LT-078',
-    titulo: 'Sala comercial em edifício corporativo',
-    tipoImovel: 'Comercial',
-    endereco: 'Av. do Batel, 1868',
-    bairro: 'Batel',
-    cidade: 'Curitiba',
-    uf: 'PR',
-    areaUtil: 45,
-    quartos: 0,
-    banheiros: 1,
-    vagas: 1,
-    valorAvaliacao: 320000,
-    lanceInicial: 192000,
-    status: 'Rascunho',
-    dataLeilao: '2026-09-18',
-    comitente: '3ª Vara Cível da Comarca de Curitiba',
-  },
-  {
-    id: 4,
-    codigo: 'LT-033',
-    titulo: 'Cobertura duplex com piscina privativa',
-    tipoImovel: 'Residencial',
-    endereco: 'Av. Ibirapuera, 3200',
-    bairro: 'Moema',
-    cidade: 'São Paulo',
-    uf: 'SP',
-    areaUtil: 210,
-    quartos: 4,
-    banheiros: 4,
-    vagas: 3,
-    valorAvaliacao: 2380000,
-    lanceInicial: 1428000,
-    status: 'Arrematado',
-    dataLeilao: '2026-07-30',
-    comitente: 'Banco Ouro Novo S.A.',
-  },
-  {
-    id: 5,
-    codigo: 'LT-091',
-    titulo: 'Terreno comercial esquina',
-    tipoImovel: 'Comercial',
-    endereco: 'Rua Pium-í, 122',
-    bairro: 'Savassi',
-    cidade: 'Belo Horizonte',
-    uf: 'MG',
-    areaUtil: 480,
-    quartos: 0,
-    banheiros: 0,
-    vagas: 0,
-    valorAvaliacao: 1980000,
-    lanceInicial: 1188000,
-    status: 'Suspenso',
-    dataLeilao: '2026-09-01',
-    comitente: '2ª Vara de Falências e Recuperações Judiciais de BH',
-  },
-  {
-    id: 6,
-    codigo: 'LT-056',
-    titulo: 'Apartamento 2 quartos vista mar',
-    tipoImovel: 'Residencial',
-    endereco: 'Av. Atlântica, 1702',
-    bairro: 'Copacabana',
-    cidade: 'Rio de Janeiro',
-    uf: 'RJ',
-    areaUtil: 72,
-    quartos: 2,
-    banheiros: 2,
-    vagas: 1,
-    valorAvaliacao: 1120000,
-    lanceInicial: 672000,
-    status: 'Publicado',
-    dataLeilao: '2026-09-10',
-    comitente: 'Espólio de Antônio Carlos Ferreira',
-  },
-]
+const LOTE_COLUMNS = 'id, codigo, titulo, tipo_imovel, endereco, bairro, cidade, uf, area_util, quartos, banheiros, vagas, valor_avaliacao, lance_inicial, status, data_leilao, comitente'
+
+function fromRow(row) {
+  return {
+    id: row.id,
+    codigo: row.codigo,
+    titulo: row.titulo,
+    tipoImovel: row.tipo_imovel,
+    endereco: row.endereco ?? '',
+    bairro: row.bairro ?? '',
+    cidade: row.cidade ?? '',
+    uf: row.uf ?? '',
+    areaUtil: row.area_util ?? 0,
+    quartos: row.quartos,
+    banheiros: row.banheiros,
+    vagas: row.vagas,
+    valorAvaliacao: row.valor_avaliacao,
+    lanceInicial: row.lance_inicial,
+    status: row.status,
+    dataLeilao: row.data_leilao,
+    comitente: row.comitente ?? '',
+  }
+}
+
+function toRow(lote) {
+  return {
+    codigo: lote.codigo,
+    titulo: lote.titulo,
+    tipo_imovel: lote.tipoImovel,
+    endereco: lote.endereco,
+    bairro: lote.bairro,
+    cidade: lote.cidade,
+    uf: lote.uf,
+    area_util: lote.areaUtil,
+    quartos: lote.quartos,
+    banheiros: lote.banheiros,
+    vagas: lote.vagas,
+    valor_avaliacao: lote.valorAvaliacao,
+    lance_inicial: lote.lanceInicial,
+    status: lote.status,
+    data_leilao: lote.dataLeilao,
+    comitente: lote.comitente,
+  }
+}
 
 export function LotesProvider({ children }) {
-  const [lotes, setLotes] = useState(lotesIniciais)
+  const [lotes, setLotes] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  function addLote(lote) {
-    setLotes(prev => [...prev, { ...lote, id: Date.now() }])
+  useEffect(() => {
+    let active = true
+    supabase
+      .from('lotes')
+      .select(LOTE_COLUMNS)
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!active) return
+        if (error) {
+          console.error('Erro ao carregar lotes:', error)
+          setLotes([])
+        } else {
+          setLotes(data.map(fromRow))
+        }
+        setLoading(false)
+      })
+    return () => { active = false }
+  }, [])
+
+  async function addLote(lote) {
+    const { data, error } = await supabase
+      .from('lotes')
+      .insert(toRow(lote))
+      .select(LOTE_COLUMNS)
+      .single()
+    if (error) {
+      console.error('Erro ao criar lote:', error)
+      return
+    }
+    setLotes(prev => [fromRow(data), ...prev])
   }
 
-  function updateLote(id, updates) {
-    setLotes(prev => prev.map(l => (l.id === id ? { ...l, ...updates } : l)))
+  async function updateLote(id, updates) {
+    const current = lotes.find(l => l.id === id)
+    const merged = { ...current, ...updates }
+    const { data, error } = await supabase
+      .from('lotes')
+      .update(toRow(merged))
+      .eq('id', id)
+      .select(LOTE_COLUMNS)
+      .single()
+    if (error) {
+      console.error('Erro ao atualizar lote:', error)
+      return
+    }
+    setLotes(prev => prev.map(l => (l.id === id ? fromRow(data) : l)))
   }
 
-  function deleteLote(id) {
+  async function deleteLote(id) {
+    const { error } = await supabase.from('lotes').delete().eq('id', id)
+    if (error) {
+      console.error('Erro ao excluir lote:', error)
+      return
+    }
     setLotes(prev => prev.filter(l => l.id !== id))
   }
 
   return (
-    <LotesContext.Provider value={{ lotes, addLote, updateLote, deleteLote }}>
+    <LotesContext.Provider value={{ lotes, addLote, updateLote, deleteLote, loading }}>
       {children}
     </LotesContext.Provider>
   )

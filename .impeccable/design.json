@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-16T00:00:00Z",
+  "title": "Design System: Agiliza Leilões",
+  "extensions": {
+    "colorMeta": {
+      "accent-carimbo-roxo": { "role": "primary", "displayName": "Carimbo Roxo", "canonical": "#5a2a6b", "tonalRamp": ["#1f0e26", "#2f1638", "#431f52", "#5a2a6b", "#7a4590", "#9c6db0", "#c3a3d4", "#e6d9ee"] },
+      "paper-page": { "role": "neutral", "displayName": "Paper Page", "canonical": "#e4e3dd", "tonalRamp": ["#1b1912", "#3a3728", "#5c564a", "#7a7461", "#c7c2b6", "#dcdbd2", "#e4e3dd", "#f1f0ea"] },
+      "paper-panel": { "role": "neutral", "displayName": "Paper Panel", "canonical": "#f1f0ea", "tonalRamp": ["#1b1912", "#3a3728", "#5c564a", "#7a7461", "#c7c2b6", "#dcdbd2", "#f1f0ea", "#faf9f5"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#1b1912", "tonalRamp": ["#1b1912", "#2e2b21", "#5c564a", "#615a4c", "#7a7461", "#a19a89", "#c7c2b6", "#e4e3dd"] },
+      "status-success": { "role": "semantic", "displayName": "Status Success", "canonical": "#3f6b3a", "tonalRamp": ["#152a12", "#234620", "#2f5a2a", "#3f6b3a", "#5b8c54", "#83ac7c", "#b3cead", "#dcecd9"] },
+      "status-danger": { "role": "semantic", "displayName": "Status Danger", "canonical": "#8b3a2b", "tonalRamp": ["#2e120b", "#4a1e15", "#6b2c1f", "#8b3a2b", "#ad5744", "#c98070", "#e3b3a6", "#f3ddd6"] },
+      "status-warning": { "role": "semantic", "displayName": "Status Warning", "canonical": "#7a5c1a", "tonalRamp": ["#241a08", "#3d2c0e", "#5c4514", "#7a5c1a", "#9c7a30", "#bf9c54", "#dcc28c", "#f0e3c9"] },
+      "status-advancing": { "role": "semantic", "displayName": "Status Advancing", "canonical": "#2e6b66", "tonalRamp": ["#0f2624", "#1a3f3c", "#22544f", "#2e6b66", "#478a84", "#6fada6", "#a3cdc8", "#d6ece9"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Bitter Display", "purpose": "Section headers, card/lote/team titles, modal headings; masthead date uses an italic variant of the same family." },
+      "label": { "displayName": "Barlow Condensed Label", "purpose": "Uppercase 'classified column-head' voice: nav, tabs, buttons, badges, form labels, kanban headers." },
+      "mono": { "displayName": "JetBrains Mono Tabular", "purpose": "Any figure that must align: prices, codes, dates, phone, CPF, stat-row big numbers." }
+    },
+    "shadows": [
+      { "name": "shadow-sm", "value": "0 1px 2px rgba(27, 25, 18, 0.1)", "purpose": "Resting cards, ruled-sheet grid containers, mobile menu button." },
+      { "name": "shadow-md", "value": "0 8px 20px -6px rgba(27, 25, 18, 0.22)", "purpose": "Modals, login card, mobile sidebar drawer — the only lifted surfaces in the system." }
+    ],
+    "motion": [
+      { "name": "ease-fast", "value": "0.15s ease", "purpose": "Default state transition for nav items, buttons, tabs, hover fills." },
+      { "name": "ease-drawer", "value": "transform 0.2s ease", "purpose": "Mobile sidebar drawer slide (translateX)." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "900px", "purpose": "Single responsive breakpoint: off-canvas sidebar, stacked stat row, single-column grids/forms, horizontal table scroll." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main call-to-action button (e.g. Save in a modal footer).",
+      "html": "<button class=\"ds-btn-primary\">Salvar</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 3px; border: 1.5px solid #5a2a6b; background-color: #5a2a6b; color: #faf9f5; font-family: 'Barlow Condensed', 'Barlow', sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.86rem; font-weight: 700; cursor: pointer; transition: all 0.15s; } .ds-btn-primary:hover { background-color: #431f52; border-color: #431f52; } .ds-btn-primary:focus-visible { outline: 2px solid #5a2a6b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Cancel / low-emphasis action.",
+      "html": "<button class=\"ds-btn-secondary\">Cancelar</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 3px; border: 1.5px solid #7a7461; background-color: transparent; color: #1b1912; font-family: 'Barlow Condensed', 'Barlow', sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.86rem; font-weight: 700; cursor: pointer; transition: all 0.15s; } .ds-btn-secondary:hover { background-color: #dcdbd2; } .ds-btn-secondary:focus-visible { outline: 2px solid #5a2a6b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Status Badge (static)",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "Hand-stamped status mark; rotated -2deg; border-style carries meaning (shown: dashed 'em andamento').",
+      "html": "<span class=\"ds-status-badge ds-status-doing\">Em Andamento</span>",
+      "css": ".ds-status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 3px; font-family: 'Barlow Condensed', 'Barlow', sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.76rem; font-weight: 700; border: 1.5px solid; line-height: 1.5; transform: rotate(-2deg); } .ds-status-doing { background-color: rgba(90, 42, 107, 0.1); color: #5a2a6b; border-style: dashed; border-color: #5a2a6b; }"
+    },
+    {
+      "name": "Status Badge — Late (double border)",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "Terminal/alarm state; double 3px border distinguishes it from ordinary dashed/solid states.",
+      "html": "<span class=\"ds-status-badge ds-status-late\">Atrasado</span>",
+      "css": ".ds-status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 3px; font-family: 'Barlow Condensed', 'Barlow', sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.76rem; font-weight: 700; border: 1.5px solid; line-height: 1.5; transform: rotate(-2deg); } .ds-status-late { background-color: rgba(139, 58, 43, 0.12); color: #8b3a2b; border-style: double; border-width: 3px; border-color: #8b3a2b; padding: 2px 9px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "form-input",
+      "description": "Standard form field with accent focus ring.",
+      "html": "<div class=\"ds-form-group\"><label class=\"ds-form-label\">Nome</label><input class=\"ds-form-input\" type=\"text\" placeholder=\"Digite o nome\" /></div>",
+      "css": ".ds-form-group { display: flex; flex-direction: column; gap: 6px; } .ds-form-label { font-family: 'Barlow Condensed', 'Barlow', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem; font-weight: 600; color: #5c564a; } .ds-form-input { padding: 9px 12px; border-radius: 3px; border: 1px solid #7a7461; font-size: 0.9rem; font-family: 'Barlow', sans-serif; color: #1b1912; background-color: #f1f0ea; caret-color: #5a2a6b; } .ds-form-input::placeholder { color: #615a4c; } .ds-form-input:focus { outline: none; border-color: #5a2a6b; box-shadow: 0 0 0 1px #5a2a6b; }"
+    },
+    {
+      "name": "Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Sidebar navigation link; active state fills solid ink, not the accent color.",
+      "html": "<button class=\"ds-nav-item ds-nav-item-active\">Painel Geral</button>",
+      "css": ".ds-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 3px; text-decoration: none; font-family: 'Barlow Condensed', 'Barlow', sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; border: none; background: transparent; width: 100%; text-align: left; color: #5c564a; } .ds-nav-item:hover { background-color: #dcdbd2; color: #1b1912; } .ds-nav-item-active { background-color: #1b1912; color: #faf9f5; }"
+    },
+    {
+      "name": "Ruled-Sheet Card (Lote)",
+      "kind": "card",
+      "refersTo": "lote-card",
+      "description": "Signature grid cell: no own radius/shadow, hairline right/bottom borders only, flat-tint + inset-ring hover — sits inside an outer bordered/shadowed grid container.",
+      "html": "<div class=\"ds-sheet-grid\"><div class=\"ds-lote-card\"><div class=\"ds-lote-strip\"><span class=\"ds-mono\">Apartamento</span><span class=\"ds-status-badge ds-status-leilao\">Leilão</span></div><div class=\"ds-lote-body\"><div class=\"ds-lote-codigo\">LT-0231</div><h3 class=\"ds-lote-title\">Apto 2 dorms, Centro</h3></div></div></div>",
+      "css": ".ds-sheet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); background-color: #f1f0ea; border-top: 1px solid #c7c2b6; border-left: 1px solid #c7c2b6; border-radius: 4px; box-shadow: 0 1px 2px rgba(27,25,18,0.1); overflow: hidden; } .ds-lote-card { border-right: 1px solid #c7c2b6; border-bottom: 1px solid #c7c2b6; transition: background-color 0.15s, box-shadow 0.15s; } .ds-lote-card:hover { background-color: #faf9f5; box-shadow: inset 0 0 0 1.5px #5a2a6b; } .ds-lote-strip { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background-color: #dcdbd2; border-bottom: 1px solid #c7c2b6; } .ds-lote-body { padding: 18px 16px; } .ds-lote-codigo { font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; color: #5c564a; } .ds-lote-title { font-family: 'Bitter', Georgia, serif; font-size: 1.08rem; font-weight: 600; color: #1b1912; } .ds-mono { font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; } .ds-status-badge { display: inline-flex; padding: 3px 10px; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.76rem; font-weight: 700; border: 1.5px solid; transform: rotate(-2deg); } .ds-status-leilao { background-color: rgba(122,92,26,0.12); color: #7a5c1a; border-style: dashed; border-color: #7a5c1a; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Seção de Editais (the auction-classifieds page of a Brazilian newspaper)",
+    "overview": "Agiliza Leilões reads as a printed page of legal notices, not a SaaS control panel: a light, slightly warm newsprint ground, near-black ink for text, a single stamp-colored accent, and structure built from ruled hairlines rather than floating boxed cards. Every record — a lote, a lead, a task, a visit — behaves like a published notice: nothing disappears, it gets carimbado (stamped) with a new status. Density is real (a tabular stat row, a numbered task column, ruled sheets of lotes and team members) but never cramped; whitespace comes from rhythm and rule lines, not from padding-heavy cards. This is a full-identity replacement, not a reskin. The previous system — a near-black '23.4studios' dashboard with a blue accent, pill-shaped buttons, and Archivo/Fragment Mono type — was explicitly disavowed by the user as belonging to a different business and is treated purely as anti-reference. The flip from dark to light is a deliberate scene judgment (newsprint reads as a daylight, paper material) and the move away from pill radii is a deliberate rejection of 'rounded SaaS' language.",
+    "keyCharacteristics": [
+      "Light newsprint ground (#E4E3DD) with near-black ink (#1B1912), never dark mode.",
+      "One identity accent — carimbo roxo, ink-stamp violet (#5A2A6B) — kept separate from a distinct five-color semantic/status palette.",
+      "Status is a mark, not only a hue: border-style (solid/dashed/double) carries semantic weight alongside color.",
+      "Grid surfaces (Lotes, Equipe, Kanban) are one ruled sheet with hairline-divided cells, never independent floating shadowed cards.",
+      "Sharp, small corner radii (3-4px) everywhere except true circles (avatars, WhatsApp button); no pill buttons.",
+      "Four-family type system: Bitter (serif display), Barlow (body), Barlow Condensed (uppercase 'classified column-head' labels), JetBrains Mono (tabular figures)."
+    ],
+    "rules": [
+      { "name": "The Two-Palette Rule", "body": "The carimbo-roxo accent (identity, interaction, emphasis) and the five-color status palette (task/lote/lead/visit state) are separate systems. Don't recruit a status color for a UI accent role, and don't extend the accent into new status meanings beyond the existing 'doing' reuse.", "section": "colors" },
+      { "name": "The Masthead Distinction Rule", "body": "`.masthead-date` (italic Bitter, 1.15rem, own 2px ink underline) is a separate role from `.card-title` (Barlow Condensed, uppercase, 0.82rem label). It is the paper's own nameplate for 'today's edition' on the Dashboard and must never collapse into a generic card title.", "section": "typography" },
+      { "name": "The Ruled-Sheet Rule", "body": "Lotes, Equipe, and Kanban are one bordered/shadowed/radiused container; individual cells inside contribute only border-right/border-bottom hairlines — no per-item radius, no per-item shadow, no hover-translateY. This was a finish-review-mandated correction after an earlier draft left independent floating cards in place; reintroducing per-item box-shadow + radius + lift in these contexts is the specific defect this system rejects.", "section": "elevation" },
+      { "name": "The Flat Nesting Rule", "body": "A card/row nested inside another surface (a lead row inside a lote card, a task row inside a team card) is a plain ruled row (border-bottom only, no background box, no shadow) — the ruled-sheet logic applies recursively to nested content, not just top-level grids.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use the carimbo-roxo accent (#5a2a6b) sparingly — active nav underline, primary buttons, focus rings, the one price highlight — never as a general-purpose background fill.",
+      "Do pair status color with border-style (solid/dashed/double) whenever adding a new status value; color alone is not sufficient in this system.",
+      "Do keep new grid/list surfaces on the ruled-sheet pattern: one outer bordered/shadowed container, hairline-only per-item borders, flat-tint + inset-ring hover.",
+      "Do use JetBrains Mono for any new tabular/numeric field (prices, codes, dates, phone, CPF) to match the existing figures.",
+      "Do reference public/logo-agiliza-ink.png (dark navy ink mark) for any new brand-mark placement; its navy tone is a fixed, separate brand asset and is intentionally not tied to the violet UI accent."
+    ],
+    "donts": [
+      "Don't reintroduce dark mode as a default surface; the flip to a light newsprint ground was a deliberate world decision, not an oversight.",
+      "Don't reintroduce pill-shaped (--radius-full) buttons, badges, tabs, or inputs; --radius-full is reserved for true circles only (avatars, WhatsApp button).",
+      "Don't add box-shadow + border-radius + hover-translateY to individual items inside a grid/list (lote cards, team cards, kanban cards, nested rows) — this is the specific defect the finish review already caught and corrected once.",
+      "Don't apply the -2deg status-badge rotation to any interactive control (select, button); rotation is reserved for static <span> badges only.",
+      "Don't reference public/logo-agiliza.png (the old light-on-transparent mark); it is orphaned since the light-mode flip and would be invisible on the current background — use logo-agiliza-ink.png.",
+      "Don't use display: block on a <table> to make it scroll on mobile; wrap it in .table-scroll (overflow-x: auto on the container) instead — the block approach previously broke column layout.",
+      "Don't treat document/contract-generation UI as designed; no visual treatment exists yet for that unscoped future feature."
+    ]
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "title": "Escolha o mundo visual do Agiliza Leilões",
+  "question": "A rolagem atribuiu Seção de Editais. Mantenha, escolha uma alternativa, ou role de novo.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Seção de Editais",
+      "kicker": "THE ROLL",
+      "lineage": "página de classificados/editais de leilão em jornal impresso",
+      "thesis": "O CRM lido como a página de editais de leilão do jornal: colunas densas, régua fina, um carimbo de tinta como único sinal de cor.",
+      "palette": ["#1B1912", "#E4E3DD", "#B6B2A8", "#5A2A6B"],
+      "materials": ["papel jornal frio (não creme)", "régua fina entre colunas", "meio-tom em fotos", "carimbo de tinta roxa sobre o registro"],
+      "viewport": "Painel Geral como a 'edição de hoje': cabeçalho tipo mastro de jornal com a data, métricas como uma linha tabular densa, Próximas Tarefas como coluna numerada de classificados.",
+      "risk": "Vira pastiche decorativo de jornal se a textura de meio-tom/carimbo virar enfeite em vez de carregar informação real.",
+      "raised": [
+        { "from": "challenger-labanotation", "raise": "Duração como comprimento proporcional (régua), não só texto de hora — aplicado na Agenda." },
+        { "from": "challenger-ticket-wallet", "raise": "Mudança de status carimba por cima do registro em vez de apagar — nada desaparece, só é cancelado." },
+        { "from": "challenger-cutting-bench", "raise": "Estado é uma marca (forma do carimbo), não só uma cor — cada status tem um símbolo próprio além da cor." }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "Edital de Leilão",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "o próprio edital de leilão judicial — cláusulas numeradas, campos com régua, timbre único",
+      "thesis": "O CRM lido como o próprio edital que torna cada lote real: cláusulas numeradas, campos com régua, um timbre oficial.",
+      "palette": ["#201D18", "#EDEBE4", "#7A1F1F"],
+      "materials": ["formulário legal com régua", "blocos de cláusula numerada", "selo oficial carimbado"],
+      "viewport": "Painel Geral como a folha de rosto de um processo, seções numeradas em vez de cards soltos.",
+      "risk": "Risco de parecer um formulário estático em vez de uma ferramenta viva se a grade de cláusulas não flexionar para entrada rápida de dados."
+    },
+    {
+      "id": "challenger-ticket-wallet",
+      "label": "Carteira de Passagem Jet-Age",
+      "verdict": "competitive",
+      "lineage": "carteiras de passagem aérea, cupons em papel carbono",
+      "thesis": "Cada lote, lead e visita é um cupom de talão em papel carbono — validado, usado, ou carimbado VOID, nunca apagado.",
+      "palette": ["#1B2A52", "#C1272D", "#F7F6F2"],
+      "materials": ["papel de cupom", "carbono roxo", "régua fina de caixas de tarifa"],
+      "materials_note": "estado impresso, nunca removido",
+      "case": "Funde bem no modelo de estado (validado/usado/void mapeia direto pro status do lote); perde na identificação com o público porque a moldura literal de companhia aérea não lê como papelada de escritório brasileiro.",
+      "risk": "Vira pastiche de agência de viagens se não for relocalizado pra longe da iconografia de aviação."
+    },
+    {
+      "id": "challenger-cutting-bench",
+      "label": "Mesa de Edição de Filme",
+      "verdict": "competitive",
+      "lineage": "mesa de corte de editor de filme, trilho de seleção perfurado",
+      "thesis": "Tarefas e visitas correm por um trilho único marcado; status é uma marca física — cruz a lápis, canto furado, fita — não só uma cor.",
+      "palette": ["#FF6A1F", "#0A0A0A"],
+      "materials": ["trilho perfurado", "marca a lápis de cera", "fita de sinalização"],
+      "case": "Funde bem em clareza do produto (estado por marca é mais acessível e mais honesto com a cultura de papel do que só cor); perde em identificação porque edição de filme é estranha a um escritório de leilão.",
+      "risk": "Vira pastiche de ferramenta de produção audiovisual se o trilho dominar sobre a leitura normal de lista."
+    },
+    {
+      "id": "challenger-labanotation",
+      "label": "Partitura de Labanotation",
+      "verdict": "declined",
+      "lineage": "notação de dança, coluna central bilateral",
+      "palette": ["#FFFFFF", "#000000"],
+      "materials": ["blocos sombreados", "coluna central"],
+      "case": "Funde mal: um escritório de leilão não lê notação de dança, e colunas bilaterais de membro não têm equivalente no produto.",
+      "kept": "Duração como comprimento exato, doada pra linha do tempo da Agenda."
+    },
+    {
+      "id": "challenger-tensegrity",
+      "label": "Coluna de Tensegridade",
+      "verdict": "declined",
+      "lineage": "escultura cinética, hastes de carbono e cordas vermelhas",
+      "palette": ["#0A0A0A", "#C9C4BA", "#B5342A"],
+      "materials": ["hastes de carbono", "corda de tensão", "linhas de chamada"],
+      "case": "Funde mal: os dados do CRM são listas simples, não uma rede de tensão interdependente.",
+      "kept": "Anotação numérica confiante com linha de chamada — já coberta pelas cifras tabulares da direção escolhida."
+    },
+    {
+      "id": "challenger-cloud-edge",
+      "label": "Borda de Nuvem Iridescente",
+      "verdict": "declined",
+      "lineage": "difração de luz em borda de nuvem, ciência óptica",
+      "palette": ["#F4F5F2", "#4A5560", "#C9A0C9"],
+      "materials": ["franja espectral fina", "corpo acromático"],
+      "case": "Funde mal: não existe tarefa de comparar hipóteses no produto, e o tom científico suave enfraquece a seriedade que um leilão judicial pede.",
+      "kept": "Cor reservada a uma borda fina e decisiva em vez de pintada em área ampla — já é a disciplina da direção escolhida."
+    },
+    {
+      "id": "challenger-crt-arcade",
+      "label": "Fliperama CRT",
+      "verdict": "declined",
+      "lineage": "tela de fliperama em pixel art, scanlines",
+      "palette": ["#000000", "#F5D400", "#00C0C0"],
+      "materials": ["sprites em grade de pixel", "scanlines", "brilho de fósforo"],
+      "case": "Funde mal: a grade rígida de pixel briga com tipografia real (endereço, CPF, valores), e a nostalgia de fliperama mina a confiança que um leilão judicial exige.",
+      "kept": "Disciplina de paleta estrita por estado — ecoada na regra de 'um carimbo por status' da direção escolhida."
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code" },
+  "canon": true,
+  "canonCard": {
+    "label": "O dashboard SaaS escuro",
+    "thesis": "Fundo quase preto, um acento azul, botões em pílula e grades de card — o que a maioria dos CRMs entrega, incluindo o visual anterior deste projeto.",
+    "palette": ["#0A0A0A", "#111111", "#3A63D8"],
+    "materials": ["cards planos", "botões em pílula", "sans-serif de sistema"],
+    "viewport": "O mesmo dashboard que este projeto já tinha antes do redesign.",
+    "risk": "Indistinguível da concorrência — e especificamente da identidade que este projeto acabou de descartar."
+  },
+  "steer": true
+}

@@ -17,7 +17,7 @@ import { ProfilesProvider } from './context/ProfilesContext'
 import './index.css'
 
 function AppShell() {
-  const { currentUser, isAdmin } = useUser()
+  const { currentUser, isAdmin, loading } = useUser()
   const [currentView, setCurrentView] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -29,6 +29,10 @@ function AppShell() {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [sidebarOpen])
+
+  if (loading) {
+    return null
+  }
 
   if (!currentUser) {
     return <Login />

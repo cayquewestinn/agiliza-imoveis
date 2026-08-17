@@ -1,35 +1,69 @@
-import { createContext, useContext, useState } from 'react'
-import { TEAM_MEMBERS, findByCredentials } from '../utils/teamHelpers'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { supabase } from '../lib/supabaseClient'
 
 const UserContext = createContext(null)
 
-const STORAGE_KEY = 'agiliza_current_user'
+const EMAIL_DOMAIN = 'agiliza-imoveis.app'
 
-function loadStoredUser() {
-  const nome = localStorage.getItem(STORAGE_KEY)
-  return TEAM_MEMBERS.find(m => m.nome === nome) ?? null
+function toEmail(usuario) {
+  return `${usuario.trim().toLowerCase()}@${EMAIL_DOMAIN}`
 }
 
 export function UserProvider({ children }) {
-  const [currentUser, setCurrentUserState] = useState(loadStoredUser)
+  const [currentUser, setCurrentUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  function login(usuario, senha) {
-    const member = findByCredentials(usuario, senha)
-    if (!member) return false
-    setCurrentUserState(member)
-    localStorage.setItem(STORAGE_KEY, member.nome)
-    return true
+  useEffect(() => {
+    async function loadProfile(userId) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, nome, cargo, is_admin')
+        .eq('id', userId)
+        .single()
+      if (error) {
+        console.error('Erro ao carregar profile:', error)
+        setCurrentUser(null)
+      } else {
+        setCurrentUser(data)
+      }
+    }
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        loadProfile(session.user.id).then(() => setLoading(false))
+      } else {
+        setLoading(false)
+      }
+    })
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        loadProfile(session.user.id)
+      } else {
+        setCurrentUser(null)
+      }
+    })
+
+    return () => listener.subscription.unsubscribe()
+  }, [])
+
+  async function login(usuario, senha) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: toEmail(usuario),
+      password: senha,
+    })
+    return !error
   }
 
-  function logout() {
-    setCurrentUserState(null)
-    localStorage.removeItem(STORAGE_KEY)
+  async function logout() {
+    await supabase.auth.signOut()
+    setCurrentUser(null)
   }
 
-  const isAdmin = currentUser?.cargo === 'Administrador/Agendador'
+  const isAdmin = currentUser?.is_admin === true
 
   return (
-    <UserContext.Provider value={{ currentUser, login, logout, isAdmin }}>
+    <UserContext.Provider value={{ currentUser, login, logout, isAdmin, loading }}>
       {children}
     </UserContext.Provider>
   )

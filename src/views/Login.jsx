@@ -8,9 +8,9 @@ export function Login() {
   const [senha, setSenha] = useState('')
   const [error, setError] = useState('')
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    const ok = login(usuario, senha)
+    const ok = await login(usuario, senha)
     if (!ok) {
       setError('Usuário ou senha inválidos.')
     }

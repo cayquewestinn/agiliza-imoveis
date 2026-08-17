@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { STATUS_OPTIONS } from '../utils/taskHelpers'
-import { TEAM_MEMBERS } from '../utils/teamHelpers'
+import { useProfiles } from '../context/ProfilesContext'
 
 function toInputDate(prazoBr) {
   if (!prazoBr) return ''
@@ -14,12 +14,13 @@ function toBrDate(prazoInput) {
   return `${day}/${month}/${year}`
 }
 
-export function TaskModal({ task, defaultResponsavel, onClose, onSave }) {
+export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
+  const { profiles } = useProfiles()
   const isEditing = Boolean(task)
   const [titulo, setTitulo] = useState(task?.titulo ?? '')
   const [status, setStatus] = useState(task?.status ?? STATUS_OPTIONS[0])
   const [prazo, setPrazo] = useState(toInputDate(task?.prazo))
-  const [responsavel, setResponsavel] = useState(task?.responsavel ?? defaultResponsavel ?? TEAM_MEMBERS[0].nome)
+  const [responsavelId, setResponsavelId] = useState(task?.responsavelId ?? defaultResponsavelId ?? profiles[0]?.id ?? '')
   const [error, setError] = useState('')
 
   function handleSubmit(e) {
@@ -32,11 +33,15 @@ export function TaskModal({ task, defaultResponsavel, onClose, onSave }) {
       setError('Informe um prazo.')
       return
     }
+    if (!responsavelId) {
+      setError('Selecione um responsável.')
+      return
+    }
     onSave({
       titulo: titulo.trim(),
       status,
       prazo: toBrDate(prazo),
-      responsavel,
+      responsavelId,
     })
   }
 
@@ -99,11 +104,11 @@ export function TaskModal({ task, defaultResponsavel, onClose, onSave }) {
               <select
                 id="responsavel"
                 className="form-input"
-                value={responsavel}
-                onChange={e => setResponsavel(e.target.value)}
+                value={responsavelId}
+                onChange={e => setResponsavelId(e.target.value)}
               >
-                {TEAM_MEMBERS.map(member => (
-                  <option key={member.nome} value={member.nome}>{member.nome} — {member.cargo}</option>
+                {profiles.map(profile => (
+                  <option key={profile.id} value={profile.id}>{profile.nome} — {profile.cargo}</option>
                 ))}
               </select>
             </div>

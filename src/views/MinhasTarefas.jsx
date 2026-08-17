@@ -9,7 +9,7 @@ import { STATUS_OPTIONS, statusToClassName, isLate } from '../utils/taskHelpers'
 export function MinhasTarefas() {
   const { tasks: allTasks, addTask, updateTask, deleteTask } = useTasks()
   const { currentUser, isAdmin } = useUser()
-  const tasks = isAdmin ? allTasks : allTasks.filter(t => t.responsavel === currentUser.nome)
+  const tasks = isAdmin ? allTasks : allTasks.filter(t => t.responsavelId === currentUser.id)
   const [viewMode, setViewMode] = useState('list') // 'list' | 'kanban'
   const [editingTask, setEditingTask] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -151,7 +151,7 @@ export function MinhasTarefas() {
       {isModalOpen && (
         <TaskModal
           task={editingTask}
-          defaultResponsavel={isAdmin ? undefined : currentUser.nome}
+          defaultResponsavelId={isAdmin ? undefined : currentUser.id}
           onClose={closeModal}
           onSave={handleSave}
         />

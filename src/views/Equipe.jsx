@@ -3,24 +3,26 @@ import { Header } from '../components/Header'
 import { TaskModal } from '../components/TaskModal'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { useTasks } from '../context/TasksContext'
+import { useProfiles } from '../context/ProfilesContext'
 import { statusToClassName, isLate } from '../utils/taskHelpers'
-import { TEAM_MEMBERS, initials } from '../utils/teamHelpers'
+import { initials } from '../utils/teamHelpers'
 
 export function Equipe() {
   const { tasks, addTask, updateTask, deleteTask } = useTasks()
+  const { profiles } = useProfiles()
   const [editingTask, setEditingTask] = useState(null)
   const [activeMember, setActiveMember] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  function openNewTaskModal(nome) {
+  function openNewTaskModal(id) {
     setEditingTask(null)
-    setActiveMember(nome)
+    setActiveMember(id)
     setIsModalOpen(true)
   }
 
   function openEditTaskModal(task) {
     setEditingTask(task)
-    setActiveMember(task.responsavel)
+    setActiveMember(task.responsavelId)
     setIsModalOpen(true)
   }
 
@@ -51,13 +53,13 @@ export function Equipe() {
 
       <div className="page-content" style={{ flex: 1, overflow: 'auto' }}>
         <div className="team-grid">
-          {TEAM_MEMBERS.map(member => {
-            const tarefasDoMembro = tasks.filter(t => t.responsavel === member.nome)
+          {profiles.map(member => {
+            const tarefasDoMembro = tasks.filter(t => t.responsavelId === member.id)
             const emAndamento = tarefasDoMembro.filter(t => t.status === 'Em Andamento').length
             const atrasadas = tarefasDoMembro.filter(isLate).length
 
             return (
-              <div className="team-card" key={member.nome}>
+              <div className="team-card" key={member.id}>
                 <div className="team-card-header">
                   <div className="team-avatar">{initials(member.nome)}</div>
                   <div>
@@ -99,7 +101,7 @@ export function Equipe() {
                   ))}
                 </div>
 
-                <button className="kanban-add-btn" onClick={() => openNewTaskModal(member.nome)}>
+                <button className="kanban-add-btn" onClick={() => openNewTaskModal(member.id)}>
                   <Plus size={16} /> Nova tarefa para {member.nome}
                 </button>
               </div>
@@ -109,7 +111,7 @@ export function Equipe() {
       </div>
 
       {isModalOpen && (
-        <TaskModal task={editingTask} defaultResponsavel={activeMember} onClose={closeModal} onSave={handleSave} />
+        <TaskModal task={editingTask} defaultResponsavelId={activeMember} onClose={closeModal} onSave={handleSave} />
       )}
     </div>
   )

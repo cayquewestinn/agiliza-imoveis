@@ -7,7 +7,7 @@ import { statusToClassName, isLate, parsePrazo } from '../utils/taskHelpers'
 export function Dashboard() {
   const { tasks: allTasks } = useTasks()
   const { currentUser, isAdmin } = useUser()
-  const tasks = isAdmin ? allTasks : allTasks.filter(t => t.responsavel === currentUser.nome)
+  const tasks = isAdmin ? allTasks : allTasks.filter(t => t.responsavelId === currentUser.id)
 
   const concluidas = tasks.filter(t => t.status === 'Concluído').length
   const emAtraso = tasks.filter(isLate).length

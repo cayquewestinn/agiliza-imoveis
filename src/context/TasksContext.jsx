@@ -1,30 +1,88 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { supabase } from '../lib/supabaseClient'
 
 const TasksContext = createContext(null)
 
-const tarefasIniciais = [
-  { id: 1, titulo: 'Elaborar contrato de arrematação — Lote LT-045', status: 'A Fazer', prazo: '16/08/2026', responsavel: 'Cayque' },
-  { id: 2, titulo: 'Aprovar laudo de avaliação — Lote LT-012', status: 'Em Andamento', prazo: '14/08/2026', responsavel: 'Stefanie' },
-  { id: 3, titulo: 'Enviar notificação extrajudicial — Lote LT-091', status: 'Em Andamento', prazo: '13/08/2026', responsavel: 'Gilmar' },
-  { id: 4, titulo: 'Reunião de alinhamento com comitente — Espólio Antônio Ferreira', status: 'Concluído', prazo: '12/08/2026', responsavel: 'Cayque' },
-  { id: 5, titulo: 'Publicar edital no Diário Oficial — Lote LT-078', status: 'A Fazer', prazo: '18/08/2026', responsavel: 'Raissa' },
-  { id: 6, titulo: 'Agendar vistoria pré-leilão — Lote LT-056', status: 'A Fazer', prazo: '20/08/2026', responsavel: 'Scarlett' },
-  { id: 7, titulo: 'Follow-up com lead interessado — Lote LT-034', status: 'Em Andamento', prazo: '15/08/2026', responsavel: 'Ramon' },
-  { id: 8, titulo: 'Enviar proposta comercial — Lote LT-021', status: 'A Fazer', prazo: '19/08/2026', responsavel: 'Vitória' },
-]
+const TAREFA_SELECT = 'id, titulo, status, prazo, responsavel_id, profiles(nome)'
+
+function isoToBr(iso) {
+  if (!iso) return ''
+  const [y, m, d] = iso.split('-')
+  return `${d}/${m}/${y}`
+}
+
+function brToIso(br) {
+  if (!br) return null
+  const [d, m, y] = br.split('/')
+  return `${y}-${m}-${d}`
+}
+
+function fromRow(row) {
+  return {
+    id: row.id,
+    titulo: row.titulo,
+    status: row.status,
+    prazo: isoToBr(row.prazo),
+    responsavelId: row.responsavel_id,
+    responsavel: row.profiles?.nome ?? '',
+  }
+}
+
+function toRow(task) {
+  return {
+    titulo: task.titulo,
+    status: task.status,
+    prazo: brToIso(task.prazo),
+    responsavel_id: task.responsavelId,
+  }
+}
 
 export function TasksProvider({ children }) {
-  const [tasks, setTasks] = useState(tarefasIniciais)
+  const [tasks, setTasks] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  function addTask(task) {
-    setTasks(prev => [...prev, { ...task, id: Date.now() }])
+  async function refetch() {
+    const { data, error } = await supabase
+      .from('tarefas')
+      .select(TAREFA_SELECT)
+      .order('prazo', { ascending: true })
+    if (error) {
+      console.error('Erro ao carregar tarefas:', error)
+      return
+    }
+    setTasks(data.map(fromRow))
   }
 
-  function updateTask(id, updates) {
-    setTasks(prev => prev.map(t => (t.id === id ? { ...t, ...updates } : t)))
+  useEffect(() => {
+    refetch().then(() => setLoading(false))
+  }, [])
+
+  async function addTask(task) {
+    const { error } = await supabase.from('tarefas').insert(toRow(task))
+    if (error) {
+      console.error('Erro ao criar tarefa:', error)
+      return
+    }
+    await refetch()
   }
 
-  function deleteTask(id) {
+  async function updateTask(id, updates) {
+    const current = tasks.find(t => t.id === id)
+    const merged = { ...current, ...updates }
+    const { error } = await supabase.from('tarefas').update(toRow(merged)).eq('id', id)
+    if (error) {
+      console.error('Erro ao atualizar tarefa:', error)
+      return
+    }
+    await refetch()
+  }
+
+  async function deleteTask(id) {
+    const { error } = await supabase.from('tarefas').delete().eq('id', id)
+    if (error) {
+      console.error('Erro ao excluir tarefa:', error)
+      return
+    }
     setTasks(prev => prev.filter(t => t.id !== id))
   }
 
@@ -33,7 +91,7 @@ export function TasksProvider({ children }) {
   }
 
   return (
-    <TasksContext.Provider value={{ tasks, addTask, updateTask, deleteTask, updateStatus }}>
+    <TasksContext.Provider value={{ tasks, addTask, updateTask, deleteTask, updateStatus, loading }}>
       {children}
     </TasksContext.Provider>
   )

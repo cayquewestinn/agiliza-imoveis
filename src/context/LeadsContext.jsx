@@ -1,30 +1,102 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { supabase } from '../lib/supabaseClient'
+import { useUser } from './UserContext'
 
 const LeadsContext = createContext(null)
 
-const leadsIniciais = [
-  { id: 1, loteId: 1, nome: 'Fernanda Souza', telefone: '5511987654321', etapa: 'Em Atendimento', origem: 'Site', dataRecebimento: '2026-08-10' },
-  { id: 2, loteId: 1, nome: 'Ricardo Almeida', telefone: '5511976543210', etapa: 'Em Visita', origem: 'Indicação', dataRecebimento: '2026-08-08' },
-  { id: 3, loteId: 2, nome: 'Juliana Martins', telefone: '5511965432109', etapa: 'Novo', origem: 'Portal', dataRecebimento: '2026-08-13' },
-  { id: 4, loteId: 3, nome: 'Carlos Eduardo', telefone: '5541987654321', etapa: 'Em Proposta', origem: 'WhatsApp', dataRecebimento: '2026-08-05' },
-  { id: 5, loteId: 4, nome: 'Marina Torres', telefone: '5511954321098', etapa: 'Convertido', origem: 'Site', dataRecebimento: '2026-07-25' },
-  { id: 6, loteId: 5, nome: 'Paulo Henrique', telefone: '5531987654321', etapa: 'Perdido', origem: 'Portal', dataRecebimento: '2026-08-01' },
-  { id: 7, loteId: 6, nome: 'Beatriz Lima', telefone: '5521987654321', etapa: 'Novo', origem: 'Site', dataRecebimento: '2026-08-12' },
-  { id: 8, loteId: 6, nome: 'Gustavo Rocha', telefone: '5521976543210', etapa: 'Em Atendimento', origem: 'Indicação', dataRecebimento: '2026-08-11' },
-]
+const LEAD_COLUMNS = 'id, lote_id, nome, telefone, etapa, origem, data_recebimento'
+
+function fromRow(row) {
+  return {
+    id: row.id,
+    loteId: row.lote_id,
+    nome: row.nome,
+    telefone: row.telefone,
+    etapa: row.etapa,
+    origem: row.origem ?? '',
+    dataRecebimento: row.data_recebimento,
+  }
+}
+
+function toRow(lead) {
+  return {
+    lote_id: lead.loteId ?? null,
+    nome: lead.nome,
+    telefone: lead.telefone,
+    etapa: lead.etapa,
+    origem: lead.origem,
+    data_recebimento: lead.dataRecebimento,
+  }
+}
 
 export function LeadsProvider({ children }) {
-  const [leads, setLeads] = useState(leadsIniciais)
+  const { currentUser } = useUser()
+  const [leads, setLeads] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  function addLead(lead) {
-    setLeads(prev => [...prev, { ...lead, id: lead.id ?? Date.now() }])
+  useEffect(() => {
+    let active = true
+
+    if (!currentUser) {
+      setLeads([])
+      setLoading(false)
+      return
+    }
+
+    supabase
+      .from('leads')
+      .select(LEAD_COLUMNS)
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!active) return
+        if (error) {
+          console.error('Erro ao carregar leads:', error)
+          setLeads([])
+        } else {
+          setLeads(data.map(fromRow))
+        }
+        setLoading(false)
+      })
+    return () => { active = false }
+  }, [currentUser?.id])
+
+  async function addLead(lead) {
+    const { data, error } = await supabase
+      .from('leads')
+      .insert(toRow(lead))
+      .select(LEAD_COLUMNS)
+      .single()
+    if (error) {
+      console.error('Erro ao criar lead:', error)
+      return null
+    }
+    const created = fromRow(data)
+    setLeads(prev => [created, ...prev])
+    return created
   }
 
-  function updateLead(id, updates) {
-    setLeads(prev => prev.map(l => (l.id === id ? { ...l, ...updates } : l)))
+  async function updateLead(id, updates) {
+    const current = leads.find(l => l.id === id)
+    const merged = { ...current, ...updates }
+    const { data, error } = await supabase
+      .from('leads')
+      .update(toRow(merged))
+      .eq('id', id)
+      .select(LEAD_COLUMNS)
+      .single()
+    if (error) {
+      console.error('Erro ao atualizar lead:', error)
+      return
+    }
+    setLeads(prev => prev.map(l => (l.id === id ? fromRow(data) : l)))
   }
 
-  function deleteLead(id) {
+  async function deleteLead(id) {
+    const { error } = await supabase.from('leads').delete().eq('id', id)
+    if (error) {
+      console.error('Erro ao excluir lead:', error)
+      return
+    }
     setLeads(prev => prev.filter(l => l.id !== id))
   }
 
@@ -33,7 +105,7 @@ export function LeadsProvider({ children }) {
   }
 
   return (
-    <LeadsContext.Provider value={{ leads, addLead, updateLead, deleteLead, leadsByLote }}>
+    <LeadsContext.Provider value={{ leads, addLead, updateLead, deleteLead, leadsByLote, loading }}>
       {children}
     </LeadsContext.Provider>
   )

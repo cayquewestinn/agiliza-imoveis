@@ -43,7 +43,7 @@ export function TasksProvider({ children }) {
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
 
-  async function refetch() {
+  async function refetch(isActive = () => true) {
     const { data, error } = await supabase
       .from('tarefas')
       .select(TAREFA_SELECT)
@@ -52,16 +52,25 @@ export function TasksProvider({ children }) {
       console.error('Erro ao carregar tarefas:', error)
       return
     }
-    setTasks(data.map(fromRow))
+    if (isActive()) {
+      setTasks(data.map(fromRow))
+    }
   }
 
   useEffect(() => {
+    let active = true
+
     if (!currentUser) {
       setTasks([])
       setLoading(false)
       return
     }
-    refetch().then(() => setLoading(false))
+
+    refetch(() => active).then(() => {
+      if (active) setLoading(false)
+    })
+
+    return () => { active = false }
   }, [currentUser?.id])
 
   async function addTask(task) {

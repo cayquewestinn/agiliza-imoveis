@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { useUser } from './UserContext'
 
 const TasksContext = createContext(null)
 
@@ -38,6 +39,7 @@ function toRow(task) {
 }
 
 export function TasksProvider({ children }) {
+  const { currentUser } = useUser()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -54,8 +56,13 @@ export function TasksProvider({ children }) {
   }
 
   useEffect(() => {
+    if (!currentUser) {
+      setTasks([])
+      setLoading(false)
+      return
+    }
     refetch().then(() => setLoading(false))
-  }, [])
+  }, [currentUser?.id])
 
   async function addTask(task) {
     const { error } = await supabase.from('tarefas').insert(toRow(task))

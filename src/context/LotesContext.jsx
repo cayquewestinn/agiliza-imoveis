@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { useUser } from './UserContext'
 
 const LotesContext = createContext(null)
 
@@ -43,17 +44,25 @@ function toRow(lote) {
     valor_avaliacao: lote.valorAvaliacao,
     lance_inicial: lote.lanceInicial,
     status: lote.status,
-    data_leilao: lote.dataLeilao,
+    data_leilao: lote.dataLeilao || null,
     comitente: lote.comitente,
   }
 }
 
 export function LotesProvider({ children }) {
+  const { currentUser } = useUser()
   const [lotes, setLotes] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let active = true
+
+    if (!currentUser) {
+      setLotes([])
+      setLoading(false)
+      return
+    }
+
     supabase
       .from('lotes')
       .select(LOTE_COLUMNS)
@@ -69,7 +78,7 @@ export function LotesProvider({ children }) {
         setLoading(false)
       })
     return () => { active = false }
-  }, [])
+  }, [currentUser?.id])
 
   async function addLote(lote) {
     const { data, error } = await supabase

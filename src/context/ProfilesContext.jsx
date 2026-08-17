@@ -1,14 +1,23 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { useUser } from './UserContext'
 
 const ProfilesContext = createContext(null)
 
 export function ProfilesProvider({ children }) {
+  const { currentUser } = useUser()
   const [profiles, setProfiles] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let active = true
+
+    if (!currentUser) {
+      setProfiles([])
+      setLoading(false)
+      return
+    }
+
     supabase
       .from('profiles')
       .select('id, nome, cargo, is_admin')
@@ -24,7 +33,7 @@ export function ProfilesProvider({ children }) {
         setLoading(false)
       })
     return () => { active = false }
-  }, [])
+  }, [currentUser?.id])
 
   return (
     <ProfilesContext.Provider value={{ profiles, loading }}>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import { STATUS_OPTIONS } from '../utils/taskHelpers'
 import { useProfiles } from '../context/ProfilesContext'
+import { useUser } from '../context/UserContext'
 
 function toInputDate(prazoBr) {
   if (!prazoBr) return ''
@@ -16,11 +17,14 @@ function toBrDate(prazoInput) {
 
 export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
   const { profiles } = useProfiles()
+  const { currentUser, isAdmin } = useUser()
   const isEditing = Boolean(task)
   const [titulo, setTitulo] = useState(task?.titulo ?? '')
   const [status, setStatus] = useState(task?.status ?? STATUS_OPTIONS[0])
   const [prazo, setPrazo] = useState(toInputDate(task?.prazo))
-  const [responsavelId, setResponsavelId] = useState(task?.responsavelId ?? defaultResponsavelId ?? profiles[0]?.id ?? '')
+  const [responsavelId, setResponsavelId] = useState(
+    isAdmin ? (task?.responsavelId ?? defaultResponsavelId ?? profiles[0]?.id ?? '') : (currentUser?.id ?? '')
+  )
   const [error, setError] = useState('')
 
   function handleSubmit(e) {
@@ -106,10 +110,15 @@ export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
                 className="form-input"
                 value={responsavelId}
                 onChange={e => setResponsavelId(e.target.value)}
+                disabled={!isAdmin}
               >
-                {profiles.map(profile => (
-                  <option key={profile.id} value={profile.id}>{profile.nome} — {profile.cargo}</option>
-                ))}
+                {isAdmin
+                  ? profiles.map(profile => (
+                      <option key={profile.id} value={profile.id}>{profile.nome} — {profile.cargo}</option>
+                    ))
+                  : currentUser && (
+                      <option key={currentUser.id} value={currentUser.id}>{currentUser.nome} — {currentUser.cargo}</option>
+                    )}
               </select>
             </div>
           </div>

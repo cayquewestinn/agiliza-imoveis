@@ -18,23 +18,37 @@ export function UserProvider({ children }) {
   // must not be allowed to reinstate currentUser.
   const requestTokenRef = useRef(0)
 
-  useEffect(() => {
-    async function loadProfile(userId) {
-      const token = ++requestTokenRef.current
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, nome, cargo, is_admin')
-        .eq('id', userId)
-        .single()
-      if (token !== requestTokenRef.current) return
-      if (error) {
-        console.error('Erro ao carregar profile:', error)
-        setCurrentUser(null)
-      } else {
-        setCurrentUser(data)
-      }
+  // Fetches the profiles row for userId and applies it to currentUser.
+  // Returns true iff a profile row was actually found (i.e. the account is
+  // fully provisioned), independent of the token race-guard below — the
+  // guard only decides whether THIS call is allowed to write state (to
+  // avoid a stale/late-resolving fetch clobbering newer state after a
+  // sign-out or user switch), it must not distort the success/failure
+  // signal callers (like login()) rely on.
+  async function loadProfile(userId) {
+    const token = ++requestTokenRef.current
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, nome, cargo, is_admin')
+      .eq('id', userId)
+      .single()
+
+    const found = !error && !!data
+    if (!found) {
+      console.error('Erro ao carregar profile:', error)
+      // Auth sign-in succeeded but there's no matching profiles row (or the
+      // lookup failed) — don't leave a half-authenticated Auth session lingering.
+      await supabase.auth.signOut()
     }
 
+    if (token === requestTokenRef.current) {
+      setCurrentUser(found ? data : null)
+    }
+
+    return found
+  }
+
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         loadProfile(session.user.id).then(() => setLoading(false))
@@ -56,11 +70,16 @@ export function UserProvider({ children }) {
   }, [])
 
   async function login(usuario, senha) {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: toEmail(usuario),
       password: senha,
     })
-    return !error
+    if (error || !data?.user) return false
+    // Auth sign-in alone isn't enough — the account also needs a matching
+    // profiles row. loadProfile() signs the session back out and returns
+    // false when that row is missing, so login() correctly reports failure
+    // instead of leaving the UI stuck on a silently-broken "successful" login.
+    return await loadProfile(data.user.id)
   }
 
   async function logout() {

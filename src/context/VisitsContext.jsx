@@ -48,7 +48,7 @@ export function VisitsProvider({ children }) {
   const [visitas, setVisitas] = useState([])
   const [loading, setLoading] = useState(true)
 
-  async function refetch() {
+  async function refetch(isActive = () => true) {
     const { data, error } = await supabase
       .from('visitas')
       .select(VISITA_SELECT)
@@ -58,7 +58,9 @@ export function VisitsProvider({ children }) {
       console.error('Erro ao carregar visitas:', error)
       return
     }
-    setVisitas(data.map(fromRow))
+    if (isActive()) {
+      setVisitas(data.map(fromRow))
+    }
   }
 
   useEffect(() => {
@@ -70,12 +72,12 @@ export function VisitsProvider({ children }) {
       return
     }
 
-    refetch().then(() => { if (active) setLoading(false) })
+    refetch(() => active).then(() => { if (active) setLoading(false) })
 
     const channel = supabase
       .channel('visitas-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'visitas' }, () => {
-        refetch()
+        refetch(() => active)
       })
       .subscribe()
 

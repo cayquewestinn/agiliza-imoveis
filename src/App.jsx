@@ -13,6 +13,7 @@ import { LeadsProvider } from './context/LeadsContext'
 import { VisitsProvider } from './context/VisitsContext'
 import { UserProvider, useUser } from './context/UserContext'
 import { ThemeProvider } from './context/ThemeContext'
+import { ProfilesProvider } from './context/ProfilesContext'
 import './index.css'
 
 function AppShell() {
@@ -74,15 +75,17 @@ function App() {
   return (
     <ThemeProvider>
       <UserProvider>
-        <TasksProvider>
-          <LotesProvider>
-            <LeadsProvider>
-              <VisitsProvider>
-                <AppShell />
-              </VisitsProvider>
-            </LeadsProvider>
-          </LotesProvider>
-        </TasksProvider>
+        <ProfilesProvider>
+          <TasksProvider>
+            <LotesProvider>
+              <LeadsProvider>
+                <VisitsProvider>
+                  <AppShell />
+                </VisitsProvider>
+              </LeadsProvider>
+            </LotesProvider>
+          </TasksProvider>
+        </ProfilesProvider>
       </UserProvider>
     </ThemeProvider>
   )

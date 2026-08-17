@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
 const UserContext = createContext(null)
@@ -12,14 +12,21 @@ function toEmail(usuario) {
 export function UserProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  // Monotonically increasing token identifying the "current" profile request.
+  // Any in-flight loadProfile() whose token no longer matches this ref when it
+  // resolves is stale (a sign-out, or a newer sign-in, happened meanwhile) and
+  // must not be allowed to reinstate currentUser.
+  const requestTokenRef = useRef(0)
 
   useEffect(() => {
     async function loadProfile(userId) {
+      const token = ++requestTokenRef.current
       const { data, error } = await supabase
         .from('profiles')
         .select('id, nome, cargo, is_admin')
         .eq('id', userId)
         .single()
+      if (token !== requestTokenRef.current) return
       if (error) {
         console.error('Erro ao carregar profile:', error)
         setCurrentUser(null)
@@ -40,6 +47,7 @@ export function UserProvider({ children }) {
       if (session?.user) {
         loadProfile(session.user.id)
       } else {
+        requestTokenRef.current++
         setCurrentUser(null)
       }
     })
@@ -56,6 +64,7 @@ export function UserProvider({ children }) {
   }
 
   async function logout() {
+    requestTokenRef.current++
     await supabase.auth.signOut()
     setCurrentUser(null)
   }

@@ -3,7 +3,7 @@ import { X } from 'lucide-react'
 import { useLotes } from '../context/LotesContext'
 import { useLeads } from '../context/LeadsContext'
 import { useVisits } from '../context/VisitsContext'
-import { TEAM_MEMBERS } from '../utils/teamHelpers'
+import { useProfiles } from '../context/ProfilesContext'
 import { normalizePhoneBR } from '../utils/leadHelpers'
 import { VISITA_TIPO_OPTIONS } from '../utils/visitHelpers'
 
@@ -12,13 +12,14 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export function VisitModal({ visita, presetLote, presetLead, defaultResponsavel, onClose }) {
+export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelId, onClose }) {
   const isEditing = Boolean(visita)
   const locked = isEditing || Boolean(presetLote)
 
   const { lotes } = useLotes()
   const { leads, leadsByLote, addLead, updateLead } = useLeads()
   const { addVisita, updateVisita } = useVisits()
+  const { profiles } = useProfiles()
 
   const [tipo, setTipo] = useState(visita?.tipo ?? (presetLote ? 'imovel' : 'imovel'))
   const [loteId, setLoteId] = useState(visita?.loteId ?? presetLote?.id ?? '')
@@ -33,15 +34,16 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavel,
 
   const [data, setData] = useState(visita?.data ?? '')
   const [hora, setHora] = useState(visita?.hora ?? '')
-  const [responsavel, setResponsavel] = useState(visita?.responsavel ?? defaultResponsavel ?? TEAM_MEMBERS[0].nome)
+  const [responsavelId, setResponsavelId] = useState(visita?.responsavelId ?? defaultResponsavelId ?? profiles[0]?.id ?? '')
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
-  const leadsDoLote = loteId ? leadsByLote(Number(loteId)) : []
+  const leadsDoLote = loteId ? leadsByLote(loteId) : []
 
   function handleContatoChange(value) {
     setContatoOption(value)
     if (value !== 'novo') {
-      const lead = leads.find(l => l.id === Number(value))
+      const lead = leads.find(l => l.id === value)
       if (lead) {
         setNomeCompleto(lead.nome)
         setTelefone(lead.telefone.replace(/^55/, ''))
@@ -52,7 +54,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavel,
     }
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     setError('')
 
@@ -60,23 +62,27 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavel,
       setError('Informe data e hora da visita.')
       return
     }
-    if (!responsavel) {
+    if (!responsavelId) {
       setError('Selecione um responsável.')
       return
     }
 
+    setSaving(true)
+
     if (tipo === 'imovel') {
       if (!loteId || !leadId) {
         setError('Selecione o lote e o lead.')
+        setSaving(false)
         return
       }
-      const payload = { tipo: 'imovel', loteId: Number(loteId), leadId: Number(leadId), data, hora, responsavel }
+      const payload = { tipo: 'imovel', loteId, leadId, data, hora, responsavelId }
       if (isEditing) {
-        updateVisita(visita.id, payload)
+        await updateVisita(visita.id, payload)
       } else {
-        addVisita(payload)
-        updateLead(Number(leadId), { etapa: 'Em Visita' })
+        await addVisita(payload)
+        await updateLead(leadId, { etapa: 'Em Visita' })
       }
+      setSaving(false)
       onClose()
       return
     }
@@ -84,23 +90,23 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavel,
     // tipo === 'empresa'
     if (!nomeCompleto.trim() || !telefone.trim() || !cpf.trim()) {
       setError('Nome completo, CPF e telefone são obrigatórios para liberar a entrada na recepção.')
+      setSaving(false)
       return
     }
 
     const recepcao = { nomeCompleto: nomeCompleto.trim(), cpf: cpf.trim(), telefone: normalizePhoneBR(telefone) }
 
     if (isEditing) {
-      updateVisita(visita.id, { data, hora, responsavel, recepcao })
+      await updateVisita(visita.id, { data, hora, responsavelId, recepcao })
+      setSaving(false)
       onClose()
       return
     }
 
-    let finalLeadId = contatoOption === 'novo' ? null : Number(contatoOption)
+    let finalLeadId = contatoOption === 'novo' ? null : contatoOption
 
     if (finalLeadId === null) {
-      finalLeadId = Date.now()
-      addLead({
-        id: finalLeadId,
+      const novoLead = await addLead({
         loteId: null,
         nome: recepcao.nomeCompleto,
         telefone: recepcao.telefone,
@@ -108,11 +114,18 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavel,
         origem: 'Visita à empresa',
         dataRecebimento: todayISO(),
       })
+      if (!novoLead) {
+        setError('Não foi possível criar o contato. Tente novamente.')
+        setSaving(false)
+        return
+      }
+      finalLeadId = novoLead.id
     } else {
-      updateLead(finalLeadId, { etapa: 'Em Visita' })
+      await updateLead(finalLeadId, { etapa: 'Em Visita' })
     }
 
-    addVisita({ tipo: 'empresa', loteId: null, leadId: finalLeadId, data, hora, responsavel, recepcao })
+    await addVisita({ tipo: 'empresa', loteId: null, leadId: finalLeadId, data, hora, responsavelId, recepcao })
+    setSaving(false)
     onClose()
   }
 
@@ -152,7 +165,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavel,
                     <label className="form-label" htmlFor="lote">Lote</label>
                     {locked ? (
                       <div className="form-static">
-                        {lotes.find(l => l.id === Number(loteId))?.codigo} — {lotes.find(l => l.id === Number(loteId))?.titulo}
+                        {lotes.find(l => l.id === loteId)?.codigo} — {lotes.find(l => l.id === loteId)?.titulo}
                       </div>
                     ) : (
                       <select
@@ -172,7 +185,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavel,
                   <div className="form-group">
                     <label className="form-label" htmlFor="lead">Lead</label>
                     {locked ? (
-                      <div className="form-static">{leads.find(l => l.id === Number(leadId))?.nome}</div>
+                      <div className="form-static">{leads.find(l => l.id === leadId)?.nome}</div>
                     ) : (
                       <select
                         id="lead"
@@ -278,19 +291,19 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavel,
               <select
                 id="responsavel"
                 className="form-input"
-                value={responsavel}
-                onChange={e => setResponsavel(e.target.value)}
+                value={responsavelId}
+                onChange={e => setResponsavelId(e.target.value)}
               >
-                {TEAM_MEMBERS.map(member => (
-                  <option key={member.nome} value={member.nome}>{member.nome} — {member.cargo}</option>
+                {profiles.map(profile => (
+                  <option key={profile.id} value={profile.id}>{profile.nome} — {profile.cargo}</option>
                 ))}
               </select>
             </div>
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn btn-primary">{isEditing ? 'Salvar' : 'Marcar Visita'}</button>
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={saving}>Cancelar</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>{isEditing ? 'Salvar' : 'Marcar Visita'}</button>
           </div>
         </form>
       </div>

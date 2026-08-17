@@ -154,7 +154,7 @@ export function Agenda() {
       </div>
 
       {isModalOpen && (
-        <VisitModal visita={editingVisita} defaultResponsavel={currentUser.nome} onClose={closeModal} />
+        <VisitModal visita={editingVisita} defaultResponsavelId={currentUser.id} onClose={closeModal} />
       )}
     </div>
   )

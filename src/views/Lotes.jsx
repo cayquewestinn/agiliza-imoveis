@@ -169,7 +169,7 @@ export function Lotes() {
         <VisitModal
           presetLote={visitTarget.lote}
           presetLead={visitTarget.lead}
-          defaultResponsavel={currentUser.nome}
+          defaultResponsavelId={currentUser.id}
           onClose={() => setVisitTarget(null)}
         />
       )}

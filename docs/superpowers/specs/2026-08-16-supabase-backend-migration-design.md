@@ -146,4 +146,4 @@ Todas as tabelas com RLS habilitado (obrigatório em qualquer tabela no schema `
 
 - Normalizar `comitente` em tabela própria (adiado — texto livre por enquanto).
 - Qualquer geração de documento/contrato (ainda sem forma definida, ver `PRODUCT.md`).
-- Papel formal de "Consultor Financeiro" — depende da resposta do Juan (ver `docs/duvidas-para-o-juan.md`).
+- ~~Papel formal de "Consultor Financeiro"~~ — respondido 18/08/2026: não é um cargo separado, é o próprio vendedor (ver `docs/duvidas-para-o-juan.md`). Nenhuma mudança de schema necessária.

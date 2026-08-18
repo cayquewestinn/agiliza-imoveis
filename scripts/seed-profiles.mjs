@@ -1,9 +1,16 @@
 // Uso: SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/seed-profiles.mjs
 // A service role key nunca deve ser commitada nem usada dentro de src/ —
-// só aqui, uma vez, pra criar as contas iniciais da equipe.
+// só aqui, uma vez, pra criar contas novas da equipe.
 // Pegue a key no painel do Supabase: Project Settings > API > service_role secret.
+//
+// SEGURANÇA: este script NUNCA deve conter senhas reais em texto puro.
+// Cada conta nova recebe uma senha aleatória gerada na hora, impressa uma
+// única vez no terminal — quem rodar o script é responsável por entregar
+// essa senha à pessoa certa por um canal seguro (nunca por e-mail/chat aberto)
+// e orientar a troca no primeiro acesso. Nada de senha é gravado em arquivo.
 
 import { createClient } from '@supabase/supabase-js'
+import { randomBytes } from 'crypto'
 
 const SUPABASE_URL = 'https://golnjkuocqtpaeyzbemb.supabase.co'
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -19,22 +26,27 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 
 const EMAIL_DOMAIN = 'agiliza-imoveis.app'
 
+// Adicione aqui apenas os dados de contas NOVAS a criar — nunca inclua "senha".
 const TEAM = [
-  { nome: 'Cayque', cargo: 'Administrador/Agendador', usuario: 'cayque', senha: 'cayque123', isAdmin: true },
-  { nome: 'Stefanie', cargo: 'Agendador', usuario: 'stefanie', senha: 'stefanie123', isAdmin: false },
-  { nome: 'Scarlett', cargo: 'Agendador', usuario: 'scarlett', senha: 'scarlett123', isAdmin: false },
-  { nome: 'Gilmar', cargo: 'Agendador', usuario: 'gilmar', senha: 'gilmar123', isAdmin: false },
-  { nome: 'Raissa', cargo: 'Vendedor', usuario: 'raissa', senha: 'raissa123', isAdmin: false },
-  { nome: 'Ramon', cargo: 'Vendedor', usuario: 'ramon', senha: 'ramon123', isAdmin: false },
-  { nome: 'Vitória', cargo: 'Vendedor', usuario: 'vitoria', senha: 'vitoria123', isAdmin: false },
+  // { nome: 'Nome da Pessoa', cargo: 'Agendador', usuario: 'usuario', isAdmin: false },
 ]
 
+function gerarSenhaAleatoria() {
+  return randomBytes(9).toString('base64').replace(/[+/=]/g, '').slice(0, 12)
+}
+
 async function run() {
+  if (TEAM.length === 0) {
+    console.log('Nenhuma conta nova configurada em TEAM. Edite o array antes de rodar.')
+    return
+  }
+
   for (const member of TEAM) {
     const email = `${member.usuario}@${EMAIL_DOMAIN}`
+    const senha = gerarSenhaAleatoria()
     const { data: created, error: createError } = await supabase.auth.admin.createUser({
       email,
-      password: member.senha,
+      password: senha,
       email_confirm: true,
     })
 
@@ -55,7 +67,7 @@ async function run() {
       continue
     }
 
-    console.log(`OK: ${member.usuario} -> ${email}`)
+    console.log(`OK: ${member.usuario} -> ${email}  |  senha inicial: ${senha}`)
   }
 }
 

@@ -94,7 +94,7 @@ export function LoteCard({ lote, onEdit, onDelete, onScheduleVisit }) {
                   </button>
                   <a
                     className="whatsapp-btn"
-                    href={whatsappLink(lead.telefone, `Olá ${lead.nome.split(' ')[0]}, tudo bem? Sou da Agiliza Leilões e gostaria de falar sobre o imóvel ${lote.codigo}.`)}
+                    href={whatsappLink(lead.telefone, `Olá ${lead.nome.split(' ')[0]}, tudo bem? Sou da Agiliza Imóveis e gostaria de falar sobre o imóvel ${lote.codigo}.`)}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Chamar ${lead.nome} no WhatsApp`}

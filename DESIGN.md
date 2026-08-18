@@ -1,5 +1,5 @@
 ---
-name: Agiliza Leilões
+name: Agiliza Imóveis
 description: A light-mode editorial CRM that reads like a Brazilian newspaper's classifieds/legal-notices page ("Seção de Editais"), not a generic dark SaaS dashboard.
 colors:
   paper-page: "#e4e3dd"
@@ -116,13 +116,13 @@ components:
     padding: "24px"
 ---
 
-# Design System: Agiliza Leilões
+# Design System: Agiliza Imóveis
 
 ## Overview
 
 **Creative North Star: "Seção de Editais" (the auction-classifieds page of a Brazilian newspaper)**
 
-Agiliza Leilões reads as a printed page of legal notices, not a SaaS control panel: a light, slightly warm newsprint ground, near-black ink for text, a single stamp-colored accent, and structure built from ruled hairlines rather than floating boxed cards. Every record — a lote, a lead, a task, a visit — behaves like a published notice: nothing disappears, it gets carimbado (stamped) with a new status. Density is real (a tabular stat row, a numbered task column, ruled sheets of lotes and team members) but never cramped; whitespace comes from rhythm and rule lines, not from padding-heavy cards.
+Agiliza Imóveis reads as a printed page of legal notices, not a SaaS control panel: a light, slightly warm newsprint ground, near-black ink for text, a single stamp-colored accent, and structure built from ruled hairlines rather than floating boxed cards. Every record — a lote, a lead, a task, a visit — behaves like a published notice: nothing disappears, it gets carimbado (stamped) with a new status. Density is real (a tabular stat row, a numbered task column, ruled sheets of lotes and team members) but never cramped; whitespace comes from rhythm and rule lines, not from padding-heavy cards.
 
 This is a full-identity replacement, not a reskin. The previous system — a near-black "23.4studios" dashboard with a blue accent, pill-shaped buttons, and Archivo/Fragment Mono type — was explicitly disavowed by the user as belonging to a different business and is treated purely as anti-reference. The flip from dark to light is a deliberate scene judgment (newsprint reads as a daylight, paper material) and the move away from pill radii is a deliberate rejection of "rounded SaaS" language. A future session must not "restore dark mode" or reintroduce pill buttons without recognizing both were rejected on purpose.
 

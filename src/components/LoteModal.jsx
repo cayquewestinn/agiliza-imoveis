@@ -17,7 +17,6 @@ export function LoteModal({ lote, onClose, onSave }) {
   const [banheiros, setBanheiros] = useState(lote?.banheiros ?? 0)
   const [vagas, setVagas] = useState(lote?.vagas ?? 0)
   const [valorAvaliacao, setValorAvaliacao] = useState(lote?.valorAvaliacao ?? '')
-  const [lanceInicial, setLanceInicial] = useState(lote?.lanceInicial ?? '')
   const [dataLeilao, setDataLeilao] = useState(lote?.dataLeilao ?? '')
   const [comitente, setComitente] = useState(lote?.comitente ?? '')
   const [error, setError] = useState('')
@@ -46,7 +45,6 @@ export function LoteModal({ lote, onClose, onSave }) {
       banheiros: Number(banheiros) || 0,
       vagas: Number(vagas) || 0,
       valorAvaliacao: Number(valorAvaliacao) || 0,
-      lanceInicial: Number(lanceInicial) || 0,
       dataLeilao,
       comitente: comitente.trim(),
     })
@@ -226,29 +224,16 @@ export function LoteModal({ lote, onClose, onSave }) {
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label" htmlFor="valorAvaliacao">Valor de avaliação (R$)</label>
-                <input
-                  id="valorAvaliacao"
-                  className="form-input"
-                  type="number"
-                  min="0"
-                  value={valorAvaliacao}
-                  onChange={e => setValorAvaliacao(e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label" htmlFor="lanceInicial">Lance inicial (R$)</label>
-                <input
-                  id="lanceInicial"
-                  className="form-input"
-                  type="number"
-                  min="0"
-                  value={lanceInicial}
-                  onChange={e => setLanceInicial(e.target.value)}
-                />
-              </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="valorAvaliacao">Valor de avaliação (R$)</label>
+              <input
+                id="valorAvaliacao"
+                className="form-input"
+                type="number"
+                min="0"
+                value={valorAvaliacao}
+                onChange={e => setValorAvaliacao(e.target.value)}
+              />
             </div>
 
             <div className="form-group">

@@ -122,7 +122,6 @@ export function Lotes() {
                   <th>Lote</th>
                   <th>Localização</th>
                   <th>Avaliação</th>
-                  <th>Lance Inicial</th>
                   <th>Status</th>
                   <th>Leilão</th>
                   <th>Ações</th>
@@ -135,7 +134,6 @@ export function Lotes() {
                     <td>{lote.titulo}</td>
                     <td>{lote.bairro}, {lote.cidade} - {lote.uf}</td>
                     <td>{formatCurrency(lote.valorAvaliacao)}</td>
-                    <td>{formatCurrency(lote.lanceInicial)}</td>
                     <td>
                       <span className={`status-badge status-${statusToClassName(lote.status)}`}>
                         {lote.status}

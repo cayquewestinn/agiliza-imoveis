@@ -44,10 +44,6 @@ export function LoteCard({ lote, onEdit, onDelete, onScheduleVisit }) {
             <div className="lote-price-label">Avaliação</div>
             <div className="lote-price-value">{formatCurrency(lote.valorAvaliacao)}</div>
           </div>
-          <div>
-            <div className="lote-price-label">Lance inicial</div>
-            <div className="lote-price-value lote-price-highlight">{formatCurrency(lote.lanceInicial)}</div>
-          </div>
         </div>
 
         <div className="lote-card-footer">

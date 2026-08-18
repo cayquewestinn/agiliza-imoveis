@@ -3,7 +3,7 @@ import { Header } from '../components/Header'
 import { LoteModal } from '../components/LoteModal'
 import { LoteCard } from '../components/LoteCard'
 import { VisitModal } from '../components/VisitModal'
-import { LayoutGrid, List, Plus, Pencil, Trash2 } from 'lucide-react'
+import { LayoutGrid, List, Plus, Pencil, Trash2, Search } from 'lucide-react'
 import { useLotes } from '../context/LotesContext'
 import { useUser } from '../context/UserContext'
 import { LOTE_STATUS_OPTIONS, statusToClassName, formatCurrency, formatDate } from '../utils/loteHelpers'
@@ -13,11 +13,19 @@ export function Lotes() {
   const { currentUser } = useUser()
   const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list'
   const [statusFilter, setStatusFilter] = useState('Todos')
+  const [searchTerm, setSearchTerm] = useState('')
   const [editingLote, setEditingLote] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [visitTarget, setVisitTarget] = useState(null) // { lote, lead } | null
 
-  const filtered = statusFilter === 'Todos' ? lotes : lotes.filter(l => l.status === statusFilter)
+  const byStatus = statusFilter === 'Todos' ? lotes : lotes.filter(l => l.status === statusFilter)
+
+  const normalizedSearch = searchTerm.trim().toLowerCase()
+  const filtered = normalizedSearch === ''
+    ? byStatus
+    : byStatus.filter(l => [l.codigo, l.titulo, l.endereco, l.bairro, l.cidade]
+        .filter(Boolean)
+        .some(field => field.toLowerCase().includes(normalizedSearch)))
 
   function openNewLoteModal() {
     setEditingLote(null)
@@ -94,9 +102,20 @@ export function Lotes() {
           ))}
         </div>
 
+        <div className="search-field">
+          <Search size={16} className="search-field-icon" />
+          <input
+            type="text"
+            className="search-field-input"
+            placeholder="Buscar por código, título, endereço, bairro ou cidade..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         {filtered.length === 0 && (
           <div className="card" style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 48 }}>
-            Nenhum lote encontrado para este filtro.
+            Nenhum lote encontrado para esta busca.
           </div>
         )}
 

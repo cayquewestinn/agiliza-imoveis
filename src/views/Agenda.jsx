@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Header } from '../components/Header'
 import { VisitModal } from '../components/VisitModal'
-import { Plus, Building2, Home, Pencil, Trash2, MapPin } from 'lucide-react'
+import { Plus, Building2, Home, Pencil, Trash2, MapPin, MessageSquareText } from 'lucide-react'
 import { useVisits } from '../context/VisitsContext'
 import { useLotes } from '../context/LotesContext'
 import { useLeads } from '../context/LeadsContext'
@@ -122,6 +122,12 @@ export function Agenda() {
                           <>Visita à empresa · CPF {visita.recepcao?.cpf}</>
                         )}
                       </div>
+                      {visita.feedback && (
+                        <div className="visit-row-feedback">
+                          <MessageSquareText size={12} />
+                          <span>{visita.feedback}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="visit-row-responsavel">{visita.responsavel}</div>

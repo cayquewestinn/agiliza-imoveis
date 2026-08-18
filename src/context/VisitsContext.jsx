@@ -4,7 +4,7 @@ import { useUser } from './UserContext'
 
 const VisitsContext = createContext(null)
 
-const VISITA_SELECT = 'id, tipo, lote_id, lead_id, data, hora, responsavel_id, status, recepcao_nome_completo, recepcao_cpf, recepcao_telefone, profiles(nome)'
+const VISITA_SELECT = 'id, tipo, lote_id, lead_id, data, hora, responsavel_id, status, recepcao_nome_completo, recepcao_cpf, recepcao_telefone, feedback, profiles(nome)'
 
 function fromRow(row) {
   const visita = {
@@ -17,6 +17,7 @@ function fromRow(row) {
     responsavelId: row.responsavel_id,
     responsavel: row.profiles?.nome ?? '',
     status: row.status,
+    feedback: row.feedback ?? '',
   }
   if (row.tipo === 'empresa') {
     visita.recepcao = {
@@ -37,6 +38,7 @@ function toRow(visita) {
     hora: visita.hora,
     responsavel_id: visita.responsavelId,
     status: visita.status,
+    feedback: visita.feedback || null,
     recepcao_nome_completo: visita.recepcao?.nomeCompleto ?? null,
     recepcao_cpf: visita.recepcao?.cpf ?? null,
     recepcao_telefone: visita.recepcao?.telefone ?? null,

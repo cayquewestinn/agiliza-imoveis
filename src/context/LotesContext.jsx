@@ -4,7 +4,7 @@ import { useUser } from './UserContext'
 
 const LotesContext = createContext(null)
 
-const LOTE_COLUMNS = 'id, codigo, titulo, tipo_imovel, endereco, bairro, cidade, uf, area_util, quartos, banheiros, vagas, valor_avaliacao, lance_inicial, status, data_leilao, comitente'
+const LOTE_COLUMNS = 'id, codigo, titulo, tipo_imovel, endereco, bairro, cidade, uf, area_util, quartos, banheiros, vagas, valor_avaliacao, lance_inicial, status, data_leilao, comitente, fotos'
 
 function fromRow(row) {
   return {
@@ -25,6 +25,7 @@ function fromRow(row) {
     status: row.status,
     dataLeilao: row.data_leilao,
     comitente: row.comitente ?? '',
+    fotos: row.fotos ?? [],
   }
 }
 

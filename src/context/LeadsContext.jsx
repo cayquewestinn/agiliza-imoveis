@@ -29,6 +29,25 @@ function toRow(lead) {
   }
 }
 
+const PAGE_SIZE = 1000
+
+async function fetchAllLeads() {
+  const rows = []
+  let from = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from('leads')
+      .select(LEAD_COLUMNS)
+      .order('created_at', { ascending: false })
+      .range(from, from + PAGE_SIZE - 1)
+    if (error) return { rows: null, error }
+    rows.push(...data)
+    if (data.length < PAGE_SIZE) break
+    from += PAGE_SIZE
+  }
+  return { rows, error: null }
+}
+
 export function LeadsProvider({ children }) {
   const { currentUser } = useUser()
   const [leads, setLeads] = useState([])
@@ -43,20 +62,16 @@ export function LeadsProvider({ children }) {
       return
     }
 
-    supabase
-      .from('leads')
-      .select(LEAD_COLUMNS)
-      .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (!active) return
-        if (error) {
-          console.error('Erro ao carregar leads:', error)
-          setLeads([])
-        } else {
-          setLeads(data.map(fromRow))
-        }
-        setLoading(false)
-      })
+    fetchAllLeads().then(({ rows, error }) => {
+      if (!active) return
+      if (error) {
+        console.error('Erro ao carregar leads:', error)
+        setLeads([])
+      } else {
+        setLeads(rows.map(fromRow))
+      }
+      setLoading(false)
+    })
     return () => { active = false }
   }, [currentUser?.id])
 

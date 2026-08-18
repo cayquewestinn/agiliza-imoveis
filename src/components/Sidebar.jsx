@@ -67,24 +67,26 @@ export function Sidebar({ currentView, setCurrentView, isOpen, onClose }) {
         </button>
       </nav>
 
-      <button
-        type="button"
-        className="theme-toggle-btn"
-        onClick={toggleTheme}
-        aria-label={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
-      >
-        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
-      </button>
+      <div className="sidebar-utility">
+        <button
+          type="button"
+          className="theme-toggle-btn"
+          onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+        </button>
 
-      <button
-        type="button"
-        className="theme-toggle-btn"
-        onClick={() => setShowChangePassword(true)}
-      >
-        <KeyRound size={16} />
-        Trocar Senha
-      </button>
+        <button
+          type="button"
+          className="theme-toggle-btn"
+          onClick={() => setShowChangePassword(true)}
+        >
+          <KeyRound size={16} />
+          Trocar Senha
+        </button>
+      </div>
 
       {currentUser && (
         <div className="sidebar-user">

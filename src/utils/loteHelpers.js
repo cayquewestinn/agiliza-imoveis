@@ -1,4 +1,4 @@
-export const LOTE_STATUS_OPTIONS = ['Rascunho', 'Publicado', 'Em Leilão', 'Arrematado', 'Suspenso', 'Cancelado']
+export const LOTE_STATUS_OPTIONS = ['Rascunho', 'Publicado', 'Suspenso', 'Cancelado']
 
 export const TIPO_IMOVEL_OPTIONS = ['Residencial', 'Comercial']
 
@@ -6,8 +6,6 @@ export function statusToClassName(status) {
   switch (status) {
     case 'Rascunho': return 'todo'
     case 'Publicado': return 'doing'
-    case 'Em Leilão': return 'leilao'
-    case 'Arrematado': return 'done'
     case 'Suspenso': return 'late'
     case 'Cancelado': return 'late'
     default: return 'todo'

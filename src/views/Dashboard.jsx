@@ -1,17 +1,29 @@
 import { Header } from '../components/Header'
-import { CheckCircle2, AlertTriangle, Gauge } from 'lucide-react'
 import { useTasks } from '../context/TasksContext'
+import { useLeads } from '../context/LeadsContext'
 import { useUser } from '../context/UserContext'
 import { statusToClassName, isLate, parsePrazo } from '../utils/taskHelpers'
 
+const LEAD_ETAPA_CHART = [
+  { etapa: 'Novo', color: 'var(--status-neutral)' },
+  { etapa: 'Em Atendimento', color: 'var(--status-active)' },
+  { etapa: 'Em Visita', color: 'var(--status-warning)' },
+  { etapa: 'Em Proposta', color: 'var(--status-advancing)' },
+  { etapa: 'Convertido', color: 'var(--status-success)' },
+  { etapa: 'Perdido', color: 'var(--status-danger)' },
+]
+
 export function Dashboard() {
   const { tasks: allTasks } = useTasks()
+  const { leads } = useLeads()
   const { currentUser, isAdmin } = useUser()
   const tasks = isAdmin ? allTasks : allTasks.filter(t => t.responsavelId === currentUser.id)
 
-  const concluidas = tasks.filter(t => t.status === 'Concluído').length
-  const emAtraso = tasks.filter(isLate).length
-  const produtividade = tasks.length > 0 ? Math.round((concluidas / tasks.length) * 100) : 0
+  const totalLeads = leads.length
+  const leadsPorEtapa = LEAD_ETAPA_CHART.map(item => ({
+    ...item,
+    count: leads.filter(l => l.etapa === item.etapa).length,
+  }))
 
   const tarefasRecentes = [...tasks]
     .sort((a, b) => parsePrazo(a.prazo) - parsePrazo(b.prazo))
@@ -27,35 +39,28 @@ export function Dashboard() {
       <div className="page-content">
         <div className="card">
           <h2 className="masthead-date">Edição de Hoje — {dataDeHoje}</h2>
-          <div className="stat-row">
-            <div className="stat-row-item">
-              <div className="stat-row-label">
-                <CheckCircle2 size={15} />
-                Tarefas Concluídas
-              </div>
-              <div className="stat-row-value mono">{concluidas}</div>
-              <div className="stat-row-trend trend-neutral">de {tasks.length} tarefas no total</div>
-            </div>
-
-            <div className="stat-row-item">
-              <div className="stat-row-label">
-                <AlertTriangle size={15} />
-                Em Atraso
-              </div>
-              <div className="stat-row-value mono">{emAtraso}</div>
-              <div className={`stat-row-trend ${emAtraso > 0 ? 'trend-down' : 'trend-neutral'}`}>
-                {emAtraso > 0 ? 'requer atenção' : 'nenhuma pendência'}
-              </div>
-            </div>
-
-            <div className="stat-row-item">
-              <div className="stat-row-label">
-                <Gauge size={15} />
-                Produtividade
-              </div>
-              <div className="stat-row-value mono">{produtividade}%</div>
-              <div className="stat-row-trend trend-neutral">tarefas concluídas / total</div>
-            </div>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16}}>
+            <h3 className="card-title" style={{margin: 0}}>Leads por Etapa</h3>
+            <span className="mono" style={{fontSize: '0.8rem', color: 'var(--ink-tertiary)'}}>{totalLeads} no total</span>
+          </div>
+          <div className="status-chart">
+            {leadsPorEtapa.map(item => {
+              const pct = totalLeads > 0 ? Math.round((item.count / totalLeads) * 100) : 0
+              return (
+                <div className="status-chart-row" key={item.etapa}>
+                  <div className="status-chart-row-header">
+                    <span className="status-chart-row-label">{item.etapa}</span>
+                    <span className="status-chart-row-value mono">{item.count}</span>
+                  </div>
+                  <div className="status-chart-bar-track">
+                    <div
+                      className="status-chart-bar-fill"
+                      style={{ transform: `scaleX(${pct / 100})`, backgroundColor: item.color }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
 

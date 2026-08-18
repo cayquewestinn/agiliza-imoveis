@@ -1,19 +1,40 @@
 import { useState } from 'react'
 import {
   MapPin, Bed, Bath, Car, Ruler, Building2, Home, Gavel, Pencil, Trash2,
-  ChevronDown, ChevronUp, Users, MessageCircle, CalendarClock,
+  ChevronDown, ChevronUp, Users, MessageCircle, CalendarClock, ImageOff, Images,
 } from 'lucide-react'
 import { statusToClassName, formatCurrency, formatDate } from '../utils/loteHelpers'
 import { etapaToClassName, formatPhone, whatsappLink } from '../utils/leadHelpers'
 import { useLeads } from '../context/LeadsContext'
+import { PhotoGallery } from './PhotoGallery'
 
 export function LoteCard({ lote, onEdit, onDelete, onScheduleVisit }) {
   const { leadsByLote } = useLeads()
   const [showLeads, setShowLeads] = useState(false)
+  const [galleryOpen, setGalleryOpen] = useState(false)
   const leads = leadsByLote(lote.id)
+  const fotos = lote.fotos ?? []
 
   return (
     <div className="lote-card">
+      <div className="lote-card-photo" onClick={() => fotos.length > 0 && setGalleryOpen(true)}>
+        {fotos.length > 0 ? (
+          <>
+            <img src={fotos[0]} alt={lote.titulo} loading="lazy" />
+            {fotos.length > 1 && (
+              <span className="lote-card-photo-count">
+                <Images size={13} /> {fotos.length}
+              </span>
+            )}
+          </>
+        ) : (
+          <div className="lote-card-photo-empty">
+            <ImageOff size={22} />
+            <span>Sem fotos</span>
+          </div>
+        )}
+      </div>
+
       <div className="lote-card-strip">
         <div className="lote-card-strip-left">
           {lote.tipoImovel === 'Comercial' ? <Building2 size={15} /> : <Home size={15} />}
@@ -103,6 +124,15 @@ export function LoteCard({ lote, onEdit, onDelete, onScheduleVisit }) {
           </div>
         )}
       </div>
+
+      {galleryOpen && (
+        <PhotoGallery
+          fotos={fotos}
+          startIndex={0}
+          titulo={lote.titulo}
+          onClose={() => setGalleryOpen(false)}
+        />
+      )}
     </div>
   )
 }

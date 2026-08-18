@@ -35,6 +35,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
   const [data, setData] = useState(visita?.data ?? '')
   const [hora, setHora] = useState(visita?.hora ?? '')
   const [responsavelId, setResponsavelId] = useState(visita?.responsavelId ?? defaultResponsavelId ?? profiles[0]?.id ?? '')
+  const [feedback, setFeedback] = useState(visita?.feedback ?? '')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -75,7 +76,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
         setSaving(false)
         return
       }
-      const payload = { tipo: 'imovel', loteId, leadId, data, hora, responsavelId }
+      const payload = { tipo: 'imovel', loteId, leadId, data, hora, responsavelId, feedback }
       if (isEditing) {
         await updateVisita(visita.id, payload)
       } else {
@@ -97,7 +98,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
     const recepcao = { nomeCompleto: nomeCompleto.trim(), cpf: cpf.trim(), telefone: normalizePhoneBR(telefone) }
 
     if (isEditing) {
-      await updateVisita(visita.id, { data, hora, responsavelId, recepcao })
+      await updateVisita(visita.id, { data, hora, responsavelId, recepcao, feedback })
       setSaving(false)
       onClose()
       return
@@ -124,7 +125,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
       await updateLead(finalLeadId, { etapa: 'Em Visita' })
     }
 
-    await addVisita({ tipo: 'empresa', loteId: null, leadId: finalLeadId, data, hora, responsavelId, recepcao })
+    await addVisita({ tipo: 'empresa', loteId: null, leadId: finalLeadId, data, hora, responsavelId, recepcao, feedback })
     setSaving(false)
     onClose()
   }
@@ -298,6 +299,18 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
                   <option key={profile.id} value={profile.id}>{profile.nome} — {profile.cargo}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="feedback">Feedback do cliente</label>
+              <textarea
+                id="feedback"
+                className="form-input"
+                rows={3}
+                value={feedback}
+                onChange={e => setFeedback(e.target.value)}
+                placeholder="Ex.: Cliente disse que não gostou do imóvel, procurar outro. / Cliente gostou, mas o investimento só cai no dia 30/10."
+              />
             </div>
           </div>
 

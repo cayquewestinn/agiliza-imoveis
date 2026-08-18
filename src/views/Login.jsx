@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { LogIn } from 'lucide-react'
 import { useUser } from '../context/UserContext'
+import { useTheme } from '../context/ThemeContext'
 
 export function Login() {
   const { login } = useUser()
+  const { theme } = useTheme()
   const [usuario, setUsuario] = useState('')
   const [senha, setSenha] = useState('')
   const [error, setError] = useState('')
@@ -19,7 +21,11 @@ export function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <img src="/logo-agiliza-ink.png" alt="Agiliza" className="login-brand" />
+        <img
+          src={theme === 'dark' ? '/logo-agiliza.png' : '/logo-agiliza-ink.png'}
+          alt="Agiliza"
+          className="login-brand"
+        />
 
         <h1 className="login-title">Entrar</h1>
         <p className="login-subtitle">Acesse com seu usuário e senha.</p>

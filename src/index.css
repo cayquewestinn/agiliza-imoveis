@@ -45,39 +45,42 @@
 
 /* Dark mode — pure monochrome (no accent, no status hues); status stays
    readable through border-style alone, same rule the light system already
-   follows. Opt-in via the sidebar toggle, default stays light. */
+   follows. Opt-in via the sidebar toggle, default stays light.
+   Every surface token is inverted here (page AND panels AND cards), not
+   just the page background — a "dark mode" that only blackens the page
+   shell while cards/panels stay white isn't actually dark. */
 :root[data-theme="dark"] {
   --bg-page: #000000;
-  --bg-panel: #f2f2f2;
-  --bg-panel-raised: #ffffff;
-  --bg-inset: #e2e2e2;
+  --bg-panel: #161616;
+  --bg-panel-raised: #212121;
+  --bg-inset: #0a0a0a;
 
-  --ink: #0a0a0a;
-  --ink-secondary: #3d3d3d;
-  --ink-tertiary: #5c5c5c;
+  --ink: #f2f2f2;
+  --ink-secondary: #b8b8b8;
+  --ink-tertiary: #8c8c8c;
 
-  --rule: #999999;
-  --rule-strong: #737373;
+  --rule: #3d3d3d;
+  --rule-strong: #5c5c5c;
 
-  --accent: #000000;
-  --accent-hover: #2b2b2b;
-  --accent-soft: rgba(0, 0, 0, 0.08);
+  --accent: #f2f2f2;
+  --accent-hover: #ffffff;
+  --accent-soft: rgba(242, 242, 242, 0.1);
 
   --status-neutral: var(--ink-secondary);
-  --status-neutral-soft: rgba(0, 0, 0, 0.06);
-  --status-active: #000000;
-  --status-active-soft: rgba(0, 0, 0, 0.08);
-  --status-success: #000000;
-  --status-success-soft: rgba(0, 0, 0, 0.06);
-  --status-danger: #000000;
-  --status-danger-soft: rgba(0, 0, 0, 0.06);
-  --status-warning: #000000;
-  --status-warning-soft: rgba(0, 0, 0, 0.06);
-  --status-advancing: #000000;
-  --status-advancing-soft: rgba(0, 0, 0, 0.06);
+  --status-neutral-soft: rgba(242, 242, 242, 0.06);
+  --status-active: #f2f2f2;
+  --status-active-soft: rgba(242, 242, 242, 0.08);
+  --status-success: #f2f2f2;
+  --status-success-soft: rgba(242, 242, 242, 0.06);
+  --status-danger: #f2f2f2;
+  --status-danger-soft: rgba(242, 242, 242, 0.06);
+  --status-warning: #f2f2f2;
+  --status-warning-soft: rgba(242, 242, 242, 0.06);
+  --status-advancing: #f2f2f2;
+  --status-advancing-soft: rgba(242, 242, 242, 0.06);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px -6px rgba(0, 0, 0, 0.7);
   --overlay: rgba(0, 0, 0, 0.65);
 }
 

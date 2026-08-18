@@ -1,16 +1,23 @@
-import { LayoutDashboard, CheckSquare, Building2, Users, LogOut, CalendarClock, X, Sun, Moon } from 'lucide-react'
+import { useState } from 'react'
+import { LayoutDashboard, CheckSquare, Building2, Users, LogOut, CalendarClock, X, Sun, Moon, KeyRound } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { useTheme } from '../context/ThemeContext'
 import { initials } from '../utils/teamHelpers'
+import { ChangePasswordModal } from './ChangePasswordModal'
 
 export function Sidebar({ currentView, setCurrentView, isOpen, onClose }) {
   const { currentUser, logout, isAdmin } = useUser()
   const { theme, toggleTheme } = useTheme()
+  const [showChangePassword, setShowChangePassword] = useState(false)
 
   return (
     <aside id="sidebar-nav" className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
       <div className="sidebar-logo">
-        <img src="/logo-agiliza-ink.png" alt="Agiliza" className="sidebar-brand" />
+        <img
+          src={theme === 'dark' ? '/logo-agiliza.png' : '/logo-agiliza-ink.png'}
+          alt="Agiliza"
+          className="sidebar-brand"
+        />
         <button type="button" className="sidebar-close-btn" onClick={onClose} aria-label="Fechar menu">
           <X size={18} />
         </button>
@@ -70,6 +77,15 @@ export function Sidebar({ currentView, setCurrentView, isOpen, onClose }) {
         {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
       </button>
 
+      <button
+        type="button"
+        className="theme-toggle-btn"
+        onClick={() => setShowChangePassword(true)}
+      >
+        <KeyRound size={16} />
+        Trocar Senha
+      </button>
+
       {currentUser && (
         <div className="sidebar-user">
           <div className="sidebar-user-avatar">{initials(currentUser.nome)}</div>
@@ -81,6 +97,10 @@ export function Sidebar({ currentView, setCurrentView, isOpen, onClose }) {
             <LogOut size={16} />
           </button>
         </div>
+      )}
+
+      {showChangePassword && (
+        <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
       )}
     </aside>
   )

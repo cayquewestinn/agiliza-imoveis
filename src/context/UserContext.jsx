@@ -88,10 +88,16 @@ export function UserProvider({ children }) {
     setCurrentUser(null)
   }
 
+  async function changePassword(novaSenha) {
+    const { error } = await supabase.auth.updateUser({ password: novaSenha })
+    if (error) return { ok: false, message: error.message }
+    return { ok: true }
+  }
+
   const isAdmin = currentUser?.is_admin === true
 
   return (
-    <UserContext.Provider value={{ currentUser, login, logout, isAdmin, loading }}>
+    <UserContext.Provider value={{ currentUser, login, logout, changePassword, isAdmin, loading }}>
       {children}
     </UserContext.Provider>
   )

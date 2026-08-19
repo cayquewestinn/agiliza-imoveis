@@ -45,23 +45,39 @@ function toRow(visita) {
   }
 }
 
+const PAGE_SIZE = 1000
+
+async function fetchAllVisitas() {
+  const rows = []
+  let from = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from('visitas')
+      .select(VISITA_SELECT)
+      .order('data', { ascending: true })
+      .order('hora', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1)
+    if (error) return { rows: null, error }
+    rows.push(...data)
+    if (data.length < PAGE_SIZE) break
+    from += PAGE_SIZE
+  }
+  return { rows, error: null }
+}
+
 export function VisitsProvider({ children }) {
   const { currentUser } = useUser()
   const [visitas, setVisitas] = useState([])
   const [loading, setLoading] = useState(true)
 
   async function refetch(isActive = () => true) {
-    const { data, error } = await supabase
-      .from('visitas')
-      .select(VISITA_SELECT)
-      .order('data', { ascending: true })
-      .order('hora', { ascending: true })
+    const { rows, error } = await fetchAllVisitas()
     if (error) {
       console.error('Erro ao carregar visitas:', error)
       return
     }
     if (isActive()) {
-      setVisitas(data.map(fromRow))
+      setVisitas(rows.map(fromRow))
     }
   }
 

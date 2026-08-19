@@ -5,11 +5,13 @@ import { LoteCard } from '../components/LoteCard'
 import { VisitModal } from '../components/VisitModal'
 import { LayoutGrid, List, Plus, Pencil, Trash2, Search } from 'lucide-react'
 import { useLotes } from '../context/LotesContext'
+import { useLeads } from '../context/LeadsContext'
 import { useUser } from '../context/UserContext'
 import { LOTE_STATUS_OPTIONS, statusToClassName, formatCurrency, formatDate } from '../utils/loteHelpers'
 
 export function Lotes() {
   const { lotes, addLote, updateLote, deleteLote } = useLotes()
+  const { leadsByLote } = useLeads()
   const { currentUser } = useUser()
   const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list'
   const [statusFilter, setStatusFilter] = useState('Todos')
@@ -52,7 +54,14 @@ export function Lotes() {
   }
 
   function handleDelete(id) {
-    if (window.confirm('Tem certeza que deseja excluir este lote?')) {
+    const totalLeadsVinculados = leadsByLote(id).length
+    let mensagem = 'Tem certeza que deseja excluir este lote?'
+    if (totalLeadsVinculados === 1) {
+      mensagem += ' Isso também excluirá permanentemente o lead vinculado a ele.'
+    } else if (totalLeadsVinculados > 1) {
+      mensagem += ` Isso também excluirá permanentemente os ${totalLeadsVinculados} leads vinculados a ele.`
+    }
+    if (window.confirm(mensagem)) {
       deleteLote(id)
     }
   }

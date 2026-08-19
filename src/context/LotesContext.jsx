@@ -50,6 +50,25 @@ function toRow(lote) {
   }
 }
 
+const PAGE_SIZE = 1000
+
+async function fetchAllLotes() {
+  const rows = []
+  let from = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from('lotes')
+      .select(LOTE_COLUMNS)
+      .order('created_at', { ascending: false })
+      .range(from, from + PAGE_SIZE - 1)
+    if (error) return { rows: null, error }
+    rows.push(...data)
+    if (data.length < PAGE_SIZE) break
+    from += PAGE_SIZE
+  }
+  return { rows, error: null }
+}
+
 export function LotesProvider({ children }) {
   const { currentUser } = useUser()
   const [lotes, setLotes] = useState([])
@@ -64,20 +83,16 @@ export function LotesProvider({ children }) {
       return
     }
 
-    supabase
-      .from('lotes')
-      .select(LOTE_COLUMNS)
-      .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (!active) return
-        if (error) {
-          console.error('Erro ao carregar lotes:', error)
-          setLotes([])
-        } else {
-          setLotes(data.map(fromRow))
-        }
-        setLoading(false)
-      })
+    fetchAllLotes().then(({ rows, error }) => {
+      if (!active) return
+      if (error) {
+        console.error('Erro ao carregar lotes:', error)
+        setLotes([])
+      } else {
+        setLotes(rows.map(fromRow))
+      }
+      setLoading(false)
+    })
     return () => { active = false }
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- refetch only when the logged-in user's id actually changes, not on every currentUser object identity change
   }, [currentUser?.id])

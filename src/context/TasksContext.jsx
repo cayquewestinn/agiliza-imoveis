@@ -38,22 +38,38 @@ function toRow(task) {
   }
 }
 
+const PAGE_SIZE = 1000
+
+async function fetchAllTasks() {
+  const rows = []
+  let from = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from('tarefas')
+      .select(TAREFA_SELECT)
+      .order('prazo', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1)
+    if (error) return { rows: null, error }
+    rows.push(...data)
+    if (data.length < PAGE_SIZE) break
+    from += PAGE_SIZE
+  }
+  return { rows, error: null }
+}
+
 export function TasksProvider({ children }) {
   const { currentUser } = useUser()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
 
   async function refetch(isActive = () => true) {
-    const { data, error } = await supabase
-      .from('tarefas')
-      .select(TAREFA_SELECT)
-      .order('prazo', { ascending: true })
+    const { rows, error } = await fetchAllTasks()
     if (error) {
       console.error('Erro ao carregar tarefas:', error)
       return
     }
     if (isActive()) {
-      setTasks(data.map(fromRow))
+      setTasks(rows.map(fromRow))
     }
   }
 

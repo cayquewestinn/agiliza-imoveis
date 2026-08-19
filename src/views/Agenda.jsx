@@ -55,7 +55,11 @@ export function Agenda() {
   function handleStatusChange(visita, novoStatus) {
     updateVisita(visita.id, { status: novoStatus })
     if (novoStatus === 'Realizada' && visita.leadId) {
-      updateLead(visita.leadId, { etapa: 'Em Proposta' })
+      const lead = leadInfo(visita.leadId)
+      const etapasAnterioresAProposta = ['Novo', 'Em Atendimento', 'Em Visita']
+      if (lead && etapasAnterioresAProposta.includes(lead.etapa)) {
+        updateLead(visita.leadId, { etapa: 'Em Proposta' })
+      }
     }
   }
 

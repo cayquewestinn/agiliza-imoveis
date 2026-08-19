@@ -55,7 +55,7 @@ export function Lotes() {
 
   function handleDelete(id) {
     const totalLeadsVinculados = leadsByLote(id).length
-    let mensagem = 'Tem certeza que deseja excluir este lote?'
+    let mensagem = 'Tem certeza que deseja excluir este imóvel?'
     if (totalLeadsVinculados === 1) {
       mensagem += ' Isso também excluirá permanentemente o lead vinculado a ele.'
     } else if (totalLeadsVinculados > 1) {
@@ -83,14 +83,14 @@ export function Lotes() {
         </button>
       </div>
       <button className="btn btn-primary" onClick={openNewLoteModal}>
-        <Plus size={16} /> Novo Lote
+        <Plus size={16} /> Novo Imóvel
       </button>
     </div>
   )
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Header title="Lotes" rightContent={toggleRender} />
+      <Header title="Imóveis" rightContent={toggleRender} />
 
       <div className="page-content" style={{ flex: 1, overflow: 'auto' }}>
         <div className="status-tabs">
@@ -124,7 +124,7 @@ export function Lotes() {
 
         {filtered.length === 0 && (
           <div className="card" style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 48 }}>
-            Nenhum lote encontrado para esta busca.
+            Nenhum imóvel encontrado para esta busca.
           </div>
         )}
 
@@ -147,7 +147,7 @@ export function Lotes() {
               <thead>
                 <tr>
                   <th>Código</th>
-                  <th>Lote</th>
+                  <th>Imóvel</th>
                   <th>Localização</th>
                   <th>Avaliação</th>
                   <th>Status</th>

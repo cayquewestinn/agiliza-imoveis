@@ -215,7 +215,7 @@ export function LoteDetailModal({ lote, leads, onScheduleVisit, onClose }) {
 
             <div className="lote-leads-list">
               {leads.length === 0 && (
-                <div className="lote-leads-empty">Nenhum lead para este lote ainda.</div>
+                <div className="lote-leads-empty">Nenhum lead para este imóvel ainda.</div>
               )}
               {leads.map(lead => (
                 <LeadRow

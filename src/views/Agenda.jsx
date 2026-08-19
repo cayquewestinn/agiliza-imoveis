@@ -121,7 +121,7 @@ export function Agenda() {
                       <div className="visit-row-title">{lead?.nome ?? visita.recepcao?.nomeCompleto ?? 'Contato'}</div>
                       <div className="visit-row-subtitle">
                         {visita.tipo === 'imovel' ? (
-                          <><MapPin size={12} /> {lote ? `${lote.codigo} — ${lote.titulo}` : 'Lote não encontrado'}</>
+                          <><MapPin size={12} /> {lote ? `${lote.codigo} — ${lote.titulo}` : 'Imóvel não encontrado'}</>
                         ) : (
                           <>Visita à empresa · CPF {visita.recepcao?.cpf}</>
                         )}

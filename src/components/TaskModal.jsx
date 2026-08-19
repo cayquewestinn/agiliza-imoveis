@@ -73,7 +73,7 @@ export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
                 type="text"
                 value={titulo}
                 onChange={e => setTitulo(e.target.value)}
-                placeholder="Ex.: Revisar edital do Lote 12"
+                placeholder="Ex.: Revisar edital do Imóvel 12"
                 autoFocus
               />
             </div>

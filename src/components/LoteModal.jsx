@@ -26,11 +26,11 @@ export function LoteModal({ lote, onClose, onSave }) {
   function handleSubmit(e) {
     e.preventDefault()
     if (!titulo.trim()) {
-      setError('Informe um título para o lote.')
+      setError('Informe um título para o imóvel.')
       return
     }
     if (!codigo.trim()) {
-      setError('Informe o código do lote.')
+      setError('Informe o código do imóvel.')
       return
     }
     onSave({
@@ -56,7 +56,7 @@ export function LoteModal({ lote, onClose, onSave }) {
     <div className={`modal-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
       <div className="modal modal-wide" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>{isEditing ? 'Editar Lote' : 'Novo Lote'}</h2>
+          <h2>{isEditing ? 'Editar Imóvel' : 'Novo Imóvel'}</h2>
           <button type="button" className="icon-btn" onClick={requestClose} aria-label="Fechar">
             <X size={18} />
           </button>
@@ -252,7 +252,7 @@ export function LoteModal({ lote, onClose, onSave }) {
 
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={requestClose}>Cancelar</button>
-            <button type="submit" className="btn btn-primary">{isEditing ? 'Salvar' : 'Criar Lote'}</button>
+            <button type="submit" className="btn btn-primary">{isEditing ? 'Salvar' : 'Criar Imóvel'}</button>
           </div>
         </form>
       </div>

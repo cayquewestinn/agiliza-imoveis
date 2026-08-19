@@ -63,7 +63,7 @@ export function Sidebar({ currentView, setCurrentView, isOpen, onClose }) {
           onClick={() => setCurrentView('lotes')}
         >
           <Building2 className="nav-icon" />
-          Lotes
+          Imóveis
         </button>
       </nav>
 

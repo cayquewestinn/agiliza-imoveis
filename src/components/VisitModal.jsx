@@ -100,7 +100,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
 
     if (tipo === 'imovel') {
       if (!loteId || !leadId) {
-        setError('Selecione o lote e o lead.')
+        setError('Selecione o imóvel e o lead.')
         setSaving(false)
         return
       }
@@ -191,7 +191,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
               <>
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label" htmlFor="lote">Lote</label>
+                    <label className="form-label" htmlFor="lote">Imóvel</label>
                     {locked ? (
                       <div className="form-static">
                         {lotes.find(l => l.id === loteId)?.codigo} — {lotes.find(l => l.id === loteId)?.titulo}
@@ -203,7 +203,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
                         value={loteId}
                         onChange={e => { setLoteId(e.target.value); setLeadId('') }}
                       >
-                        <option value="">Selecione o lote</option>
+                        <option value="">Selecione o imóvel</option>
                         {lotes.map(l => (
                           <option key={l.id} value={l.id}>{l.codigo} — {l.titulo}</option>
                         ))}

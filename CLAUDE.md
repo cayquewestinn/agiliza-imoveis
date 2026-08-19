@@ -43,6 +43,7 @@ When work is delegable, dispatch the specialist that matches the task instead of
 - Any Supabase `select` that can return more than 1000 rows needs manual `.range()` pagination — PostgREST silently caps at 1000 otherwise. (This already caused a real bug: leads were silently truncated from 1186 to 1000.)
 - Never handle a real password or a `service_role`/secret key, even if offered directly — anything that requires viewing or typing a credential value goes through the Supabase dashboard, done by the user.
 - Commit messages: short, imperative, `feat:`/`fix:`/`docs:`/`chore:` prefix, matching the existing `git log` style.
+- Every `*Context.jsx` file intentionally exports both its Provider component and its `useX` hook from the same file (Context+hook co-location) — `react/only-export-components` is turned off project-wide in `.oxlintrc.json` for this reason, not an oversight. Their `useEffect` fetch/subscribe effects intentionally depend on `currentUser?.id` (not the whole `currentUser` object) to avoid refetching on every object-identity change — each site has an inline `oxlint-disable-next-line react-hooks/exhaustive-deps` comment explaining this; don't remove those comments to "fix" the warning by adding `currentUser` to the deps array, that reintroduces unnecessary refetches.
 
 ## Learn more
 

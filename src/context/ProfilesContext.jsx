@@ -33,6 +33,7 @@ export function ProfilesProvider({ children }) {
         setLoading(false)
       })
     return () => { active = false }
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- refetch only when the logged-in user's id actually changes, not on every currentUser object identity change
   }, [currentUser?.id])
 
   return (

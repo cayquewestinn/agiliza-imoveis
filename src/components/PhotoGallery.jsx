@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export function PhotoGallery({ fotos, startIndex, titulo, onClose }) {
   const [index, setIndex] = useState(startIndex)
 
-  function prev() {
+  const prev = useCallback(() => {
     setIndex(i => (i === 0 ? fotos.length - 1 : i - 1))
-  }
+  }, [fotos.length])
 
-  function next() {
+  const next = useCallback(() => {
     setIndex(i => (i === fotos.length - 1 ? 0 : i + 1))
-  }
+  }, [fotos.length])
 
   useEffect(() => {
     function handleKey(e) {
@@ -20,7 +20,7 @@ export function PhotoGallery({ fotos, startIndex, titulo, onClose }) {
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [fotos.length])
+  }, [fotos.length, onClose, next, prev])
 
   return (
     <div className="gallery-overlay" onClick={onClose}>

@@ -13,13 +13,20 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+const CONFLICT_WINDOW_MINUTES = 60
+
+function toMinutes(hora) {
+  const [h, m] = hora.split(':').map(Number)
+  return h * 60 + m
+}
+
 export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelId, onClose }) {
   const isEditing = Boolean(visita)
   const locked = isEditing || Boolean(presetLote)
 
   const { lotes } = useLotes()
   const { leads, leadsByLote, addLead, updateLead } = useLeads()
-  const { addVisita, updateVisita } = useVisits()
+  const { visitas, addVisita, updateVisita } = useVisits()
   const { profiles } = useProfiles()
 
   const [tipo, setTipo] = useState(visita?.tipo ?? (presetLote ? 'imovel' : 'imovel'))
@@ -39,9 +46,20 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
   const [feedback, setFeedback] = useState(visita?.feedback ?? '')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [conflito, setConflito] = useState(null)
   const { closing, requestClose } = useClosingTransition(onClose)
 
   const leadsDoLote = loteId ? leadsByLote(loteId) : []
+
+  function encontrarConflito() {
+    return visitas.find(v => (
+      v.status === 'Agendada' &&
+      v.responsavelId === responsavelId &&
+      v.data === data &&
+      (!isEditing || v.id !== visita.id) &&
+      Math.abs(toMinutes(v.hora) - toMinutes(hora)) < CONFLICT_WINDOW_MINUTES
+    ))
+  }
 
   function handleContatoChange(value) {
     setContatoOption(value)
@@ -68,6 +86,14 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
     if (!responsavelId) {
       setError('Selecione um responsável.')
       return
+    }
+
+    if (!conflito) {
+      const encontrado = encontrarConflito()
+      if (encontrado) {
+        setConflito(encontrado)
+        return
+      }
     }
 
     setSaving(true)
@@ -274,7 +300,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
                   className="form-input"
                   type="date"
                   value={data}
-                  onChange={e => setData(e.target.value)}
+                  onChange={e => { setConflito(null); setData(e.target.value) }}
                 />
               </div>
               <div className="form-group">
@@ -284,7 +310,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
                   className="form-input"
                   type="time"
                   value={hora}
-                  onChange={e => setHora(e.target.value)}
+                  onChange={e => { setConflito(null); setHora(e.target.value) }}
                 />
               </div>
             </div>
@@ -295,7 +321,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
                 id="responsavel"
                 className="form-input"
                 value={responsavelId}
-                onChange={e => setResponsavelId(e.target.value)}
+                onChange={e => { setConflito(null); setResponsavelId(e.target.value) }}
               >
                 {profiles.map(profile => (
                   <option key={profile.id} value={profile.id}>{profile.nome} — {profile.cargo}</option>
@@ -314,11 +340,17 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
                 placeholder="Ex.: Cliente disse que não gostou do imóvel, procurar outro. / Cliente gostou, mas o investimento só cai no dia 30/10."
               />
             </div>
+
+            {conflito && (
+              <div className="form-error">
+                {profiles.find(p => p.id === conflito.responsavelId)?.nome ?? 'Este responsável'} já tem uma visita marcada em {conflito.data.split('-').reverse().join('/')} às {conflito.hora}. Clique novamente em "{isEditing ? 'Salvar' : 'Marcar Visita'}" para confirmar mesmo assim.
+              </div>
+            )}
           </div>
 
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={requestClose} disabled={saving}>Cancelar</button>
-            <button type="submit" className="btn btn-primary" disabled={saving}>{isEditing ? 'Salvar' : 'Marcar Visita'}</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>{conflito ? 'Confirmar mesmo assim' : (isEditing ? 'Salvar' : 'Marcar Visita')}</button>
           </div>
         </form>
       </div>

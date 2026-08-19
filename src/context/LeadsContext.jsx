@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useUser } from './UserContext'
+import { useToast } from './ToastContext'
 
 const LeadsContext = createContext(null)
 
@@ -54,6 +55,7 @@ async function fetchAllLeads() {
 
 export function LeadsProvider({ children }) {
   const { currentUser } = useUser()
+  const { showError } = useToast()
   const [leads, setLeads] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -88,6 +90,7 @@ export function LeadsProvider({ children }) {
       .single()
     if (error) {
       console.error('Erro ao criar lead:', error)
+      showError('Não foi possível criar o lead. Tente novamente.')
       return null
     }
     const created = fromRow(data)
@@ -106,6 +109,7 @@ export function LeadsProvider({ children }) {
       .single()
     if (error) {
       console.error('Erro ao atualizar lead:', error)
+      showError('Não foi possível salvar as alterações do lead. Tente novamente.')
       return
     }
     setLeads(prev => prev.map(l => (l.id === id ? fromRow(data) : l)))
@@ -115,6 +119,7 @@ export function LeadsProvider({ children }) {
     const { error } = await supabase.from('leads').delete().eq('id', id)
     if (error) {
       console.error('Erro ao excluir lead:', error)
+      showError('Não foi possível excluir o lead. Tente novamente.')
       return
     }
     setLeads(prev => prev.filter(l => l.id !== id))

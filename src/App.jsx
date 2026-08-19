@@ -7,6 +7,7 @@ import { Equipe } from './views/Equipe'
 import { Lotes } from './views/Lotes'
 import { Agenda } from './views/Agenda'
 import { Login } from './views/Login'
+import { Toast } from './components/Toast'
 import { TasksProvider } from './context/TasksContext'
 import { LotesProvider } from './context/LotesContext'
 import { LeadsProvider } from './context/LeadsContext'
@@ -14,6 +15,7 @@ import { VisitsProvider } from './context/VisitsContext'
 import { UserProvider, useUser } from './context/UserContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { ProfilesProvider } from './context/ProfilesContext'
+import { ToastProvider } from './context/ToastContext'
 import './index.css'
 
 function AppShell() {
@@ -78,19 +80,22 @@ function AppShell() {
 function App() {
   return (
     <ThemeProvider>
-      <UserProvider>
-        <ProfilesProvider>
-          <TasksProvider>
-            <LotesProvider>
-              <LeadsProvider>
-                <VisitsProvider>
-                  <AppShell />
-                </VisitsProvider>
-              </LeadsProvider>
-            </LotesProvider>
-          </TasksProvider>
-        </ProfilesProvider>
-      </UserProvider>
+      <ToastProvider>
+        <UserProvider>
+          <ProfilesProvider>
+            <TasksProvider>
+              <LotesProvider>
+                <LeadsProvider>
+                  <VisitsProvider>
+                    <AppShell />
+                    <Toast />
+                  </VisitsProvider>
+                </LeadsProvider>
+              </LotesProvider>
+            </TasksProvider>
+          </ProfilesProvider>
+        </UserProvider>
+      </ToastProvider>
     </ThemeProvider>
   )
 }

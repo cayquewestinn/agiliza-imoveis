@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useUser } from './UserContext'
+import { useToast } from './ToastContext'
 
 const TasksContext = createContext(null)
 
@@ -59,6 +60,7 @@ async function fetchAllTasks() {
 
 export function TasksProvider({ children }) {
   const { currentUser } = useUser()
+  const { showError } = useToast()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -94,6 +96,7 @@ export function TasksProvider({ children }) {
     const { error } = await supabase.from('tarefas').insert(toRow(task))
     if (error) {
       console.error('Erro ao criar tarefa:', error)
+      showError('Não foi possível criar a tarefa. Tente novamente.')
       return
     }
     await refetch()
@@ -105,6 +108,7 @@ export function TasksProvider({ children }) {
     const { error } = await supabase.from('tarefas').update(toRow(merged)).eq('id', id)
     if (error) {
       console.error('Erro ao atualizar tarefa:', error)
+      showError('Não foi possível salvar as alterações da tarefa. Tente novamente.')
       return
     }
     await refetch()
@@ -114,6 +118,7 @@ export function TasksProvider({ children }) {
     const { error } = await supabase.from('tarefas').delete().eq('id', id)
     if (error) {
       console.error('Erro ao excluir tarefa:', error)
+      showError('Não foi possível excluir a tarefa. Tente novamente.')
       return
     }
     setTasks(prev => prev.filter(t => t.id !== id))

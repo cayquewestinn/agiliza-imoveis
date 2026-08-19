@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useUser } from './UserContext'
+import { useToast } from './ToastContext'
 
 const LotesContext = createContext(null)
 
@@ -71,6 +72,7 @@ async function fetchAllLotes() {
 
 export function LotesProvider({ children }) {
   const { currentUser } = useUser()
+  const { showError } = useToast()
   const [lotes, setLotes] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -105,6 +107,7 @@ export function LotesProvider({ children }) {
       .single()
     if (error) {
       console.error('Erro ao criar lote:', error)
+      showError('Não foi possível criar o imóvel. Tente novamente.')
       return
     }
     setLotes(prev => [fromRow(data), ...prev])
@@ -121,6 +124,7 @@ export function LotesProvider({ children }) {
       .single()
     if (error) {
       console.error('Erro ao atualizar lote:', error)
+      showError('Não foi possível salvar as alterações do imóvel. Tente novamente.')
       return
     }
     setLotes(prev => prev.map(l => (l.id === id ? fromRow(data) : l)))
@@ -130,6 +134,7 @@ export function LotesProvider({ children }) {
     const { error } = await supabase.from('lotes').delete().eq('id', id)
     if (error) {
       console.error('Erro ao excluir lote:', error)
+      showError('Não foi possível excluir o imóvel. Tente novamente.')
       return
     }
     setLotes(prev => prev.filter(l => l.id !== id))

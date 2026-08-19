@@ -1635,6 +1635,32 @@ select.form-input {
   font-size: 0.85rem;
 }
 
+.toast-stack {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 360px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background-color: var(--bg-panel-raised);
+  color: var(--status-danger);
+  border: 1px solid var(--status-danger);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  animation: modal-content-in 180ms ease-out;
+}
+
 .form-static {
   padding: 9px 12px;
   border-radius: var(--radius-sm);

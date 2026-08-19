@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useUser } from './UserContext'
+import { useToast } from './ToastContext'
 
 const VisitsContext = createContext(null)
 
@@ -67,6 +68,7 @@ async function fetchAllVisitas() {
 
 export function VisitsProvider({ children }) {
   const { currentUser } = useUser()
+  const { showError } = useToast()
   const [visitas, setVisitas] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -110,6 +112,7 @@ export function VisitsProvider({ children }) {
     const { error } = await supabase.from('visitas').insert(toRow(visita))
     if (error) {
       console.error('Erro ao criar visita:', error)
+      showError('Não foi possível marcar a visita. Tente novamente.')
       return
     }
     await refetch()
@@ -121,6 +124,7 @@ export function VisitsProvider({ children }) {
     const { error } = await supabase.from('visitas').update(toRow(merged)).eq('id', id)
     if (error) {
       console.error('Erro ao atualizar visita:', error)
+      showError('Não foi possível salvar as alterações da visita. Tente novamente.')
       return
     }
     await refetch()
@@ -130,6 +134,7 @@ export function VisitsProvider({ children }) {
     const { error } = await supabase.from('visitas').delete().eq('id', id)
     if (error) {
       console.error('Erro ao excluir visita:', error)
+      showError('Não foi possível excluir a visita. Tente novamente.')
       return
     }
     await refetch()

@@ -1,4 +1,9 @@
 import { useState } from 'react'
+import {
+  DndContext, DragOverlay, PointerSensor, closestCorners, useSensor, useSensors, useDroppable,
+} from '@dnd-kit/core'
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { Header } from '../components/Header'
 import { TaskModal } from '../components/TaskModal'
 import { List, LayoutGrid, Plus, Pencil, Trash2 } from 'lucide-react'
@@ -6,13 +11,109 @@ import { useTasks } from '../context/TasksContext'
 import { useUser } from '../context/UserContext'
 import { STATUS_OPTIONS, statusToClassName, isLate } from '../utils/taskHelpers'
 
+function KanbanCard({ task, onOpen, onDelete }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0 : 1,
+  }
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="kanban-card"
+      onClick={() => onOpen(task)}
+    >
+      <button
+        type="button"
+        className="icon-btn icon-btn-danger kanban-card-delete"
+        aria-label="Excluir tarefa"
+        onPointerDown={e => e.stopPropagation()}
+        onClick={e => { e.stopPropagation(); onDelete(task.id) }}
+      >
+        <Trash2 size={14} />
+      </button>
+      <div className="kanban-card-title">{task.titulo}</div>
+      <div className="kanban-card-meta">
+        <span className={`status-badge status-${isLate(task) ? 'late' : statusToClassName(task.status)}`}>
+          {isLate(task) ? 'Atrasado' : task.status}
+        </span>
+        <span>{task.prazo}</span>
+      </div>
+    </div>
+  )
+}
+
+function KanbanCardPreview({ task }) {
+  return (
+    <div className="kanban-card kanban-card-overlay">
+      <div className="kanban-card-title">{task.titulo}</div>
+      <div className="kanban-card-meta">
+        <span className={`status-badge status-${isLate(task) ? 'late' : statusToClassName(task.status)}`}>
+          {isLate(task) ? 'Atrasado' : task.status}
+        </span>
+        <span>{task.prazo}</span>
+      </div>
+    </div>
+  )
+}
+
+function KanbanColumn({ status, tasks, onOpen, onAdd, onDelete }) {
+  const { setNodeRef, isOver } = useDroppable({ id: status })
+  return (
+    <div className={`kanban-column ${isOver ? 'kanban-column-over' : ''}`} ref={setNodeRef}>
+      <div className="kanban-header">
+        <span>{status}</span>
+        <span className="kanban-count">{tasks.length}</span>
+      </div>
+      <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+        {tasks.map(t => (
+          <KanbanCard key={t.id} task={t} onOpen={onOpen} onDelete={onDelete} />
+        ))}
+      </SortableContext>
+      {status === STATUS_OPTIONS[0] && (
+        <button className="kanban-add-btn" onClick={onAdd}>
+          <Plus size={16} /> Adicionar tarefa
+        </button>
+      )}
+    </div>
+  )
+}
+
 export function MinhasTarefas() {
-  const { tasks: allTasks, addTask, updateTask, deleteTask } = useTasks()
+  const { tasks: allTasks, addTask, updateTask, deleteTask, updateStatus } = useTasks()
   const { currentUser, isAdmin } = useUser()
   const tasks = isAdmin ? allTasks : allTasks.filter(t => t.responsavelId === currentUser.id)
   const [viewMode, setViewMode] = useState('list') // 'list' | 'kanban'
   const [editingTask, setEditingTask] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [draggingTask, setDraggingTask] = useState(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  )
+
+  function handleDragStart(event) {
+    const task = tasks.find(t => t.id === event.active.id)
+    setDraggingTask(task ?? null)
+  }
+
+  function handleDragEnd(event) {
+    setDraggingTask(null)
+    const { active, over } = event
+    if (!over) return
+    const activeTask = tasks.find(t => t.id === active.id)
+    if (!activeTask) return
+    const overStatus = STATUS_OPTIONS.includes(over.id)
+      ? over.id
+      : tasks.find(t => t.id === over.id)?.status
+    if (overStatus && overStatus !== activeTask.status) {
+      updateStatus(activeTask.id, overStatus)
+    }
+  }
 
   function openNewTaskModal() {
     setEditingTask(null)
@@ -119,32 +220,28 @@ export function MinhasTarefas() {
             </div>
           </div>
         ) : (
-          <div className="kanban-board">
-            {STATUS_OPTIONS.map(statusOption => (
-              <div className="kanban-column" key={statusOption}>
-                <div className="kanban-header">
-                  <span>{statusOption}</span>
-                  <span className="kanban-count">{tasks.filter(t => t.status === statusOption).length}</span>
-                </div>
-                {tasks.filter(t => t.status === statusOption).map(t => (
-                  <div key={t.id} className="kanban-card" onClick={() => openEditTaskModal(t)}>
-                    <div className="kanban-card-title">{t.titulo}</div>
-                    <div className="kanban-card-meta">
-                      <span className={`status-badge status-${isLate(t) ? 'late' : statusToClassName(t.status)}`}>
-                        {isLate(t) ? 'Atrasado' : t.status}
-                      </span>
-                      <span>{t.prazo}</span>
-                    </div>
-                  </div>
-                ))}
-                {statusOption === STATUS_OPTIONS[0] && (
-                  <button className="kanban-add-btn" onClick={openNewTaskModal}>
-                    <Plus size={16} /> Adicionar tarefa
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="kanban-board">
+              {STATUS_OPTIONS.map(statusOption => (
+                <KanbanColumn
+                  key={statusOption}
+                  status={statusOption}
+                  tasks={tasks.filter(t => t.status === statusOption)}
+                  onOpen={openEditTaskModal}
+                  onAdd={openNewTaskModal}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+            <DragOverlay>
+              {draggingTask && <KanbanCardPreview task={draggingTask} />}
+            </DragOverlay>
+          </DndContext>
         )}
       </div>
 

@@ -247,6 +247,23 @@ body {
   padding: 32px;
 }
 
+/* Dashboard grid rows — row 2 pairs Próximas Tarefas with a compact summary
+   sidebar, row 3 puts the two full ranking tables side by side. Both stack
+   to one column at the same 900px breakpoint the sidebar drawer uses. */
+.dashboard-row-2col {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.dashboard-row-perf {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
 /* Panels */
 .card {
   background-color: var(--bg-panel);
@@ -331,6 +348,39 @@ body {
 .trend-up { color: var(--status-success); }
 .trend-down { color: var(--status-danger); }
 .trend-neutral { color: var(--ink-secondary); }
+
+/* Dashboard KPI tiles — raw current-count per etapa, sits above the sqrt-scaled
+   bars so a dominant stage (e.g. hundreds of "Novo") doesn't visually erase a
+   thin one (e.g. a single "Em Visita") the way a linear bar scale would. */
+.dashboard-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.dashboard-kpi-tile {
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-panel-raised);
+}
+
+.dashboard-kpi-label {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.78rem;
+  color: var(--ink-secondary);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.dashboard-kpi-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
 
 /* Dashboard bar chart (lotes por status) */
 .status-chart {
@@ -833,35 +883,72 @@ span.status-badge {
   padding: 10px 0;
 }
 
-.lote-lead-row {
+.lead-row {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
   padding: 10px 0;
   border-bottom: 1px solid var(--rule);
 }
 
-.lote-lead-row:last-child {
+.lead-row:last-child {
   border-bottom: none;
-}
-
-.lote-lead-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .lote-lead-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  flex: 1 1 150px;
+  min-width: 130px;
 }
 
-.lote-lead-assign {
+.lead-row-chips {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  flex: 2 1 260px;
+}
+
+.lead-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Status badge reused as a clickable trigger for inline-edit — same look as
+   the static/select variants, just without the select's dropdown chrome.
+   Stays upright (no -2deg rotation) because it's a functional control. */
+.status-chip {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+/* Vendedor/Agendador assign chips — dashed border marks them as editable,
+   same subtle-border token the form inputs already use. */
+.lead-assign-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--rule-strong);
+  background: transparent;
+  color: var(--ink-secondary);
+  font-family: var(--font-label);
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.lead-assign-chip:hover {
+  background-color: var(--bg-inset);
+  color: var(--ink);
 }
 
 .lote-lead-select {
@@ -887,9 +974,14 @@ span.status-badge {
   box-shadow: 0 0 0 1px var(--accent);
 }
 
-.lote-lead-sold-btn {
-  padding: 5px 12px;
-  font-size: 0.7rem;
+.dashboard-subgroup-title {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  color: var(--ink-tertiary);
+  font-weight: 600;
+  margin-bottom: 6px;
 }
 
 .desempenho-list {
@@ -933,12 +1025,6 @@ span.status-badge {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--ink);
-}
-
-.lote-lead-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .lote-lead-phone {
@@ -1276,6 +1362,13 @@ span.status-badge {
 .icon-btn-danger:hover {
   background-color: var(--status-danger-soft);
   color: var(--status-danger);
+}
+
+.icon-btn.is-sold,
+.icon-btn.is-sold:hover {
+  background-color: var(--status-success-soft);
+  color: var(--status-success);
+  cursor: default;
 }
 
 /* Modal */
@@ -1925,7 +2018,9 @@ select.form-input {
   }
 
   .lotes-grid,
-  .team-grid {
+  .team-grid,
+  .dashboard-row-2col,
+  .dashboard-row-perf {
     grid-template-columns: 1fr;
   }
 

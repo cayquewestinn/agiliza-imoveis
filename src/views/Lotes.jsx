@@ -2,23 +2,19 @@ import { useState } from 'react'
 import { Header } from '../components/Header'
 import { LoteModal } from '../components/LoteModal'
 import { LoteCard } from '../components/LoteCard'
-import { VisitModal } from '../components/VisitModal'
 import { LayoutGrid, List, Plus, Pencil, Trash2, Search } from 'lucide-react'
 import { useLotes } from '../context/LotesContext'
 import { useLeads } from '../context/LeadsContext'
-import { useUser } from '../context/UserContext'
 import { LOTE_STATUS_OPTIONS, statusToClassName, formatCurrency, formatDate } from '../utils/loteHelpers'
 
 export function Lotes() {
   const { lotes, addLote, updateLote, deleteLote } = useLotes()
   const { leadsByLote } = useLeads()
-  const { currentUser } = useUser()
   const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list'
   const [statusFilter, setStatusFilter] = useState('Todos')
   const [searchTerm, setSearchTerm] = useState('')
   const [editingLote, setEditingLote] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [visitTarget, setVisitTarget] = useState(null) // { lote, lead } | null
 
   const byStatus = statusFilter === 'Todos' ? lotes : lotes.filter(l => l.status === statusFilter)
 
@@ -136,7 +132,6 @@ export function Lotes() {
                 lote={lote}
                 onEdit={openEditLoteModal}
                 onDelete={handleDelete}
-                onScheduleVisit={(l, lead) => setVisitTarget({ lote: l, lead })}
               />
             ))}
           </div>
@@ -189,15 +184,6 @@ export function Lotes() {
 
       {isModalOpen && (
         <LoteModal lote={editingLote} onClose={closeModal} onSave={handleSave} />
-      )}
-
-      {visitTarget && (
-        <VisitModal
-          presetLote={visitTarget.lote}
-          presetLead={visitTarget.lead}
-          defaultResponsavelId={currentUser.id}
-          onClose={() => setVisitTarget(null)}
-        />
       )}
     </div>
   )

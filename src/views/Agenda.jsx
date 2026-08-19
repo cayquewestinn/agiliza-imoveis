@@ -2,11 +2,10 @@ import { useState } from 'react'
 import { Header } from '../components/Header'
 import { VisitModal } from '../components/VisitModal'
 import {
-  Plus, Building2, Home, Pencil, Trash2, MapPin, MessageSquareText,
+  Plus, Building2, Pencil, Trash2, MessageSquareText,
   ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { useVisits } from '../context/VisitsContext'
-import { useLotes } from '../context/LotesContext'
 import { useLeads } from '../context/LeadsContext'
 import { useUser } from '../context/UserContext'
 import {
@@ -18,7 +17,6 @@ const today = new Date()
 
 export function Agenda() {
   const { visitas, updateVisita, deleteVisita } = useVisits()
-  const { lotes } = useLotes()
   const { leads, updateLead } = useLeads()
   const { currentUser } = useUser()
 
@@ -50,10 +48,6 @@ export function Agenda() {
     const date = new Date(calYear, calMonth + 1, 1)
     setCalYear(date.getFullYear())
     setCalMonth(date.getMonth())
-  }
-
-  function loteInfo(loteId) {
-    return lotes.find(l => l.id === loteId)
   }
 
   function leadInfo(leadId) {
@@ -93,24 +87,19 @@ export function Agenda() {
   }
 
   function renderVisitRow(visita) {
-    const lote = visita.tipo === 'imovel' ? loteInfo(visita.loteId) : null
     const lead = leadInfo(visita.leadId)
     return (
       <div className="visit-row" key={visita.id}>
         <div className="visit-row-time mono">{visita.hora}</div>
 
-        <div className={`visit-tipo-icon visit-tipo-${visita.tipo}`}>
-          {visita.tipo === 'imovel' ? <Home size={16} /> : <Building2 size={16} />}
+        <div className="visit-tipo-icon visit-tipo-empresa">
+          <Building2 size={16} />
         </div>
 
         <div className="visit-row-info">
           <div className="visit-row-title">{lead?.nome ?? visita.recepcao?.nomeCompleto ?? 'Contato'}</div>
           <div className="visit-row-subtitle">
-            {visita.tipo === 'imovel' ? (
-              <><MapPin size={12} /> {lote ? `${lote.codigo} — ${lote.titulo}` : 'Imóvel não encontrado'}</>
-            ) : (
-              <>Visita à empresa · CPF {visita.recepcao?.cpf}</>
-            )}
+            Visita à empresa · CPF {visita.recepcao?.cpf}
           </div>
           {visita.feedback && (
             <div className="visit-row-feedback">

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   X, MapPin, Bed, Bath, Car, Ruler, Building2, Home, Gavel,
-  Users, MessageCircle, CalendarClock, CheckCircle2, ImageOff, Images,
+  Users, MessageCircle, CheckCircle2, ImageOff, Images,
 } from 'lucide-react'
 import { statusToClassName, formatCurrency, formatDate } from '../utils/loteHelpers'
 import { etapaToClassName, formatPhone, whatsappLink, LEAD_ETAPA_OPTIONS } from '../utils/leadHelpers'
@@ -10,7 +10,7 @@ import { useProfiles } from '../context/ProfilesContext'
 import { useClosingTransition } from '../hooks/useClosingTransition'
 import { PhotoGallery } from './PhotoGallery'
 
-function LeadRow({ lead, lote, vendedores, agendadores, updateLead, onScheduleVisit }) {
+function LeadRow({ lead, lote, vendedores, agendadores, updateLead }) {
   const [editing, setEditing] = useState(null) // null | 'etapa' | 'vendedor' | 'agendador'
   const vendedor = vendedores.find(p => p.id === lead.vendedorId)
   const agendador = agendadores.find(p => p.id === lead.agendadorId)
@@ -100,14 +100,6 @@ function LeadRow({ lead, lote, vendedores, agendadores, updateLead, onScheduleVi
       </div>
 
       <div className="lead-row-actions">
-        <button
-          type="button"
-          className="icon-btn"
-          onClick={() => onScheduleVisit(lote, lead)}
-          aria-label={`Marcar visita com ${lead.nome}`}
-        >
-          <CalendarClock size={16} />
-        </button>
         <a
           className="whatsapp-btn"
           href={whatsappLink(lead.telefone, `Olá ${lead.nome.split(' ')[0]}, tudo bem? Sou da Agiliza Imóveis e gostaria de falar sobre o imóvel ${lote.codigo}.`)}
@@ -132,7 +124,7 @@ function LeadRow({ lead, lote, vendedores, agendadores, updateLead, onScheduleVi
   )
 }
 
-export function LoteDetailModal({ lote, leads, onScheduleVisit, onClose }) {
+export function LoteDetailModal({ lote, leads, onClose }) {
   const { updateLead } = useLeads()
   const { profiles } = useProfiles()
   const vendedores = profiles.filter(p => p.cargo === 'Vendedor')
@@ -225,7 +217,6 @@ export function LoteDetailModal({ lote, leads, onScheduleVisit, onClose }) {
                   vendedores={vendedores}
                   agendadores={agendadores}
                   updateLead={updateLead}
-                  onScheduleVisit={onScheduleVisit}
                 />
               ))}
             </div>

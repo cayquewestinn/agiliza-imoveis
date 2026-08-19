@@ -7,7 +7,7 @@ import { statusToClassName, formatCurrency, formatDate } from '../utils/loteHelp
 import { useLeads } from '../context/LeadsContext'
 import { LoteDetailModal } from './LoteDetailModal'
 
-export function LoteCard({ lote, onEdit, onDelete, onScheduleVisit }) {
+export function LoteCard({ lote, onEdit, onDelete }) {
   const { leadsByLote } = useLeads()
   const [detailOpen, setDetailOpen] = useState(false)
   const leads = leadsByLote(lote.id)
@@ -96,7 +96,6 @@ export function LoteCard({ lote, onEdit, onDelete, onScheduleVisit }) {
         <LoteDetailModal
           lote={lote}
           leads={leads}
-          onScheduleVisit={onScheduleVisit}
           onClose={() => setDetailOpen(false)}
         />
       )}

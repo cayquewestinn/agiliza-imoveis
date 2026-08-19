@@ -1,11 +1,9 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
-import { useLotes } from '../context/LotesContext'
 import { useLeads } from '../context/LeadsContext'
 import { useVisits } from '../context/VisitsContext'
 import { useProfiles } from '../context/ProfilesContext'
 import { normalizePhoneBR } from '../utils/leadHelpers'
-import { VISITA_TIPO_OPTIONS } from '../utils/visitHelpers'
 import { useClosingTransition } from '../hooks/useClosingTransition'
 
 function todayISO() {
@@ -20,21 +18,12 @@ function toMinutes(hora) {
   return h * 60 + m
 }
 
-export function VisitModal({ visita, presetLote, presetLead, presetData, defaultResponsavelId, onClose }) {
+export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }) {
   const isEditing = Boolean(visita)
-  const locked = isEditing || Boolean(presetLote)
 
-  const { lotes } = useLotes()
-  const { leads, leadsByLote, addLead, updateLead } = useLeads()
+  const { leads, addLead, updateLead } = useLeads()
   const { visitas, addVisita, updateVisita } = useVisits()
   const { profiles } = useProfiles()
-
-  const [tipo, setTipo] = useState(visita?.tipo ?? (presetLote ? 'imovel' : 'imovel'))
-  const [loteId, setLoteId] = useState(visita?.loteId ?? presetLote?.id ?? '')
-  const [leadId, setLeadId] = useState(visita?.leadId ?? presetLead?.id ?? '')
-
-  const [novoLeadNome, setNovoLeadNome] = useState('')
-  const [novoLeadTelefone, setNovoLeadTelefone] = useState('')
 
   const [contatoOption, setContatoOption] = useState(isEditing ? String(visita.leadId) : 'novo')
   const [nomeCompleto, setNomeCompleto] = useState(visita?.recepcao?.nomeCompleto ?? '')
@@ -51,8 +40,6 @@ export function VisitModal({ visita, presetLote, presetLead, presetData, default
   const [saving, setSaving] = useState(false)
   const [conflito, setConflito] = useState(null)
   const { closing, requestClose } = useClosingTransition(onClose)
-
-  const leadsDoLote = loteId ? leadsByLote(loteId) : []
 
   function encontrarConflito() {
     return visitas.find(v => (
@@ -101,52 +88,6 @@ export function VisitModal({ visita, presetLote, presetLead, presetData, default
 
     setSaving(true)
 
-    if (tipo === 'imovel') {
-      if (!loteId || !leadId) {
-        setError('Selecione o imóvel e o lead.')
-        setSaving(false)
-        return
-      }
-
-      let finalLeadId = leadId
-
-      if (leadId === 'novo') {
-        if (!novoLeadNome.trim() || !novoLeadTelefone.trim()) {
-          setError('Informe o nome e o telefone do novo lead.')
-          setSaving(false)
-          return
-        }
-        const novoLead = await addLead({
-          loteId,
-          nome: novoLeadNome.trim(),
-          telefone: normalizePhoneBR(novoLeadTelefone),
-          etapa: 'Em Visita',
-          origem: 'Agenda de visitas',
-          dataRecebimento: todayISO(),
-        })
-        if (!novoLead) {
-          setError('Não foi possível criar o lead. Tente novamente.')
-          setSaving(false)
-          return
-        }
-        finalLeadId = novoLead.id
-      }
-
-      const payload = { tipo: 'imovel', loteId, leadId: finalLeadId, data, hora, responsavelId, feedback }
-      if (isEditing) {
-        await updateVisita(visita.id, payload)
-      } else {
-        await addVisita(payload)
-        if (leadId !== 'novo') {
-          await updateLead(finalLeadId, { etapa: 'Em Visita' })
-        }
-      }
-      setSaving(false)
-      requestClose()
-      return
-    }
-
-    // tipo === 'empresa'
     if (!nomeCompleto.trim() || !telefone.trim() || !cpf.trim()) {
       setError('Nome completo, CPF e telefone são obrigatórios para liberar a entrada na recepção.')
       setSaving(false)
@@ -202,153 +143,61 @@ export function VisitModal({ visita, presetLote, presetLead, presetData, default
           <div className="modal-body">
             {error && <div className="form-error">{error}</div>}
 
-            {!locked && (
-              <div className="view-toggle" style={{ alignSelf: 'flex-start' }}>
-                {VISITA_TIPO_OPTIONS.map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    className={`toggle-btn ${tipo === opt.value ? 'active' : ''}`}
-                    onClick={() => setTipo(opt.value)}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+            {!isEditing && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="contato">Contato</label>
+                <select
+                  id="contato"
+                  className="form-input"
+                  value={contatoOption}
+                  onChange={e => handleContatoChange(e.target.value)}
+                >
+                  <option value="novo">Novo contato</option>
+                  {leads.map(l => (
+                    <option key={l.id} value={l.id}>{l.nome}</option>
+                  ))}
+                </select>
               </div>
             )}
 
-            {tipo === 'imovel' ? (
-              <>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="lote">Imóvel</label>
-                    {locked ? (
-                      <div className="form-static">
-                        {lotes.find(l => l.id === loteId)?.codigo} — {lotes.find(l => l.id === loteId)?.titulo}
-                      </div>
-                    ) : (
-                      <select
-                        id="lote"
-                        className="form-input"
-                        value={loteId}
-                        onChange={e => { setLoteId(e.target.value); setLeadId('') }}
-                      >
-                        <option value="">Selecione o imóvel</option>
-                        {lotes.map(l => (
-                          <option key={l.id} value={l.id}>{l.codigo} — {l.titulo}</option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label" htmlFor="nomeCompleto">Nome completo</label>
+                <input
+                  id="nomeCompleto"
+                  className="form-input"
+                  type="text"
+                  value={nomeCompleto}
+                  onChange={e => setNomeCompleto(e.target.value)}
+                  placeholder="Nome para a recepção"
+                  readOnly={!isEditing && contatoOption !== 'novo'}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="telefone">Telefone</label>
+                <input
+                  id="telefone"
+                  className="form-input"
+                  type="text"
+                  value={telefone}
+                  onChange={e => setTelefone(e.target.value)}
+                  placeholder="11987654321"
+                  readOnly={!isEditing && contatoOption !== 'novo'}
+                />
+              </div>
+            </div>
 
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="lead">Lead</label>
-                    {locked ? (
-                      <div className="form-static">{leads.find(l => l.id === leadId)?.nome}</div>
-                    ) : (
-                      <select
-                        id="lead"
-                        className="form-input"
-                        value={leadId}
-                        onChange={e => setLeadId(e.target.value)}
-                        disabled={!loteId}
-                      >
-                        <option value="">Selecione o lead</option>
-                        <option value="novo">+ Novo lead</option>
-                        {leadsDoLote.map(l => (
-                          <option key={l.id} value={l.id}>{l.nome}</option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
-                </div>
-
-                {!locked && leadId === 'novo' && (
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="novoLeadNome">Nome do lead</label>
-                      <input
-                        id="novoLeadNome"
-                        className="form-input"
-                        type="text"
-                        value={novoLeadNome}
-                        onChange={e => setNovoLeadNome(e.target.value)}
-                        placeholder="Nome completo"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="novoLeadTelefone">Telefone do lead</label>
-                      <input
-                        id="novoLeadTelefone"
-                        className="form-input"
-                        type="text"
-                        value={novoLeadTelefone}
-                        onChange={e => setNovoLeadTelefone(e.target.value)}
-                        placeholder="11987654321"
-                      />
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                {!isEditing && (
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="contato">Contato</label>
-                    <select
-                      id="contato"
-                      className="form-input"
-                      value={contatoOption}
-                      onChange={e => handleContatoChange(e.target.value)}
-                    >
-                      <option value="novo">Novo contato</option>
-                      {leads.map(l => (
-                        <option key={l.id} value={l.id}>{l.nome}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="nomeCompleto">Nome completo</label>
-                    <input
-                      id="nomeCompleto"
-                      className="form-input"
-                      type="text"
-                      value={nomeCompleto}
-                      onChange={e => setNomeCompleto(e.target.value)}
-                      placeholder="Nome para a recepção"
-                      readOnly={!isEditing && contatoOption !== 'novo'}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="telefone">Telefone</label>
-                    <input
-                      id="telefone"
-                      className="form-input"
-                      type="text"
-                      value={telefone}
-                      onChange={e => setTelefone(e.target.value)}
-                      placeholder="11987654321"
-                      readOnly={!isEditing && contatoOption !== 'novo'}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label" htmlFor="cpf">CPF (liberação na recepção)</label>
-                  <input
-                    id="cpf"
-                    className="form-input"
-                    type="text"
-                    value={cpf}
-                    onChange={e => setCpf(e.target.value)}
-                    placeholder="000.000.000-00"
-                  />
-                </div>
-              </>
-            )}
+            <div className="form-group">
+              <label className="form-label" htmlFor="cpf">CPF (liberação na recepção)</label>
+              <input
+                id="cpf"
+                className="form-input"
+                type="text"
+                value={cpf}
+                onChange={e => setCpf(e.target.value)}
+                placeholder="000.000.000-00"
+              />
+            </div>
 
             <div className="form-row">
               <div className="form-group">

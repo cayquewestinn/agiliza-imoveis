@@ -1,8 +1,3 @@
-export const VISITA_TIPO_OPTIONS = [
-  { value: 'imovel', label: 'Visita ao imóvel' },
-  { value: 'empresa', label: 'Visita à empresa' },
-]
-
 export const VISITA_STATUS_OPTIONS = ['Agendada', 'Realizada', 'Não Compareceu', 'Remarcada']
 
 export function statusToClassName(status) {

@@ -1784,6 +1784,123 @@ select.form-input {
   color: var(--ink-tertiary);
 }
 
+.agenda-calendar {
+  margin-bottom: 24px;
+}
+
+.agenda-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.agenda-calendar-heading {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 190px;
+  text-align: center;
+}
+
+.agenda-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.agenda-calendar-weekday {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-tertiary);
+  text-align: center;
+  padding: 6px 0;
+}
+
+.agenda-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+}
+
+.agenda-calendar-cell {
+  min-height: 60px;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: var(--bg-panel-raised);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.agenda-calendar-cell:hover {
+  background: var(--bg-inset);
+}
+
+.agenda-calendar-cell-outside {
+  background: var(--bg-panel);
+}
+
+.agenda-calendar-cell-day {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+}
+
+.agenda-calendar-cell-outside .agenda-calendar-cell-day {
+  color: var(--ink-tertiary);
+}
+
+.agenda-calendar-cell-today .agenda-calendar-cell-day {
+  border-color: var(--rule-strong);
+}
+
+.agenda-calendar-cell-selected {
+  background: var(--bg-inset);
+}
+
+.agenda-calendar-cell-selected .agenda-calendar-cell-day {
+  background: var(--ink);
+  color: var(--bg-panel-raised);
+  border-color: var(--ink);
+}
+
+.agenda-calendar-cell-marks {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 5px;
+}
+
+.agenda-calendar-mark {
+  width: 5px;
+  height: 5px;
+  background: var(--status-active);
+}
+
+.agenda-calendar-cell-count {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-tertiary);
+}
+
 .visit-row {
   display: flex;
   align-items: center;
@@ -2049,5 +2166,15 @@ select.form-input {
 
   .visit-row-responsavel {
     width: auto;
+  }
+
+  .agenda-calendar-cell {
+    min-height: 40px;
+    padding: 4px;
+  }
+
+  .agenda-calendar-weekday {
+    font-size: 0.72rem;
+    padding: 4px 0;
   }
 }

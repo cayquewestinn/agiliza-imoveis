@@ -20,7 +20,7 @@ function toMinutes(hora) {
   return h * 60 + m
 }
 
-export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelId, onClose }) {
+export function VisitModal({ visita, presetLote, presetLead, presetData, defaultResponsavelId, onClose }) {
   const isEditing = Boolean(visita)
   const locked = isEditing || Boolean(presetLote)
 
@@ -40,7 +40,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
   )
   const [cpf, setCpf] = useState(visita?.recepcao?.cpf ?? '')
 
-  const [data, setData] = useState(visita?.data ?? '')
+  const [data, setData] = useState(visita?.data ?? presetData ?? '')
   const [hora, setHora] = useState(visita?.hora ?? '')
   const [responsavelId, setResponsavelId] = useState(visita?.responsavelId ?? defaultResponsavelId ?? profiles[0]?.id ?? '')
   const [feedback, setFeedback] = useState(visita?.feedback ?? '')

@@ -15,9 +15,40 @@ export function statusToClassName(status) {
   }
 }
 
+export function toISODate(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
 function todayISO() {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  return toISODate(new Date())
+}
+
+export const WEEKDAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+
+export function formatMonthHeading(year, month) {
+  const label = new Date(year, month, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+  return label.charAt(0).toUpperCase() + label.slice(1)
+}
+
+export function buildMonthGrid(year, month) {
+  const firstWeekday = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  const cells = []
+  for (let i = firstWeekday; i > 0; i--) {
+    const date = new Date(year, month, 1 - i)
+    cells.push({ date, iso: toISODate(date), inMonth: false })
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day)
+    cells.push({ date, iso: toISODate(date), inMonth: true })
+  }
+  while (cells.length % 7 !== 0) {
+    const prev = cells[cells.length - 1].date
+    const date = new Date(prev.getFullYear(), prev.getMonth(), prev.getDate() + 1)
+    cells.push({ date, iso: toISODate(date), inMonth: false })
+  }
+  return cells
 }
 
 export function isToday(isoDate) {

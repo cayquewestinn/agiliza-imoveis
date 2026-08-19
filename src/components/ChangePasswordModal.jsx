@@ -27,7 +27,7 @@ export function ChangePasswordModal({ onClose }) {
     const result = await changePassword(novaSenha)
     setSaving(false)
     if (!result.ok) {
-      setError('Não foi possível trocar a senha. Tente novamente.')
+      setError(result.message || 'Não foi possível trocar a senha. Tente novamente.')
       return
     }
     setSuccess(true)

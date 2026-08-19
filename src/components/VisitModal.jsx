@@ -33,6 +33,9 @@ export function VisitModal({ visita, presetLote, presetLead, presetData, default
   const [loteId, setLoteId] = useState(visita?.loteId ?? presetLote?.id ?? '')
   const [leadId, setLeadId] = useState(visita?.leadId ?? presetLead?.id ?? '')
 
+  const [novoLeadNome, setNovoLeadNome] = useState('')
+  const [novoLeadTelefone, setNovoLeadTelefone] = useState('')
+
   const [contatoOption, setContatoOption] = useState(isEditing ? String(visita.leadId) : 'novo')
   const [nomeCompleto, setNomeCompleto] = useState(visita?.recepcao?.nomeCompleto ?? '')
   const [telefone, setTelefone] = useState(
@@ -104,12 +107,39 @@ export function VisitModal({ visita, presetLote, presetLead, presetData, default
         setSaving(false)
         return
       }
-      const payload = { tipo: 'imovel', loteId, leadId, data, hora, responsavelId, feedback }
+
+      let finalLeadId = leadId
+
+      if (leadId === 'novo') {
+        if (!novoLeadNome.trim() || !novoLeadTelefone.trim()) {
+          setError('Informe o nome e o telefone do novo lead.')
+          setSaving(false)
+          return
+        }
+        const novoLead = await addLead({
+          loteId,
+          nome: novoLeadNome.trim(),
+          telefone: normalizePhoneBR(novoLeadTelefone),
+          etapa: 'Em Visita',
+          origem: 'Agenda de visitas',
+          dataRecebimento: todayISO(),
+        })
+        if (!novoLead) {
+          setError('Não foi possível criar o lead. Tente novamente.')
+          setSaving(false)
+          return
+        }
+        finalLeadId = novoLead.id
+      }
+
+      const payload = { tipo: 'imovel', loteId, leadId: finalLeadId, data, hora, responsavelId, feedback }
       if (isEditing) {
         await updateVisita(visita.id, payload)
       } else {
         await addVisita(payload)
-        await updateLead(leadId, { etapa: 'Em Visita' })
+        if (leadId !== 'novo') {
+          await updateLead(finalLeadId, { etapa: 'Em Visita' })
+        }
       }
       setSaving(false)
       requestClose()
@@ -224,6 +254,7 @@ export function VisitModal({ visita, presetLote, presetLead, presetData, default
                         disabled={!loteId}
                       >
                         <option value="">Selecione o lead</option>
+                        <option value="novo">+ Novo lead</option>
                         {leadsDoLote.map(l => (
                           <option key={l.id} value={l.id}>{l.nome}</option>
                         ))}
@@ -231,6 +262,33 @@ export function VisitModal({ visita, presetLote, presetLead, presetData, default
                     )}
                   </div>
                 </div>
+
+                {!locked && leadId === 'novo' && (
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="novoLeadNome">Nome do lead</label>
+                      <input
+                        id="novoLeadNome"
+                        className="form-input"
+                        type="text"
+                        value={novoLeadNome}
+                        onChange={e => setNovoLeadNome(e.target.value)}
+                        placeholder="Nome completo"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="novoLeadTelefone">Telefone do lead</label>
+                      <input
+                        id="novoLeadTelefone"
+                        className="form-input"
+                        type="text"
+                        value={novoLeadTelefone}
+                        onChange={e => setNovoLeadTelefone(e.target.value)}
+                        placeholder="11987654321"
+                      />
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <>

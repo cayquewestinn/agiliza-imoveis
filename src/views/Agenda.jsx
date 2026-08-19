@@ -3,14 +3,14 @@ import { Header } from '../components/Header'
 import { VisitModal } from '../components/VisitModal'
 import {
   Plus, Building2, Home, Pencil, Trash2, MapPin, MessageSquareText,
-  List, CalendarDays, ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { useVisits } from '../context/VisitsContext'
 import { useLotes } from '../context/LotesContext'
 import { useLeads } from '../context/LeadsContext'
 import { useUser } from '../context/UserContext'
 import {
-  VISITA_STATUS_OPTIONS, statusToClassName, formatDateHeading, groupByDate, isPast,
+  VISITA_STATUS_OPTIONS, statusToClassName, formatDateHeading, isPast,
   WEEKDAY_LABELS, buildMonthGrid, formatMonthHeading, toISODate,
 } from '../utils/visitHelpers'
 
@@ -25,13 +25,11 @@ export function Agenda() {
   const [statusFilter, setStatusFilter] = useState('Todas')
   const [editingVisita, setEditingVisita] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [viewMode, setViewMode] = useState('lista')
   const [calYear, setCalYear] = useState(today.getFullYear())
   const [calMonth, setCalMonth] = useState(today.getMonth())
   const [selectedDate, setSelectedDate] = useState(null)
 
   const filtered = statusFilter === 'Todas' ? visitas : visitas.filter(v => v.status === statusFilter)
-  const groups = groupByDate(filtered)
 
   const visitasPorDia = {}
   for (const v of filtered) {
@@ -154,25 +152,9 @@ export function Agenda() {
       <Header
         title="Agenda de Visitas"
         rightContent={
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <div className="view-toggle">
-              <button
-                className={`toggle-btn ${viewMode === 'lista' ? 'active' : ''}`}
-                onClick={() => setViewMode('lista')}
-              >
-                <List size={16} /> Lista
-              </button>
-              <button
-                className={`toggle-btn ${viewMode === 'calendario' ? 'active' : ''}`}
-                onClick={() => setViewMode('calendario')}
-              >
-                <CalendarDays size={16} /> Calendário
-              </button>
-            </div>
-            <button className="btn btn-primary" onClick={openNewModal}>
-              <Plus size={16} /> Marcar Visita
-            </button>
-          </div>
+          <button className="btn btn-primary" onClick={openNewModal}>
+            <Plus size={16} /> Marcar Visita
+          </button>
         }
       />
 
@@ -195,104 +177,80 @@ export function Agenda() {
           ))}
         </div>
 
-        {viewMode === 'lista' ? (
-          <>
-            {groups.length === 0 && (
-              <div className="card" style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 48 }}>
-                Nenhuma visita encontrada para este filtro.
-              </div>
-            )}
+        <div className="agenda-calendar">
+          <div className="agenda-calendar-header">
+            <button className="icon-btn" onClick={goToPrevMonth} aria-label="Mês anterior">
+              <ChevronLeft size={18} />
+            </button>
+            <div className="agenda-calendar-heading">{formatMonthHeading(calYear, calMonth)}</div>
+            <button className="icon-btn" onClick={goToNextMonth} aria-label="Próximo mês">
+              <ChevronRight size={18} />
+            </button>
+          </div>
 
-            {groups.map(group => (
-              <div className="agenda-date-group" key={group.data}>
-                <div className={`agenda-date-heading ${isPast(group.data) ? 'agenda-date-past' : ''}`}>
-                  {formatDateHeading(group.data)}
-                </div>
-
-                <div className="card" style={{ padding: 0 }}>
-                  {group.visitas.map(renderVisitRow)}
-                </div>
-              </div>
+          <div className="agenda-calendar-weekdays">
+            {WEEKDAY_LABELS.map(label => (
+              <div className="agenda-calendar-weekday" key={label}>{label}</div>
             ))}
-          </>
-        ) : (
-          <>
-            <div className="agenda-calendar">
-              <div className="agenda-calendar-header">
-                <button className="icon-btn" onClick={goToPrevMonth} aria-label="Mês anterior">
-                  <ChevronLeft size={18} />
-                </button>
-                <div className="agenda-calendar-heading">{formatMonthHeading(calYear, calMonth)}</div>
-                <button className="icon-btn" onClick={goToNextMonth} aria-label="Próximo mês">
-                  <ChevronRight size={18} />
-                </button>
-              </div>
+          </div>
 
-              <div className="agenda-calendar-weekdays">
-                {WEEKDAY_LABELS.map(label => (
-                  <div className="agenda-calendar-weekday" key={label}>{label}</div>
-                ))}
-              </div>
+          <div className="agenda-calendar-grid">
+            {monthCells.map(cell => {
+              const visitasDoDia = visitasPorDia[cell.iso] ?? []
+              const cellClasses = [
+                'agenda-calendar-cell',
+                !cell.inMonth && 'agenda-calendar-cell-outside',
+                cell.iso === todayISOStr && 'agenda-calendar-cell-today',
+                cell.iso === selectedDate && 'agenda-calendar-cell-selected',
+              ].filter(Boolean).join(' ')
 
-              <div className="agenda-calendar-grid">
-                {monthCells.map(cell => {
-                  const visitasDoDia = visitasPorDia[cell.iso] ?? []
-                  const cellClasses = [
-                    'agenda-calendar-cell',
-                    !cell.inMonth && 'agenda-calendar-cell-outside',
-                    cell.iso === todayISOStr && 'agenda-calendar-cell-today',
-                    cell.iso === selectedDate && 'agenda-calendar-cell-selected',
-                  ].filter(Boolean).join(' ')
-
-                  return (
-                    <div
-                      key={cell.iso}
-                      className={cellClasses}
-                      onClick={() => {
-                        setSelectedDate(cell.iso)
-                        openNewModal()
-                      }}
-                    >
-                      <div className="agenda-calendar-cell-day">{cell.date.getDate()}</div>
-                      <div className="agenda-calendar-cell-marks">
-                        {visitasDoDia.slice(0, 3).map(v => (
-                          <div className="agenda-calendar-mark" key={v.id} />
-                        ))}
-                      </div>
-                      {visitasDoDia.length > 0 && (
-                        <div className="agenda-calendar-cell-count">{visitasDoDia.length}</div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {selectedDate && (
-              <div className="agenda-date-group">
-                <div className={`agenda-date-heading ${isPast(selectedDate) ? 'agenda-date-past' : ''}`}>
-                  {formatDateHeading(selectedDate)}
-                </div>
-
-                <div className="card" style={{ padding: 0 }}>
-                  {visitasDoDiaSelecionado.length === 0 ? (
-                    <div style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 24 }}>
-                      Nenhuma visita neste dia.
-                    </div>
-                  ) : (
-                    visitasDoDiaSelecionado.map(renderVisitRow)
+              return (
+                <div
+                  key={cell.iso}
+                  className={cellClasses}
+                  onClick={() => {
+                    setSelectedDate(cell.iso)
+                    openNewModal()
+                  }}
+                >
+                  <div className="agenda-calendar-cell-day">{cell.date.getDate()}</div>
+                  <div className="agenda-calendar-cell-marks">
+                    {visitasDoDia.slice(0, 3).map(v => (
+                      <div className="agenda-calendar-mark" key={v.id} />
+                    ))}
+                  </div>
+                  {visitasDoDia.length > 0 && (
+                    <div className="agenda-calendar-cell-count">{visitasDoDia.length}</div>
                   )}
                 </div>
-              </div>
-            )}
-          </>
+              )
+            })}
+          </div>
+        </div>
+
+        {selectedDate && (
+          <div className="agenda-date-group">
+            <div className={`agenda-date-heading ${isPast(selectedDate) ? 'agenda-date-past' : ''}`}>
+              {formatDateHeading(selectedDate)}
+            </div>
+
+            <div className="card" style={{ padding: 0 }}>
+              {visitasDoDiaSelecionado.length === 0 ? (
+                <div style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 24 }}>
+                  Nenhuma visita neste dia.
+                </div>
+              ) : (
+                visitasDoDiaSelecionado.map(renderVisitRow)
+              )}
+            </div>
+          </div>
         )}
       </div>
 
       {isModalOpen && (
         <VisitModal
           visita={editingVisita}
-          presetData={viewMode === 'calendario' ? selectedDate : null}
+          presetData={selectedDate}
           defaultResponsavelId={currentUser.id}
           onClose={closeModal}
         />

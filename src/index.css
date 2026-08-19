@@ -801,8 +801,8 @@ span.status-badge {
 
 .lote-lead-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
   padding: 10px 0;
   border-bottom: 1px solid var(--rule);
 }
@@ -811,10 +811,88 @@ span.status-badge {
   border-bottom: none;
 }
 
+.lote-lead-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .lote-lead-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.lote-lead-assign {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lote-lead-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 4px 24px 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--rule-strong);
+  font-size: 0.76rem;
+  font-family: inherit;
+  color: var(--ink);
+  background-color: var(--bg-panel);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235c564a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 12px;
+  cursor: pointer;
+}
+
+.lote-lead-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.lote-lead-sold-btn {
+  padding: 5px 12px;
+  font-size: 0.7rem;
+}
+
+.desempenho-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 18px;
+}
+
+.desempenho-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.desempenho-row:last-child {
+  border-bottom: none;
+}
+
+.desempenho-row-nome {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.desempenho-row-valor {
+  color: var(--ink-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.desempenho-row-empty {
+  color: var(--ink-tertiary);
+  font-size: 0.82rem;
+  padding: 10px 0;
 }
 
 .lote-lead-name {

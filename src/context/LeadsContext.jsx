@@ -4,7 +4,7 @@ import { useUser } from './UserContext'
 
 const LeadsContext = createContext(null)
 
-const LEAD_COLUMNS = 'id, lote_id, nome, telefone, etapa, origem, data_recebimento'
+const LEAD_COLUMNS = 'id, lote_id, nome, telefone, etapa, origem, data_recebimento, vendedor_id, agendador_id'
 
 function fromRow(row) {
   return {
@@ -15,6 +15,8 @@ function fromRow(row) {
     etapa: row.etapa,
     origem: row.origem ?? '',
     dataRecebimento: row.data_recebimento,
+    vendedorId: row.vendedor_id,
+    agendadorId: row.agendador_id,
   }
 }
 
@@ -26,6 +28,8 @@ function toRow(lead) {
     etapa: lead.etapa,
     origem: lead.origem,
     data_recebimento: lead.dataRecebimento,
+    vendedor_id: lead.vendedorId ?? null,
+    agendador_id: lead.agendadorId ?? null,
   }
 }
 

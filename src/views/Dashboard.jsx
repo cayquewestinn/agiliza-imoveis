@@ -1,6 +1,7 @@
 import { Header } from '../components/Header'
 import { useTasks } from '../context/TasksContext'
 import { useLeads } from '../context/LeadsContext'
+import { useProfiles } from '../context/ProfilesContext'
 import { useUser } from '../context/UserContext'
 import { statusToClassName, isLate, parsePrazo } from '../utils/taskHelpers'
 
@@ -13,11 +14,92 @@ const LEAD_ETAPA_CHART = [
   { etapa: 'Perdido', color: 'var(--status-danger)' },
 ]
 
+function buildDesempenho(pessoas, leads, campo) {
+  return pessoas
+    .map(p => {
+      const atribuidos = leads.filter(l => l[campo] === p.id)
+      const convertidos = atribuidos.filter(l => l.etapa === 'Convertido')
+      const perdidos = atribuidos.filter(l => l.etapa === 'Perdido')
+      const taxa = atribuidos.length > 0 ? Math.round((convertidos.length / atribuidos.length) * 100) : 0
+      const leadsPorVenda = convertidos.length > 0
+        ? Math.round((atribuidos.length / convertidos.length) * 10) / 10
+        : null
+      return {
+        id: p.id,
+        nome: p.nome,
+        leadsAtribuidos: atribuidos.length,
+        convertidos: convertidos.length,
+        perdidos: perdidos.length,
+        taxa,
+        leadsPorVenda,
+      }
+    })
+    .sort((a, b) => b.leadsAtribuidos - a.leadsAtribuidos)
+}
+
+function DesempenhoCard({ titulo, dados }) {
+  return (
+    <div className="card">
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16}}>
+        <h2 className="card-title" style={{margin: 0}}>{titulo}</h2>
+      </div>
+      <div className="desempenho-list">
+        {dados.map(d => (
+          <div className="desempenho-row" key={d.id}>
+            <span className="desempenho-row-nome">{d.nome}</span>
+            <span className="desempenho-row-valor">
+              {d.leadsPorVenda !== null ? `${d.leadsPorVenda} leads por venda` : 'Aguardando 1ª conversão'}
+            </span>
+          </div>
+        ))}
+        {dados.length === 0 && (
+          <div className="desempenho-row-empty">Nenhum profissional cadastrado nesta função ainda.</div>
+        )}
+      </div>
+      <div className="table-scroll">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Leads Atribuídos</th>
+              <th>Convertidos</th>
+              <th>Perdidos</th>
+              <th>Taxa de Conversão</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dados.map(d => (
+              <tr key={d.id}>
+                <td>{d.nome}</td>
+                <td className="mono">{d.leadsAtribuidos}</td>
+                <td className="mono">{d.convertidos}</td>
+                <td className="mono">{d.perdidos}</td>
+                <td className="mono">{d.taxa}%</td>
+              </tr>
+            ))}
+            {dados.length === 0 && (
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 32 }}>
+                  Nenhum profissional cadastrado nesta função ainda.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export function Dashboard() {
   const { tasks: allTasks } = useTasks()
   const { leads } = useLeads()
+  const { profiles } = useProfiles()
   const { currentUser, isAdmin } = useUser()
   const tasks = isAdmin ? allTasks : allTasks.filter(t => t.responsavelId === currentUser.id)
+
+  const vendedores = buildDesempenho(profiles.filter(p => p.cargo === 'Vendedor'), leads, 'vendedorId')
+  const agendadores = buildDesempenho(profiles.filter(p => p.cargo.includes('Agendador')), leads, 'agendadorId')
 
   const totalLeads = leads.length
   const leadsPorEtapa = LEAD_ETAPA_CHART.map(item => ({
@@ -102,6 +184,9 @@ export function Dashboard() {
             </table>
           </div>
         </div>
+
+        <DesempenhoCard titulo="Desempenho por Vendedor" dados={vendedores} />
+        <DesempenhoCard titulo="Desempenho por Agendador" dados={agendadores} />
       </div>
     </div>
   )

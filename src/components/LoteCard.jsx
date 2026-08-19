@@ -4,12 +4,16 @@ import {
   ChevronDown, ChevronUp, Users, MessageCircle, CalendarClock, ImageOff, Images,
 } from 'lucide-react'
 import { statusToClassName, formatCurrency, formatDate } from '../utils/loteHelpers'
-import { etapaToClassName, formatPhone, whatsappLink } from '../utils/leadHelpers'
+import { etapaToClassName, formatPhone, whatsappLink, LEAD_ETAPA_OPTIONS } from '../utils/leadHelpers'
 import { useLeads } from '../context/LeadsContext'
+import { useProfiles } from '../context/ProfilesContext'
 import { PhotoGallery } from './PhotoGallery'
 
 export function LoteCard({ lote, onEdit, onDelete, onScheduleVisit }) {
-  const { leadsByLote } = useLeads()
+  const { leadsByLote, updateLead } = useLeads()
+  const { profiles } = useProfiles()
+  const vendedores = profiles.filter(p => p.cargo === 'Vendedor')
+  const agendadores = profiles.filter(p => p.cargo.includes('Agendador'))
   const [showLeads, setShowLeads] = useState(false)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const leads = leadsByLote(lote.id)
@@ -93,31 +97,74 @@ export function LoteCard({ lote, onEdit, onDelete, onScheduleVisit }) {
             )}
             {leads.map(lead => (
               <div className="lote-lead-row" key={lead.id}>
-                <div className="lote-lead-info">
-                  <div className="lote-lead-name">{lead.nome}</div>
-                  <div className="lote-lead-meta">
-                    <span className={`status-badge status-${etapaToClassName(lead.etapa)}`}>{lead.etapa}</span>
-                    <span className="lote-lead-phone">{formatPhone(lead.telefone)}</span>
+                <div className="lote-lead-main">
+                  <div className="lote-lead-info">
+                    <div className="lote-lead-name">{lead.nome}</div>
+                    <div className="lote-lead-meta">
+                      <select
+                        className={`visit-status-select status-badge status-${etapaToClassName(lead.etapa)}`}
+                        value={lead.etapa}
+                        onChange={e => updateLead(lead.id, { etapa: e.target.value })}
+                        aria-label={`Etapa de ${lead.nome}`}
+                      >
+                        {LEAD_ETAPA_OPTIONS.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                      <span className="lote-lead-phone">{formatPhone(lead.telefone)}</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      onClick={() => onScheduleVisit(lote, lead)}
+                      aria-label={`Marcar visita com ${lead.nome}`}
+                    >
+                      <CalendarClock size={16} />
+                    </button>
+                    <a
+                      className="whatsapp-btn"
+                      href={whatsappLink(lead.telefone, `Olá ${lead.nome.split(' ')[0]}, tudo bem? Sou da Agiliza Imóveis e gostaria de falar sobre o imóvel ${lote.codigo}.`)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Chamar ${lead.nome} no WhatsApp`}
+                    >
+                      <MessageCircle size={16} />
+                    </a>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 4 }}>
+                <div className="lote-lead-assign">
+                  <select
+                    className="lote-lead-select"
+                    value={lead.vendedorId ?? ''}
+                    onChange={e => updateLead(lead.id, { vendedorId: e.target.value || null })}
+                    aria-label={`Vendedor responsável por ${lead.nome}`}
+                  >
+                    <option value="">— Vendedor —</option>
+                    {vendedores.map(p => (
+                      <option key={p.id} value={p.id}>{p.nome}</option>
+                    ))}
+                  </select>
+                  <select
+                    className="lote-lead-select"
+                    value={lead.agendadorId ?? ''}
+                    onChange={e => updateLead(lead.id, { agendadorId: e.target.value || null })}
+                    aria-label={`Agendador responsável por ${lead.nome}`}
+                  >
+                    <option value="">— Agendador —</option>
+                    {agendadores.map(p => (
+                      <option key={p.id} value={p.id}>{p.nome}</option>
+                    ))}
+                  </select>
                   <button
                     type="button"
-                    className="icon-btn"
-                    onClick={() => onScheduleVisit(lote, lead)}
-                    aria-label={`Marcar visita com ${lead.nome}`}
+                    className="btn btn-primary lote-lead-sold-btn"
+                    onClick={() => updateLead(lead.id, { etapa: 'Convertido' })}
+                    aria-label={`Marcar ${lead.nome} como vendido`}
                   >
-                    <CalendarClock size={16} />
+                    Marcar como Vendido
                   </button>
-                  <a
-                    className="whatsapp-btn"
-                    href={whatsappLink(lead.telefone, `Olá ${lead.nome.split(' ')[0]}, tudo bem? Sou da Agiliza Imóveis e gostaria de falar sobre o imóvel ${lote.codigo}.`)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Chamar ${lead.nome} no WhatsApp`}
-                  >
-                    <MessageCircle size={16} />
-                  </a>
                 </div>
               </div>
             ))}

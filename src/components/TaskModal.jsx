@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import { STATUS_OPTIONS } from '../utils/taskHelpers'
 import { useProfiles } from '../context/ProfilesContext'
 import { useUser } from '../context/UserContext'
+import { useClosingTransition } from '../hooks/useClosingTransition'
 
 function toInputDate(prazoBr) {
   if (!prazoBr) return ''
@@ -26,6 +27,7 @@ export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
     isAdmin ? (task?.responsavelId ?? defaultResponsavelId ?? profiles[0]?.id ?? '') : (currentUser?.id ?? '')
   )
   const [error, setError] = useState('')
+  const { closing, requestClose } = useClosingTransition(onClose)
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -50,11 +52,11 @@ export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className={`modal-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{isEditing ? 'Editar Tarefa' : 'Nova Tarefa'}</h2>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="Fechar">
+          <button type="button" className="icon-btn" onClick={requestClose} aria-label="Fechar">
             <X size={18} />
           </button>
         </div>
@@ -124,7 +126,7 @@ export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+            <button type="button" className="btn btn-secondary" onClick={requestClose}>Cancelar</button>
             <button type="submit" className="btn btn-primary">{isEditing ? 'Salvar' : 'Criar Tarefa'}</button>
           </div>
         </form>

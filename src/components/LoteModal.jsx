@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { LOTE_STATUS_OPTIONS, TIPO_IMOVEL_OPTIONS } from '../utils/loteHelpers'
+import { useClosingTransition } from '../hooks/useClosingTransition'
 
 export function LoteModal({ lote, onClose, onSave }) {
   const isEditing = Boolean(lote)
@@ -20,6 +21,7 @@ export function LoteModal({ lote, onClose, onSave }) {
   const [dataLeilao, setDataLeilao] = useState(lote?.dataLeilao ?? '')
   const [comitente, setComitente] = useState(lote?.comitente ?? '')
   const [error, setError] = useState('')
+  const { closing, requestClose } = useClosingTransition(onClose)
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -51,11 +53,11 @@ export function LoteModal({ lote, onClose, onSave }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className={`modal-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
       <div className="modal modal-wide" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{isEditing ? 'Editar Lote' : 'Novo Lote'}</h2>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="Fechar">
+          <button type="button" className="icon-btn" onClick={requestClose} aria-label="Fechar">
             <X size={18} />
           </button>
         </div>
@@ -249,7 +251,7 @@ export function LoteModal({ lote, onClose, onSave }) {
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+            <button type="button" className="btn btn-secondary" onClick={requestClose}>Cancelar</button>
             <button type="submit" className="btn btn-primary">{isEditing ? 'Salvar' : 'Criar Lote'}</button>
           </div>
         </form>

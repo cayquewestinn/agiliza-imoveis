@@ -6,6 +6,7 @@ import { useVisits } from '../context/VisitsContext'
 import { useProfiles } from '../context/ProfilesContext'
 import { normalizePhoneBR } from '../utils/leadHelpers'
 import { VISITA_TIPO_OPTIONS } from '../utils/visitHelpers'
+import { useClosingTransition } from '../hooks/useClosingTransition'
 
 function todayISO() {
   const d = new Date()
@@ -38,6 +39,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
   const [feedback, setFeedback] = useState(visita?.feedback ?? '')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const { closing, requestClose } = useClosingTransition(onClose)
 
   const leadsDoLote = loteId ? leadsByLote(loteId) : []
 
@@ -84,7 +86,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
         await updateLead(leadId, { etapa: 'Em Visita' })
       }
       setSaving(false)
-      onClose()
+      requestClose()
       return
     }
 
@@ -100,7 +102,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
     if (isEditing) {
       await updateVisita(visita.id, { data, hora, responsavelId, recepcao, feedback })
       setSaving(false)
-      onClose()
+      requestClose()
       return
     }
 
@@ -127,15 +129,15 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
 
     await addVisita({ tipo: 'empresa', loteId: null, leadId: finalLeadId, data, hora, responsavelId, recepcao, feedback })
     setSaving(false)
-    onClose()
+    requestClose()
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className={`modal-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
       <div className="modal modal-wide" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{isEditing ? 'Editar Visita' : 'Marcar Visita'}</h2>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="Fechar">
+          <button type="button" className="icon-btn" onClick={requestClose} aria-label="Fechar">
             <X size={18} />
           </button>
         </div>
@@ -315,7 +317,7 @@ export function VisitModal({ visita, presetLote, presetLead, defaultResponsavelI
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={saving}>Cancelar</button>
+            <button type="button" className="btn btn-secondary" onClick={requestClose} disabled={saving}>Cancelar</button>
             <button type="submit" className="btn btn-primary" disabled={saving}>{isEditing ? 'Salvar' : 'Marcar Visita'}</button>
           </div>
         </form>

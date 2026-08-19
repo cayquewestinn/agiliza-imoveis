@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useClosingTransition } from '../hooks/useClosingTransition'
 
 export function PhotoGallery({ fotos, startIndex, titulo, onClose }) {
   const [index, setIndex] = useState(startIndex)
+  const { closing, requestClose } = useClosingTransition(onClose)
 
   const prev = useCallback(() => {
     setIndex(i => (i === 0 ? fotos.length - 1 : i - 1))
@@ -14,17 +16,17 @@ export function PhotoGallery({ fotos, startIndex, titulo, onClose }) {
 
   useEffect(() => {
     function handleKey(e) {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') requestClose()
       if (e.key === 'ArrowLeft') prev()
       if (e.key === 'ArrowRight') next()
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [fotos.length, onClose, next, prev])
+  }, [fotos.length, requestClose, next, prev])
 
   return (
-    <div className="gallery-overlay" onClick={onClose}>
-      <button type="button" className="gallery-close" onClick={onClose} aria-label="Fechar galeria">
+    <div className={`gallery-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
+      <button type="button" className="gallery-close" onClick={requestClose} aria-label="Fechar galeria">
         <X size={22} />
       </button>
 

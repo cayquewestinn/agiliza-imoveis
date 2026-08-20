@@ -39,27 +39,6 @@ function buildDesempenho(pessoas, leads, campo) {
     .sort((a, b) => b.leadsAtribuidos - a.leadsAtribuidos)
 }
 
-function DesempenhoSummary({ titulo, dados }) {
-  return (
-    <div>
-      <h3 className="dashboard-subgroup-title">{titulo}</h3>
-      <div className="desempenho-list">
-        {dados.map(d => (
-          <div className="desempenho-row" key={d.id}>
-            <span className="desempenho-row-nome">{d.nome}</span>
-            <span className="desempenho-row-valor">
-              {d.leadsPorVenda !== null ? `${d.leadsPorVenda} leads por venda` : 'Aguardando 1ª conversão'}
-            </span>
-          </div>
-        ))}
-        {dados.length === 0 && (
-          <div className="desempenho-row-empty">Nenhum profissional cadastrado nesta função ainda.</div>
-        )}
-      </div>
-    </div>
-  )
-}
-
 function DesempenhoTable({ titulo, dados }) {
   return (
     <div className="card">
@@ -117,7 +96,9 @@ export function Dashboard() {
     ...item,
     count: leads.filter(l => l.etapa === item.etapa).length,
   }))
-  const maxLeadsPorEtapa = Math.max(...leadsPorEtapa.map(item => item.count), 0)
+  const novoItem = leadsPorEtapa.find(item => item.etapa === 'Novo')
+  const etapasDeTrabalho = leadsPorEtapa.filter(item => item.etapa !== 'Novo')
+  const maxEtapaDeTrabalho = Math.max(...etapasDeTrabalho.map(item => item.count), 0)
 
   const tarefasRecentes = [...tasks]
     .sort((a, b) => parsePrazo(a.prazo) - parsePrazo(b.prazo))
@@ -138,24 +119,22 @@ export function Dashboard() {
             <span className="mono" style={{fontSize: '0.8rem', color: 'var(--ink-tertiary)'}}>{totalLeads} no total</span>
           </div>
 
-          <div className="dashboard-kpi-row">
-            {leadsPorEtapa.map(item => (
-              <button
-                type="button"
-                className="dashboard-kpi-tile"
-                key={item.etapa}
-                onClick={() => setEtapaAberta(item.etapa)}
-                aria-label={`Ver leads em ${item.etapa}`}
-              >
-                <div className="dashboard-kpi-label">{item.etapa}</div>
-                <div className="dashboard-kpi-value mono">{item.count}</div>
-              </button>
-            ))}
-          </div>
+          <button
+            type="button"
+            className="dashboard-queue-callout"
+            onClick={() => setEtapaAberta('Novo')}
+            aria-label="Ver leads em Novo"
+          >
+            <div>
+              <div className="dashboard-queue-callout-label">Novo</div>
+              <div className="dashboard-queue-callout-sub">fila aguardando primeiro contato</div>
+            </div>
+            <div className="dashboard-queue-callout-value mono">{novoItem?.count ?? 0}</div>
+          </button>
 
           <div className="status-chart">
-            {leadsPorEtapa.map(item => {
-              const scale = maxLeadsPorEtapa > 0 ? Math.sqrt(item.count) / Math.sqrt(maxLeadsPorEtapa) : 0
+            {etapasDeTrabalho.map(item => {
+              const scale = maxEtapaDeTrabalho > 0 ? Math.sqrt(item.count) / Math.sqrt(maxEtapaDeTrabalho) : 0
               const pct = Math.max(scale * 100, item.count > 0 ? 4 : 0)
               return (
                 <button
@@ -181,52 +160,42 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="dashboard-row-2col">
-          <div className="card">
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16}}>
-              <h2 className="card-title" style={{margin: 0}}>Próximas Tarefas</h2>
-            </div>
-            <div className="table-scroll">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Tarefa</th>
-                    <th>Responsável</th>
-                    <th>Status</th>
-                    <th>Prazo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tarefasRecentes.map(t => (
-                    <tr key={t.id}>
-                      <td>{t.titulo}</td>
-                      <td>{t.responsavel}</td>
-                      <td>
-                        <span className={`status-badge status-${isLate(t) ? 'late' : statusToClassName(t.status)}`}>
-                          {isLate(t) ? 'Atrasado' : t.status}
-                        </span>
-                      </td>
-                      <td className="mono">{t.prazo}</td>
-                    </tr>
-                  ))}
-                  {tarefasRecentes.length === 0 && (
-                    <tr>
-                      <td colSpan={4} style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 32 }}>
-                        Nenhuma tarefa cadastrada ainda.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+        <div className="card">
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16}}>
+            <h2 className="card-title" style={{margin: 0}}>Próximas Tarefas</h2>
           </div>
-
-          <div className="card">
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16}}>
-              <h2 className="card-title" style={{margin: 0}}>Leads por Venda</h2>
-            </div>
-            <DesempenhoSummary titulo="Vendedores" dados={vendedores} />
-            <DesempenhoSummary titulo="Agendadores" dados={agendadores} />
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Tarefa</th>
+                  <th>Responsável</th>
+                  <th>Status</th>
+                  <th>Prazo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tarefasRecentes.map(t => (
+                  <tr key={t.id}>
+                    <td>{t.titulo}</td>
+                    <td>{t.responsavel}</td>
+                    <td>
+                      <span className={`status-badge status-${isLate(t) ? 'late' : statusToClassName(t.status)}`}>
+                        {isLate(t) ? 'Atrasado' : t.status}
+                      </span>
+                    </td>
+                    <td className="mono">{t.prazo}</td>
+                  </tr>
+                ))}
+                {tarefasRecentes.length === 0 && (
+                  <tr>
+                    <td colSpan={4} style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 32 }}>
+                      Nenhuma tarefa cadastrada ainda.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 

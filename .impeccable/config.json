@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font-size",
+        "value": "1.4rem",
+        "createdAt": "2026-08-20T22:13:45.561Z",
+        "reason": "novo papel real: numero do callout de fila 'Novo' no Dashboard, adicionado como dashboard-queue-value na escala do DESIGN.md"
+      }
+    ]
+  }
+}

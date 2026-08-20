@@ -54,6 +54,7 @@ typography:
     masthead: "1.15rem"
     modal-title: "1.2rem"
     mobile-header: "1.3rem"
+    dashboard-queue-value: "1.4rem"
     login-title: "1.5rem"
     header-title: "1.55rem"
     stat-value: "2.1rem"
@@ -190,7 +191,7 @@ The WhatsApp brand exception (green button) is unchanged in dark mode — third-
 
 **Character:** A serif/grotesque/condensed/mono four-part system mirrors an actual newspaper's type stack — serif for headlines, humanist sans for body copy, a condensed uppercase face for classified column-heads and section labels, and a monospace face wherever numbers must line up (codes, prices, dates, CPF, phone).
 
-**The Fine-Grained Scale Rule.** This is a 20-step editorial scale, not a sparse 4-token system: `0.7, 0.72, 0.74, 0.76, 0.78, 0.8, 0.82, 0.85, 0.86, 0.9, 0.92, 1, 1.05, 1.08, 1.15, 1.2, 1.3, 1.5, 1.55, 2.1` (rem), listed by role name in `typography.scale`. Real newspaper type specs run in fine point-size increments per role (a caption is not the same size as a byline, which is not the same as a subhead), and this system deliberately follows that convention rather than a coarse 4-5-step UI ramp. `0.82rem` (label) and `0.9rem` (body/mono) are the two workhorse sizes and should be reached for first; every other step exists because a specific component role in the shipped app already uses it (e.g. `2.1rem` is exclusively the Dashboard stat-row's big number, `1.08rem` is exclusively lote-card/team-name titles). Adding a genuinely new size for a new role is fine — extend `typography.scale` when you do, so the next session's drift check stays honest — but reach for an existing step before inventing one, and never collapse this into a coarser scale to "clean it up"; that would flatten real, reviewed hierarchy.
+**The Fine-Grained Scale Rule.** This is a 21-step editorial scale, not a sparse 4-token system: `0.7, 0.72, 0.74, 0.76, 0.78, 0.8, 0.82, 0.85, 0.86, 0.9, 0.92, 1, 1.05, 1.08, 1.15, 1.2, 1.3, 1.4, 1.5, 1.55, 2.1` (rem), listed by role name in `typography.scale`. Real newspaper type specs run in fine point-size increments per role (a caption is not the same size as a byline, which is not the same as a subhead), and this system deliberately follows that convention rather than a coarse 4-5-step UI ramp. `0.82rem` (label) and `0.9rem` (body/mono) are the two workhorse sizes and should be reached for first; every other step exists because a specific component role in the shipped app already uses it (e.g. `2.1rem` is exclusively the Dashboard stat-row's big number, `1.08rem` is exclusively lote-card/team-name titles). Adding a genuinely new size for a new role is fine — extend `typography.scale` when you do, so the next session's drift check stays honest — but reach for an existing step before inventing one, and never collapse this into a coarser scale to "clean it up"; that would flatten real, reviewed hierarchy.
 
 ### Hierarchy
 - **Display** (Bitter, 600, 1.2-1.55rem, italic variant at 1.15rem for the masthead date): section headers (`.header-title`), card/lote/team titles, modal headings.

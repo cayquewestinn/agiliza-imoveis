@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { Header } from '../components/Header'
 import { useTasks } from '../context/TasksContext'
 import { useLeads } from '../context/LeadsContext'
 import { useProfiles } from '../context/ProfilesContext'
 import { useUser } from '../context/UserContext'
 import { statusToClassName, isLate, parsePrazo } from '../utils/taskHelpers'
+import { EtapaLeadsModal } from '../components/EtapaLeadsModal'
 
 const LEAD_ETAPA_CHART = [
   { etapa: 'Novo', color: 'var(--status-neutral)' },
@@ -105,6 +107,7 @@ export function Dashboard() {
   const { profiles } = useProfiles()
   const { currentUser, isAdmin } = useUser()
   const tasks = isAdmin ? allTasks : allTasks.filter(t => t.responsavelId === currentUser.id)
+  const [etapaAberta, setEtapaAberta] = useState(null)
 
   const vendedores = buildDesempenho(profiles.filter(p => p.cargo === 'Vendedor'), leads, 'vendedorId')
   const agendadores = buildDesempenho(profiles.filter(p => p.cargo.includes('Agendador')), leads, 'agendadorId')
@@ -137,10 +140,16 @@ export function Dashboard() {
 
           <div className="dashboard-kpi-row">
             {leadsPorEtapa.map(item => (
-              <div className="dashboard-kpi-tile" key={item.etapa}>
+              <button
+                type="button"
+                className="dashboard-kpi-tile"
+                key={item.etapa}
+                onClick={() => setEtapaAberta(item.etapa)}
+                aria-label={`Ver leads em ${item.etapa}`}
+              >
                 <div className="dashboard-kpi-label">{item.etapa}</div>
                 <div className="dashboard-kpi-value mono">{item.count}</div>
-              </div>
+              </button>
             ))}
           </div>
 
@@ -149,7 +158,13 @@ export function Dashboard() {
               const scale = maxLeadsPorEtapa > 0 ? Math.sqrt(item.count) / Math.sqrt(maxLeadsPorEtapa) : 0
               const pct = Math.max(scale * 100, item.count > 0 ? 4 : 0)
               return (
-                <div className="status-chart-row" key={item.etapa}>
+                <button
+                  type="button"
+                  className="status-chart-row"
+                  key={item.etapa}
+                  onClick={() => setEtapaAberta(item.etapa)}
+                  aria-label={`Ver leads em ${item.etapa}`}
+                >
                   <div className="status-chart-row-header">
                     <span className="status-chart-row-label">{item.etapa}</span>
                     <span className="status-chart-row-value mono">{item.count}</span>
@@ -160,7 +175,7 @@ export function Dashboard() {
                       style={{ transform: `scaleX(${pct / 100})`, backgroundColor: item.color }}
                     />
                   </div>
-                </div>
+                </button>
               )
             })}
           </div>
@@ -220,6 +235,10 @@ export function Dashboard() {
           <DesempenhoTable titulo="Desempenho por Agendador" dados={agendadores} />
         </div>
       </div>
+
+      {etapaAberta && (
+        <EtapaLeadsModal etapa={etapaAberta} onClose={() => setEtapaAberta(null)} />
+      )}
     </div>
   )
 }

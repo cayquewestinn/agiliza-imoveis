@@ -369,6 +369,15 @@ body {
   border: 1px solid var(--rule);
   border-radius: var(--radius-sm);
   background-color: var(--bg-panel-raised);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.dashboard-kpi-tile:hover {
+  border-color: var(--accent);
+  background-color: var(--bg-inset);
 }
 
 .dashboard-kpi-label {
@@ -392,6 +401,23 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.status-chart-row {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.status-chart-row:hover {
+  background-color: var(--bg-inset);
 }
 
 .status-chart-row-header {
@@ -1036,6 +1062,11 @@ span.status-badge {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--ink-secondary);
+}
+
+.lote-lead-imovel {
+  font-size: 0.7rem;
+  color: var(--ink-tertiary);
 }
 
 .whatsapp-btn {

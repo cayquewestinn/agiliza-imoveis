@@ -8,6 +8,12 @@
         "value": "1.4rem",
         "createdAt": "2026-08-20T22:13:45.561Z",
         "reason": "novo papel real: numero do callout de fila 'Novo' no Dashboard, adicionado como dashboard-queue-value na escala do DESIGN.md"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.52rem",
+        "createdAt": "2026-08-20T23:41:36.345Z",
+        "reason": "novo papel real: texto do carimbo (selo), adicionado como carimbo-text na escala do DESIGN.md"
       }
     ]
   }

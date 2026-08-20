@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { Header } from '../components/Header'
-import { useTasks } from '../context/TasksContext'
 import { useLeads } from '../context/LeadsContext'
 import { useProfiles } from '../context/ProfilesContext'
 import { useUser } from '../context/UserContext'
-import { statusToClassName, isLate, parsePrazo } from '../utils/taskHelpers'
 import { EtapaLeadsModal } from '../components/EtapaLeadsModal'
 
 const LEAD_ETAPA_CHART = [
@@ -81,11 +79,9 @@ function DesempenhoTable({ titulo, dados }) {
 }
 
 export function Dashboard() {
-  const { tasks: allTasks } = useTasks()
   const { leads } = useLeads()
   const { profiles } = useProfiles()
   const { currentUser, isAdmin } = useUser()
-  const tasks = isAdmin ? allTasks : allTasks.filter(t => t.responsavelId === currentUser.id)
   const [etapaAberta, setEtapaAberta] = useState(null)
 
   const vendedores = buildDesempenho(profiles.filter(p => p.cargo === 'Vendedor'), leads, 'vendedorId')
@@ -99,10 +95,6 @@ export function Dashboard() {
   const novoItem = leadsPorEtapa.find(item => item.etapa === 'Novo')
   const etapasDeTrabalho = leadsPorEtapa.filter(item => item.etapa !== 'Novo')
   const maxEtapaDeTrabalho = Math.max(...etapasDeTrabalho.map(item => item.count), 0)
-
-  const tarefasRecentes = [...tasks]
-    .sort((a, b) => parsePrazo(a.prazo) - parsePrazo(b.prazo))
-    .slice(0, 5)
 
   const dataDeHoje = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
@@ -157,45 +149,6 @@ export function Dashboard() {
                 </button>
               )
             })}
-          </div>
-        </div>
-
-        <div className="card">
-          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16}}>
-            <h2 className="card-title" style={{margin: 0}}>Próximas Tarefas</h2>
-          </div>
-          <div className="table-scroll">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Tarefa</th>
-                  <th>Responsável</th>
-                  <th>Status</th>
-                  <th>Prazo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tarefasRecentes.map(t => (
-                  <tr key={t.id}>
-                    <td>{t.titulo}</td>
-                    <td>{t.responsavel}</td>
-                    <td>
-                      <span className={`status-badge status-${isLate(t) ? 'late' : statusToClassName(t.status)}`}>
-                        {isLate(t) ? 'Atrasado' : t.status}
-                      </span>
-                    </td>
-                    <td className="mono">{t.prazo}</td>
-                  </tr>
-                ))}
-                {tarefasRecentes.length === 0 && (
-                  <tr>
-                    <td colSpan={4} style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 32 }}>
-                      Nenhuma tarefa cadastrada ainda.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
           </div>
         </div>
 

@@ -2189,7 +2189,7 @@ select.form-input {
   .team-grid,
   .dashboard-row-2col,
   .dashboard-row-perf {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .kanban-board {

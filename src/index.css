@@ -1070,6 +1070,11 @@ span.status-badge {
   color: var(--ink-tertiary);
 }
 
+.lote-lead-meta {
+  font-size: 0.7rem;
+  color: var(--ink-tertiary);
+}
+
 .whatsapp-btn {
   display: inline-flex;
   align-items: center;

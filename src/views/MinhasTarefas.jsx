@@ -175,7 +175,7 @@ export function MinhasTarefas() {
         {viewMode === 'list' ? (
           <div className="card">
             <div className="table-scroll">
-            <table className="data-table">
+            <table className="data-table tasks-table">
               <thead>
                 <tr>
                   <th>Tarefa</th>
@@ -188,15 +188,15 @@ export function MinhasTarefas() {
               <tbody>
                 {tasks.map(t => (
                   <tr key={t.id}>
-                    <td style={{fontWeight: 500}}>{t.titulo}</td>
-                    <td>
+                    <td data-label="Tarefa" style={{fontWeight: 500}}>{t.titulo}</td>
+                    <td data-label="Status">
                       <span className={`status-badge status-${isLate(t) ? 'late' : statusToClassName(t.status)}`}>
                         {isLate(t) ? 'Atrasado' : t.status}
                       </span>
                     </td>
-                    <td className="mono">{t.prazo}</td>
-                    <td>{t.responsavel}</td>
-                    <td>
+                    <td data-label="Prazo" className="mono">{t.prazo}</td>
+                    <td data-label="Responsável">{t.responsavel}</td>
+                    <td data-label="Ações">
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button className="icon-btn" onClick={() => openEditTaskModal(t)} aria-label="Editar">
                           <Pencil size={16} />

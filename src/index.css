@@ -2242,6 +2242,62 @@ select.form-input {
     white-space: nowrap;
   }
 
+  /* Minhas Tarefas / Todas as Tarefas list view — too many columns to fit a
+     phone screen even with horizontal scroll (5 columns squeezed the Status
+     badge off-screen with no visible affordance to scroll to it). Stack each
+     row into a small card instead, matching the label:value pattern used by
+     lead rows elsewhere in the app. */
+  .tasks-table {
+    white-space: normal;
+  }
+
+  .tasks-table thead {
+    display: none;
+  }
+
+  .tasks-table tr {
+    display: block;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .tasks-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--rule);
+    text-align: right;
+  }
+
+  .tasks-table td:last-child {
+    border-bottom: none;
+  }
+
+  .tasks-table td::before {
+    content: attr(data-label);
+    font-family: var(--font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--ink-tertiary);
+    flex-shrink: 0;
+  }
+
+  .tasks-table td[data-label="Tarefa"] {
+    display: block;
+    text-align: left;
+    padding-bottom: 12px;
+  }
+
+  .tasks-table td[data-label="Tarefa"]::before {
+    content: none;
+  }
+
   .lotes-grid,
   .team-grid,
   .dashboard-row-perf {

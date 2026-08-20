@@ -148,24 +148,6 @@ export function Agenda() {
       />
 
       <div className="page-content" style={{ flex: 1, overflow: 'auto' }}>
-        <div className="status-tabs">
-          <button
-            className={`status-tab ${statusFilter === 'Todas' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('Todas')}
-          >
-            Todas <span className="status-tab-count">{visitas.length}</span>
-          </button>
-          {VISITA_STATUS_OPTIONS.map(opt => (
-            <button
-              key={opt}
-              className={`status-tab ${statusFilter === opt ? 'active' : ''}`}
-              onClick={() => setStatusFilter(opt)}
-            >
-              {opt} <span className="status-tab-count">{visitas.filter(v => v.status === opt).length}</span>
-            </button>
-          ))}
-        </div>
-
         <div className="agenda-calendar">
           <div className="agenda-calendar-header">
             <button className="icon-btn" onClick={goToPrevMonth} aria-label="Mês anterior">
@@ -214,6 +196,26 @@ export function Agenda() {
                 </div>
               )
             })}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="status-tabs" style={{ marginBottom: 0, borderBottom: 'none' }}>
+            <button
+              className={`status-tab ${statusFilter === 'Todas' ? 'active' : ''}`}
+              onClick={() => setStatusFilter('Todas')}
+            >
+              Todas <span className="status-tab-count">{visitas.length}</span>
+            </button>
+            {VISITA_STATUS_OPTIONS.map(opt => (
+              <button
+                key={opt}
+                className={`status-tab ${statusFilter === opt ? 'active' : ''}`}
+                onClick={() => setStatusFilter(opt)}
+              >
+                {opt} <span className="status-tab-count">{visitas.filter(v => v.status === opt).length}</span>
+              </button>
+            ))}
           </div>
         </div>
 

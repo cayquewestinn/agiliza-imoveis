@@ -1624,6 +1624,9 @@ select.form-input {
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 32px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .form-error {

@@ -145,6 +145,7 @@ body {
 .app-container {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -1707,6 +1708,7 @@ select.form-input {
 /* Login */
 .login-page {
   height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2165,6 +2167,7 @@ select.form-input {
     display: block;
     height: auto;
     min-height: 100vh;
+    min-height: 100dvh;
     overflow: visible;
   }
 

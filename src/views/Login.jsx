@@ -21,11 +21,16 @@ export function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <img
-          src={theme === 'dark' ? '/logo-agiliza.png' : '/logo-agiliza-ink.png'}
-          alt="Agiliza"
-          className="login-brand"
-        />
+        <div className="login-brand-wrap">
+          <img
+            src={theme === 'dark' ? '/logo-agiliza.png' : '/logo-agiliza-ink.png'}
+            alt="Agiliza"
+            className="login-brand"
+          />
+          <div className="carimbo carimbo-login" aria-hidden="true">
+            <span className="carimbo-text">Acesso<br />Restrito</span>
+          </div>
+        </div>
 
         <h1 className="login-title">Entrar</h1>
         <p className="login-subtitle">Acesse com seu usuário e senha.</p>

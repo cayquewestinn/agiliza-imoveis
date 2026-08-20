@@ -31,6 +31,9 @@ export function LoteCard({ lote, onEdit, onDelete }) {
             <span>Sem fotos</span>
           </div>
         )}
+        <div className="carimbo carimbo-lote-card" aria-hidden="true">
+          <span className="carimbo-text">Origem<br />Leilão</span>
+        </div>
       </div>
 
       <div className="lote-card-strip">

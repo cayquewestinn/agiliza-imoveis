@@ -13,6 +13,8 @@ colors:
   rule-strong: "#7a7461"
   accent-carimbo-roxo: "#5a2a6b"
   accent-hover: "#431f52"
+  stamp-ink: "rgba(20,18,14,0.42)"
+  stamp-ring: "rgba(20,18,14,0.58)"
   status-neutral: "#5c564a"
   status-active: "#5a2a6b"
   status-success: "#3f6b3a"
@@ -140,7 +142,8 @@ This is a full-identity replacement, not a reskin. The previous system — a nea
 The palette is restrained: one warm-neutral "paper" scale for structure, one violet accent for identity/interaction, and a separate five-color semantic scale for status — the two systems are never conflated.
 
 ### Primary
-- **Carimbo Roxo** (`#5a2a6b`, hover `#431f52`, soft fill `rgba(90,42,107,0.1)`): the single identity accent. Used for the active nav-tab underline, primary buttons, focus rings/outlines, links, the caret color in inputs, and the "Lance inicial" price highlight. Reads as an ink-stamp violet, not a UI-blue.
+- **Carimbo Roxo** (`#5a2a6b`, hover `#431f52`, soft fill `rgba(90,42,107,0.1)`): the single identity accent as originally specified. **Correction 2026-08-20:** `--accent` in the shipped light-mode CSS is actually `#1b1912` (= `--ink`), not this violet — it silently regressed to monochrome in commit `379866b` (2026-08-18), and the user explicitly chose to keep that regression rather than restore the violet ("eu quero preto e branco mesmo"). Treat the app as intentionally monochrome in both themes going forward; this violet value is historical, not live. Do not "fix" `--accent` back to violet without asking first.
+- **Stamp Ink** (`rgba(20,18,14,0.42)`) / **Stamp Ring** (`rgba(20,18,14,0.58)`): the carimbo (notary-stamp) motif's ink and ring color — translucent by design (a real stamp is never fully opaque). This is the system's one signature visual device, used sparingly: the lote-card "Origem Leilão" mark, the login screen's "Acesso Restrito" mark, and the Agenda calendar's "today" cell. See Components → Carimbo below.
 
 ### Neutral (paper scale)
 - **Paper Page** (`#e4e3dd`): the app's base ground — the "newsprint" surface behind everything.
@@ -237,6 +240,16 @@ Borders are structural, not decorative: 1px `--rule` for default dividers, 1.5-2
 - **Style:** small sharp-radius pill-adjacent tag (not full-round), 1.5px border, uppercase Barlow Condensed label, colored soft background + matching ink text.
 - **Border-style-as-state:** solid = todo/done/advancing baseline states, dashed = in-progress/pending (doing, leilão), double 3px = a terminal/alarm state (Atrasado/late) — border style is load-bearing semantics, not ornament.
 - **Rotation:** static badges (`<span className="status-badge">`) carry a `-2deg` rotation for a hand-stamped feel via the `span.status-badge` selector. The one interactive reuse of these classes — Agenda's status `<select>` — is deliberately excluded from rotation because it is a functional control, not a decorative mark. Any future status control (select, button) must stay upright; only static spans rotate.
+
+### Carimbo (signature component, added 2026-08-20)
+The one deliberately "loud" element in an otherwise disciplined monochrome system — the ousadia budget is spent here and nowhere else. A `.carimbo` is a rotated (~-11deg) circular ring, double-bordered (`::before` inset ring), `mix-blend-mode: multiply`, translucent `--stamp-ring`/`--stamp-ink` (never solid — a real notary stamp is uneven, not flat vector color), holding short uppercase Barlow Condensed text (`.carimbo-text`).
+
+**Where it appears (exactly three places, on purpose — do not scatter it further):**
+- `LoteCard.jsx`: "Origem Leilão", bottom-left corner of the photo, marking the real fact that every lote in this system originates from judicial-auction inventory.
+- `Login.jsx`: "Acesso Restrito", overlapping the bottom-right of the logo — the one identity touch on the app's most-seen, previously most-generic screen.
+- `Agenda.jsx`: the "today" calendar cell reuses the ring/rotation language (border + inset box-shadow) at the existing `--radius-sm` day-cell size, without the full `.carimbo` component or its `mix-blend-mode` — **do not add `mix-blend-mode: multiply` to `.agenda-calendar-cell-day`**, it was tried and made the day number disappear in dark mode (the day number is real text content, not a decorative overlay like the other two placements).
+
+**Do not** turn this into a general-purpose decoration — reintroducing pill-radius or scattering the stamp onto every card/badge would flatten it back into ornament. It stays rare precisely so it stays legible as "the one real touch."
 
 ### Cards / Containers
 - **Corner Style:** 4px radius (`--radius-md`).

@@ -16,6 +16,12 @@
   --accent-hover: #000000;
   --accent-soft: rgba(27, 25, 18, 0.08);
 
+  /* Carimbo (stamp) motif — translucent, imperfect ink, never solid.
+     Same values work on both themes: dark-mode panels are white/light too,
+     so ink-on-panel is always the near-black-on-light relationship. */
+  --stamp-ink: rgba(20, 18, 14, 0.42);
+  --stamp-ring: rgba(20, 18, 14, 0.58);
+
   --status-neutral: var(--ink-secondary);
   --status-neutral-soft: rgba(92, 86, 74, 0.1);
   --status-active: var(--accent);
@@ -502,6 +508,50 @@ body {
    status <select>, which must stay a normal clickable control) carry it. */
 span.status-badge {
   transform: rotate(-2deg);
+}
+
+/* Carimbo — the one signature visual device in this system: a notary/protocol
+   stamp ring, translucent ink (never solid), more crooked than a printed
+   badge because a real stamp is applied by hand. Used sparingly (lote card,
+   login, agenda "today") — this is the app's ousadia budget, not a
+   general-purpose decoration. */
+.carimbo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--stamp-ring);
+  transform: rotate(-11deg);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.carimbo::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid var(--stamp-ring);
+  border-radius: 50%;
+}
+
+.carimbo-text {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  color: var(--stamp-ink);
+  text-align: center;
+}
+
+.carimbo-lote-card {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
 }
 
 .status-todo {
@@ -1682,11 +1732,24 @@ select.form-input {
   gap: 4px;
 }
 
-.login-brand {
+.login-brand-wrap {
+  position: relative;
   width: 100%;
   max-width: 160px;
   margin: 0 auto 20px;
+}
+
+.login-brand {
+  width: 100%;
   display: block;
+}
+
+.carimbo-login {
+  position: absolute;
+  bottom: -14px;
+  right: -22px;
+  width: 56px;
+  height: 56px;
 }
 
 .login-title {
@@ -1911,7 +1974,9 @@ select.form-input {
 }
 
 .agenda-calendar-cell-today .agenda-calendar-cell-day {
-  border-color: var(--rule-strong);
+  border: 1.5px solid var(--stamp-ring);
+  box-shadow: inset 0 0 0 3px var(--bg-panel-raised), inset 0 0 0 4px var(--stamp-ring);
+  transform: rotate(-8deg);
 }
 
 .agenda-calendar-cell-selected {

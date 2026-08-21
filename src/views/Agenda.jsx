@@ -3,17 +3,25 @@ import { Header } from '../components/Header'
 import { VisitModal } from '../components/VisitModal'
 import {
   Plus, Building2, Pencil, Trash2, MessageSquareText,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, X,
 } from 'lucide-react'
 import { useVisits } from '../context/VisitsContext'
 import { useLeads } from '../context/LeadsContext'
 import { useUser } from '../context/UserContext'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import {
   VISITA_STATUS_OPTIONS, statusToClassName, formatDateHeading, isPast,
   WEEKDAY_LABELS, buildMonthGrid, formatMonthHeading, toISODate,
 } from '../utils/visitHelpers'
 
 const today = new Date()
+
+// Hooks can't be called conditionally, but this only renders while the
+// popover is open — same pattern as App.jsx's ScrollLock.
+function PopoverScrollLock() {
+  useBodyScrollLock()
+  return null
+}
 
 export function Agenda() {
   const { visitas, updateVisita, deleteVisita } = useVisits()
@@ -26,6 +34,7 @@ export function Agenda() {
   const [calYear, setCalYear] = useState(today.getFullYear())
   const [calMonth, setCalMonth] = useState(today.getMonth())
   const [selectedDate, setSelectedDate] = useState(null)
+  const [popoverDate, setPopoverDate] = useState(null)
 
   const filtered = statusFilter === 'Todas' ? visitas : visitas.filter(v => v.status === statusFilter)
 
@@ -185,14 +194,22 @@ export function Agenda() {
                   }}
                 >
                   <div className="agenda-calendar-cell-day">{cell.date.getDate()}</div>
-                  <div className="agenda-calendar-cell-marks">
-                    {visitasDoDia.slice(0, 3).map(v => (
-                      <div className="agenda-calendar-mark" key={v.id} />
+                  <div className="agenda-calendar-cell-items">
+                    {visitasDoDia.slice(0, 2).map(v => (
+                      <div className="agenda-calendar-cell-item" key={v.id}>
+                        <span className="mono">{v.hora}</span> {leadInfo(v.leadId)?.nome ?? v.recepcao?.nomeCompleto ?? 'Contato'}
+                      </div>
                     ))}
+                    {visitasDoDia.length > 2 && (
+                      <button
+                        type="button"
+                        className="agenda-calendar-cell-more"
+                        onClick={e => { e.stopPropagation(); setPopoverDate(cell.iso) }}
+                      >
+                        +{visitasDoDia.length - 2} mais
+                      </button>
+                    )}
                   </div>
-                  {visitasDoDia.length > 0 && (
-                    <div className="agenda-calendar-cell-count">{visitasDoDia.length}</div>
-                  )}
                 </div>
               )
             })}
@@ -245,6 +262,23 @@ export function Agenda() {
           defaultResponsavelId={currentUser.id}
           onClose={closeModal}
         />
+      )}
+
+      {popoverDate && (
+        <div className="modal-overlay" onClick={() => setPopoverDate(null)}>
+          <div className="modal modal-wide" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{formatDateHeading(popoverDate)}</h2>
+              <button type="button" className="icon-btn" onClick={() => setPopoverDate(null)} aria-label="Fechar">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: 0 }}>
+              {(visitasPorDia[popoverDate] ?? []).map(renderVisitRow)}
+            </div>
+          </div>
+          <PopoverScrollLock />
+        </div>
       )}
     </div>
   )

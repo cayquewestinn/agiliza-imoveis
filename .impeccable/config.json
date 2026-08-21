@@ -14,6 +14,30 @@
         "value": "0.52rem",
         "createdAt": "2026-08-20T23:41:36.345Z",
         "reason": "novo papel real: texto do carimbo (selo), adicionado como carimbo-text na escala do DESIGN.md"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.64rem",
+        "createdAt": "2026-08-21T01:33:14.075Z",
+        "reason": "novo papel real: botao +N mais da previa do calendario da Agenda, adicionado como agenda-cell-more na escala do DESIGN.md"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.6rem",
+        "createdAt": "2026-08-21T01:33:14.199Z",
+        "reason": "novo papel real: item da previa do calendario da Agenda no mobile, adicionado como agenda-cell-item-mobile na escala do DESIGN.md"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.58rem",
+        "createdAt": "2026-08-21T01:33:14.320Z",
+        "reason": "novo papel real: botao +N mais da previa do calendario da Agenda no mobile, adicionado como agenda-cell-more-mobile na escala do DESIGN.md"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.68rem",
+        "createdAt": "2026-08-21T01:33:24.112Z",
+        "reason": "novo papel real: item da previa do calendario da Agenda no desktop, adicionado como agenda-cell-item na escala do DESIGN.md"
       }
     ]
   }

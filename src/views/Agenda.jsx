@@ -3,7 +3,7 @@ import { Header } from '../components/Header'
 import { VisitModal } from '../components/VisitModal'
 import {
   Plus, Building2, Pencil, Trash2, MessageSquareText,
-  ChevronLeft, ChevronRight, X,
+  ChevronLeft, ChevronRight, X, Clock, Check, RotateCcw,
 } from 'lucide-react'
 import { useVisits } from '../context/VisitsContext'
 import { useLeads } from '../context/LeadsContext'
@@ -12,9 +12,21 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import {
   VISITA_STATUS_OPTIONS, statusToClassName, formatDateHeading, isPast,
   WEEKDAY_LABELS, buildMonthGrid, formatMonthHeading, toISODate,
+  AGENDA_WEEK_HOURS, buildWeekGrid, formatWeekHeading, hourLabel,
+  eventTopOffset, AGENDA_WEEK_DEFAULT_EVENT_HEIGHT, clusterOverlappingVisits,
 } from '../utils/visitHelpers'
 
 const today = new Date()
+
+// Same suffix statusToClassName() already produces for .status-badge
+// (doing/done/late/todo) — reused so month chips, week blocks, and the
+// popover accent bar all stay in sync with a single source of truth.
+const STATUS_ICON = {
+  Agendada: Clock,
+  Realizada: Check,
+  'Não Compareceu': X,
+  Remarcada: RotateCcw,
+}
 
 // Hooks can't be called conditionally, but this only renders while the
 // popover is open — same pattern as App.jsx's ScrollLock.
@@ -31,8 +43,10 @@ export function Agenda() {
   const [statusFilter, setStatusFilter] = useState('Todas')
   const [editingVisita, setEditingVisita] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [viewMode, setViewMode] = useState('month')
   const [calYear, setCalYear] = useState(today.getFullYear())
   const [calMonth, setCalMonth] = useState(today.getMonth())
+  const [weekAnchor, setWeekAnchor] = useState(toISODate(today))
   const [selectedDate, setSelectedDate] = useState(null)
   const [popoverDate, setPopoverDate] = useState(null)
 
@@ -45,6 +59,7 @@ export function Agenda() {
   }
 
   const monthCells = buildMonthGrid(calYear, calMonth)
+  const weekDays = buildWeekGrid(weekAnchor)
   const todayISOStr = toISODate(today)
 
   function goToPrevMonth() {
@@ -57,6 +72,11 @@ export function Agenda() {
     const date = new Date(calYear, calMonth + 1, 1)
     setCalYear(date.getFullYear())
     setCalMonth(date.getMonth())
+  }
+
+  function shiftWeek(days) {
+    const [y, m, d] = weekAnchor.split('-').map(Number)
+    setWeekAnchor(toISODate(new Date(y, m - 1, d + days)))
   }
 
   function leadInfo(leadId) {
@@ -157,64 +177,159 @@ export function Agenda() {
       />
 
       <div className="page-content" style={{ flex: 1, overflow: 'auto' }}>
-        <div className="agenda-calendar">
-          <div className="agenda-calendar-header">
-            <button className="icon-btn" onClick={goToPrevMonth} aria-label="Mês anterior">
-              <ChevronLeft size={18} />
-            </button>
-            <div className="agenda-calendar-heading">{formatMonthHeading(calYear, calMonth)}</div>
-            <button className="icon-btn" onClick={goToNextMonth} aria-label="Próximo mês">
-              <ChevronRight size={18} />
-            </button>
-          </div>
-
-          <div className="agenda-calendar-weekdays">
-            {WEEKDAY_LABELS.map(label => (
-              <div className="agenda-calendar-weekday" key={label}>{label}</div>
-            ))}
-          </div>
-
-          <div className="agenda-calendar-grid">
-            {monthCells.map(cell => {
-              const visitasDoDia = visitasPorDia[cell.iso] ?? []
-              const cellClasses = [
-                'agenda-calendar-cell',
-                !cell.inMonth && 'agenda-calendar-cell-outside',
-                cell.iso === todayISOStr && 'agenda-calendar-cell-today',
-                cell.iso === selectedDate && 'agenda-calendar-cell-selected',
-              ].filter(Boolean).join(' ')
-
-              return (
-                <div
-                  key={cell.iso}
-                  className={cellClasses}
-                  onClick={() => {
-                    setSelectedDate(cell.iso)
-                    openNewModal()
-                  }}
-                >
-                  <div className="agenda-calendar-cell-day">{cell.date.getDate()}</div>
-                  <div className="agenda-calendar-cell-items">
-                    {visitasDoDia.slice(0, 2).map(v => (
-                      <div className="agenda-calendar-cell-item" key={v.id}>
-                        <span className="mono">{v.hora}</span> {leadInfo(v.leadId)?.nome ?? v.recepcao?.nomeCompleto ?? 'Contato'}
-                      </div>
-                    ))}
-                    {visitasDoDia.length > 2 && (
-                      <button
-                        type="button"
-                        className="agenda-calendar-cell-more"
-                        onClick={e => { e.stopPropagation(); setPopoverDate(cell.iso) }}
-                      >
-                        +{visitasDoDia.length - 2} mais
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+        <div className="status-tabs agenda-view-toggle">
+          <button
+            className={`status-tab ${viewMode === 'month' ? 'active' : ''}`}
+            onClick={() => setViewMode('month')}
+          >
+            Mês
+          </button>
+          <button
+            className={`status-tab ${viewMode === 'week' ? 'active' : ''}`}
+            onClick={() => setViewMode('week')}
+          >
+            Semana
+          </button>
         </div>
+
+        {viewMode === 'month' ? (
+          <div className="agenda-calendar">
+            <div className="agenda-calendar-header">
+              <button className="icon-btn" onClick={goToPrevMonth} aria-label="Mês anterior">
+                <ChevronLeft size={18} />
+              </button>
+              <div className="agenda-calendar-heading">{formatMonthHeading(calYear, calMonth)}</div>
+              <button className="icon-btn" onClick={goToNextMonth} aria-label="Próximo mês">
+                <ChevronRight size={18} />
+              </button>
+            </div>
+
+            <div className="agenda-calendar-weekdays">
+              {WEEKDAY_LABELS.map(label => (
+                <div className="agenda-calendar-weekday" key={label}>{label}</div>
+              ))}
+            </div>
+
+            <div className="agenda-calendar-grid">
+              {monthCells.map(cell => {
+                const visitasDoDia = visitasPorDia[cell.iso] ?? []
+                const cellClasses = [
+                  'agenda-calendar-cell',
+                  !cell.inMonth && 'agenda-calendar-cell-outside',
+                  cell.iso === todayISOStr && 'agenda-calendar-cell-today',
+                  cell.iso === selectedDate && 'agenda-calendar-cell-selected',
+                ].filter(Boolean).join(' ')
+
+                return (
+                  <div
+                    key={cell.iso}
+                    className={cellClasses}
+                    onClick={() => {
+                      setSelectedDate(cell.iso)
+                      openNewModal()
+                    }}
+                  >
+                    <div className="agenda-calendar-cell-day">{cell.date.getDate()}</div>
+                    <div className="agenda-calendar-cell-items">
+                      {visitasDoDia.slice(0, 2).map(v => {
+                        const StatusIcon = STATUS_ICON[v.status] ?? Clock
+                        return (
+                          <div className={`agenda-calendar-cell-item agenda-block-${statusToClassName(v.status)}`} key={v.id}>
+                            <StatusIcon className="agenda-calendar-cell-item-icon" size={9} />
+                            <span className="mono">{v.hora}</span>
+                            <span className="agenda-calendar-cell-item-name">
+                              {leadInfo(v.leadId)?.nome ?? v.recepcao?.nomeCompleto ?? 'Contato'}
+                            </span>
+                          </div>
+                        )
+                      })}
+                      {visitasDoDia.length > 2 && (
+                        <button
+                          type="button"
+                          className="agenda-calendar-cell-more"
+                          onClick={e => { e.stopPropagation(); setPopoverDate(cell.iso) }}
+                        >
+                          +{visitasDoDia.length - 2} mais
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="agenda-week">
+            <div className="agenda-calendar-header">
+              <button className="icon-btn" onClick={() => shiftWeek(-7)} aria-label="Semana anterior">
+                <ChevronLeft size={18} />
+              </button>
+              <div className="agenda-calendar-heading">{formatWeekHeading(weekDays)}</div>
+              <button className="icon-btn" onClick={() => shiftWeek(7)} aria-label="Próxima semana">
+                <ChevronRight size={18} />
+              </button>
+            </div>
+
+            <div className="agenda-week-header-row">
+              <div className="agenda-week-gutter" />
+              {weekDays.map(day => (
+                <div
+                  key={day.iso}
+                  className={`agenda-week-day-heading ${day.iso === todayISOStr ? 'agenda-week-day-heading-today' : ''}`}
+                >
+                  <span className="agenda-week-day-heading-label">{WEEKDAY_LABELS[day.date.getDay()]}</span>
+                  <span className="agenda-week-day-heading-num mono">{day.date.getDate()}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="agenda-week-body">
+              <div className="agenda-week-gutter">
+                {AGENDA_WEEK_HOURS.map(hour => (
+                  <div className="agenda-week-hour-label" key={hour}>{hourLabel(hour)}</div>
+                ))}
+              </div>
+              {weekDays.map(day => {
+                const laidOutVisitas = clusterOverlappingVisits(visitasPorDia[day.iso] ?? [])
+                return (
+                  <div
+                    key={day.iso}
+                    className="agenda-week-day-column"
+                    onClick={() => { setSelectedDate(day.iso); openNewModal() }}
+                  >
+                    {AGENDA_WEEK_HOURS.map(hour => (
+                      <div className="agenda-week-hour-cell" key={hour} />
+                    ))}
+                    {laidOutVisitas.map(({ visita: v, col, colCount }) => {
+                      const StatusIcon = STATUS_ICON[v.status] ?? Clock
+                      const width = 100 / colCount
+                      return (
+                        <button
+                          type="button"
+                          key={v.id}
+                          className={`agenda-week-event agenda-block-${statusToClassName(v.status)}`}
+                          style={{
+                            top: eventTopOffset(v.hora),
+                            height: AGENDA_WEEK_DEFAULT_EVENT_HEIGHT,
+                            width: `calc(${width}% - 2px)`,
+                            left: `${width * col}%`,
+                          }}
+                          onClick={e => { e.stopPropagation(); openEditModal(v) }}
+                        >
+                          <StatusIcon size={10} />
+                          <span className="mono">{v.hora}</span>
+                          <span className="agenda-week-event-title">
+                            {leadInfo(v.leadId)?.nome ?? v.recepcao?.nomeCompleto ?? 'Contato'}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="card">
           <div className="status-tabs" style={{ marginBottom: 0, borderBottom: 'none' }}>
@@ -274,7 +389,17 @@ export function Agenda() {
               </button>
             </div>
             <div className="modal-body" style={{ padding: 0 }}>
-              {(visitasPorDia[popoverDate] ?? []).map(renderVisitRow)}
+              {(visitasPorDia[popoverDate] ?? []).map(v => {
+                const StatusIcon = STATUS_ICON[v.status] ?? Clock
+                return (
+                  <div className="agenda-popover-row" key={v.id}>
+                    <div className={`agenda-popover-row-swatch agenda-block-${statusToClassName(v.status)}`}>
+                      <StatusIcon size={13} />
+                    </div>
+                    {renderVisitRow(v)}
+                  </div>
+                )
+              })}
             </div>
           </div>
           <PopoverScrollLock />

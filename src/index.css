@@ -35,6 +35,17 @@
   --status-advancing: #2e6b66;
   --status-advancing-soft: rgba(46, 107, 102, 0.12);
 
+  /* Agenda event-type color — the one deliberate, scoped exception to the
+     monochrome status system above (approved 2026-08-21, Agenda week/month
+     event blocks only). Reuses/extends the existing status hues rather than
+     inventing a new palette; nowhere outside src/views/Agenda.jsx reads
+     these tokens. */
+  --agenda-agendada: #3d7ea6;
+  --agenda-realizada: var(--status-success);
+  --agenda-nao-compareceu: var(--status-danger);
+  --agenda-remarcada: #6b6555;
+  --agenda-event-ink: #f7f6f2;
+
   --shadow-sm: 0 1px 2px rgba(27, 25, 18, 0.1);
   --shadow-md: 0 8px 20px -6px rgba(27, 25, 18, 0.22);
   --overlay: rgba(27, 25, 18, 0.45);
@@ -84,6 +95,13 @@
   --status-warning-soft: rgba(242, 242, 242, 0.06);
   --status-advancing: #f2f2f2;
   --status-advancing-soft: rgba(242, 242, 242, 0.06);
+
+  /* Same scoped exception as the light :root above, dark values. */
+  --agenda-agendada: #2e6b8c;
+  --agenda-realizada: #3f7a44;
+  --agenda-nao-compareceu: #9c4530;
+  --agenda-remarcada: #545454;
+  --agenda-event-ink: #f5f5f5;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 8px 24px -6px rgba(0, 0, 0, 0.7);
@@ -2017,10 +2035,60 @@ select.form-input {
   align-self: stretch;
 }
 
+/* Agenda event color system — shared by month chips, week blocks, and the
+   "+N mais" popover accent bar. statusToClassName() supplies the suffix
+   (doing/done/late/todo) so all three stay in sync by construction. */
+.agenda-block-doing { background: var(--agenda-agendada); border: 2px dashed rgba(255, 255, 255, 0.5); }
+.agenda-block-done { background: var(--agenda-realizada); border: 1px solid rgba(255, 255, 255, 0.32); }
+.agenda-block-late { background: var(--agenda-nao-compareceu); border: 3px double rgba(255, 255, 255, 0.55); }
+.agenda-block-todo { background: var(--agenda-remarcada); border: 1px solid rgba(255, 255, 255, 0.28); }
+
+.agenda-popover-row {
+  display: flex;
+  align-items: stretch;
+}
+
+.agenda-popover-row .visit-row {
+  flex: 1;
+  min-width: 0;
+}
+
+.agenda-popover-row-swatch {
+  flex: none;
+  width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--agenda-event-ink);
+}
+
+.agenda-popover-row-swatch.agenda-block-doing,
+.agenda-popover-row-swatch.agenda-block-done,
+.agenda-popover-row-swatch.agenda-block-late,
+.agenda-popover-row-swatch.agenda-block-todo {
+  border: none;
+}
+
+.agenda-view-toggle {
+  margin-bottom: 16px;
+}
+
 .agenda-calendar-cell-item {
-  font-size: 0.68rem;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.64rem;
   line-height: 1.3;
-  color: var(--ink-secondary);
+  color: var(--agenda-event-ink);
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+}
+
+.agenda-calendar-cell-item-icon {
+  flex: none;
+}
+
+.agenda-calendar-cell-item-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2043,6 +2111,99 @@ select.form-input {
 .agenda-calendar-cell-more:hover {
   color: var(--ink);
   text-decoration: underline;
+}
+
+.agenda-week {
+  margin-bottom: 24px;
+}
+
+.agenda-week-header-row {
+  display: grid;
+  grid-template-columns: 48px repeat(7, minmax(0, 1fr));
+}
+
+.agenda-week-day-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0 10px;
+}
+
+.agenda-week-day-heading-label {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-tertiary);
+}
+
+.agenda-week-day-heading-num {
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.agenda-week-day-heading-today .agenda-week-day-heading-num {
+  background: var(--ink);
+  color: var(--bg-panel-raised);
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agenda-week-body {
+  display: grid;
+  grid-template-columns: 48px repeat(7, minmax(0, 1fr));
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+}
+
+.agenda-week-hour-label {
+  height: 56px;
+  padding-right: 6px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--ink-tertiary);
+  transform: translateY(-6px);
+}
+
+.agenda-week-day-column {
+  position: relative;
+  border-right: 1px solid var(--rule);
+  background: var(--bg-panel-raised);
+  cursor: pointer;
+}
+
+.agenda-week-hour-cell {
+  height: 56px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.agenda-week-event {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  color: var(--agenda-event-ink);
+  font-size: 0.64rem;
+  line-height: 1.2;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: var(--shadow-sm);
+}
+
+.agenda-week-event-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .visit-row {
@@ -2398,6 +2559,11 @@ select.form-input {
 
   .agenda-calendar-cell-item {
     font-size: 0.6rem;
+    padding: 1px 4px;
+  }
+
+  .agenda-calendar-cell-item-icon {
+    display: none;
   }
 
   .agenda-calendar-cell-more {
@@ -2407,5 +2573,32 @@ select.form-input {
   .agenda-calendar-weekday {
     font-size: 0.72rem;
     padding: 4px 0;
+  }
+
+  .agenda-week-header-row,
+  .agenda-week-body {
+    grid-template-columns: 30px repeat(7, minmax(0, 1fr));
+  }
+
+  .agenda-week-hour-label {
+    font-size: 0.52rem;
+  }
+
+  .agenda-week-day-heading-label {
+    font-size: 0.6rem;
+  }
+
+  .agenda-week-day-heading-num {
+    font-size: 0.72rem;
+  }
+
+  .agenda-week-event {
+    font-size: 0.52rem;
+    padding: 1px 3px;
+    gap: 2px;
+  }
+
+  .agenda-week-event svg {
+    display: none;
   }
 }

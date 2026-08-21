@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useUser } from './UserContext'
 import { useToast } from './ToastContext'
+import { useLeads } from './LeadsContext'
+import { toISODate } from '../utils/visitHelpers'
 
 const VisitsContext = createContext(null)
 
@@ -76,8 +78,35 @@ async function fetchAllVisitas() {
 export function VisitsProvider({ children }) {
   const { currentUser } = useUser()
   const { showError } = useToast()
+  const { leads, updateLead } = useLeads()
   const [visitas, setVisitas] = useState([])
   const [loading, setLoading] = useState(true)
+
+  // A lead whose only pending contact was a no-show visit is dead weight in
+  // the active lists — archive it (not the sales-funnel "Perdido", just set
+  // aside) unless it already has another visit today or later. Runs off
+  // committed `visitas`/`leads` state (not the freshly-fetched rows inside
+  // refetch) because LeadsContext can still be mid-fetch — empty — at the
+  // exact moment a visitas refetch lands; reacting to both keeps this
+  // self-healing once leads finish loading, and it's idempotent (already
+  // -arquivado leads are skipped) so re-running on every leads/visitas
+  // change is safe.
+  useEffect(() => {
+    if (visitas.length === 0 || leads.length === 0) return
+    const todayStr = toISODate(new Date())
+    const noShowLeadIds = new Set(
+      visitas.filter(v => v.status === 'Não Compareceu' && v.leadId).map(v => v.leadId)
+    )
+    for (const leadId of noShowLeadIds) {
+      const lead = leads.find(l => l.id === leadId)
+      if (!lead || lead.arquivado) continue
+      const hasPending = visitas.some(v =>
+        v.leadId === leadId && v.status !== 'Não Compareceu' && v.data >= todayStr
+      )
+      if (!hasPending) updateLead(leadId, { arquivado: true })
+    }
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- updateLead/leads change identity on every LeadsContext update; the idempotent guard above (skip already-arquivado leads) makes re-running safe instead of chasing a stable reference here
+  }, [visitas, leads])
 
   async function refetch(isActive = () => true) {
     const { rows, error } = await fetchAllVisitas()

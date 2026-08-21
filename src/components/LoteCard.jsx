@@ -98,7 +98,6 @@ export function LoteCard({ lote, onEdit, onDelete }) {
       {detailOpen && (
         <LoteDetailModal
           lote={lote}
-          leads={leads}
           onClose={() => setDetailOpen(false)}
         />
       )}

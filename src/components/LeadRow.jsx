@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MessageCircle, CheckCircle2 } from 'lucide-react'
+import { MessageCircle, CheckCircle2, Archive, ArchiveRestore } from 'lucide-react'
 import { etapaToClassName, formatPhone, whatsappLink, LEAD_ETAPA_OPTIONS } from '../utils/leadHelpers'
 import { formatDate } from '../utils/loteHelpers'
 
@@ -14,9 +14,12 @@ export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showL
     : `Olá ${lead.nome.split(' ')[0]}, tudo bem? Sou da Agiliza Imóveis.`
 
   return (
-    <div className="lead-row">
+    <div className={`lead-row${lead.arquivado ? ' lead-row-archived' : ''}`}>
       <div className="lote-lead-info">
-        <div className="lote-lead-name">{lead.nome}</div>
+        <div className="lote-lead-name">
+          {lead.nome}
+          {lead.arquivado && <span className="lead-archived-tag">Arquivado</span>}
+        </div>
         <span className="lote-lead-phone">{formatPhone(lead.telefone)}</span>
         <span className="lote-lead-meta">
           {lead.origem || 'Origem não informada'} · recebido em {formatDate(lead.dataRecebimento)}
@@ -121,6 +124,14 @@ export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showL
           aria-label={isSold ? `${lead.nome} já foi marcado como vendido` : `Marcar ${lead.nome} como vendido`}
         >
           <CheckCircle2 size={16} />
+        </button>
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={() => updateLead(lead.id, { arquivado: !lead.arquivado })}
+          aria-label={lead.arquivado ? `Desarquivar ${lead.nome}` : `Arquivar ${lead.nome}`}
+        >
+          {lead.arquivado ? <ArchiveRestore size={16} /> : <Archive size={16} />}
         </button>
       </div>
     </div>

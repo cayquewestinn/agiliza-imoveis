@@ -22,7 +22,7 @@ export function EtapaLeadsModal({ etapa, onClose }) {
   const loteById = useMemo(() => new Map(lotes.map(l => [l.id, l])), [lotes])
 
   const leadsDaEtapa = useMemo(
-    () => leads.filter(l => l.etapa === etapa),
+    () => leads.filter(l => l.etapa === etapa && !l.arquivado),
     [leads, etapa]
   )
 
@@ -64,10 +64,12 @@ export function EtapaLeadsModal({ etapa, onClose }) {
             />
           </div>
 
-          <h3 className="lote-detail-section-title">
-            {leadsFiltrados.length} lead{leadsFiltrados.length !== 1 ? 's' : ''}
-            {truncado ? ` — mostrando os primeiros ${PREVIEW_LIMIT}, refine a busca para ver os demais` : ''}
-          </h3>
+          <div className="lote-leads-header">
+            <h3 className="lote-detail-section-title">
+              {leadsFiltrados.length} lead{leadsFiltrados.length !== 1 ? 's' : ''}
+              {truncado ? ` — mostrando os primeiros ${PREVIEW_LIMIT}, refine a busca para ver os demais` : ''}
+            </h3>
+          </div>
 
           <div className="lote-leads-list">
             {leadsExibidos.length === 0 && (

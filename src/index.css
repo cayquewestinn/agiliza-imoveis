@@ -964,19 +964,36 @@ span.status-badge {
   line-height: 1.3;
 }
 
+.lote-leads-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding-top: 14px;
+  margin-top: 4px;
+  border-top: 1px solid var(--rule);
+}
+
 .lote-detail-section-title {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding-top: 14px;
-  margin-top: 4px;
-  border-top: 1px solid var(--rule);
   color: var(--ink-secondary);
   font-family: var(--font-label);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+.lote-leads-archived-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-tertiary);
+  font-size: 0.76rem;
+  cursor: pointer;
 }
 
 .lote-leads-list {
@@ -1087,6 +1104,25 @@ span.status-badge {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lead-row-archived {
+  opacity: 0.6;
+}
+
+.lead-archived-tag {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--ink-tertiary);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+  padding: 1px 6px;
 }
 
 .lote-lead-phone {

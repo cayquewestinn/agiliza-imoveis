@@ -80,11 +80,15 @@ function DesempenhoTable({ titulo, dados }) {
 }
 
 export function Dashboard() {
-  const { leads } = useLeads()
+  const { leads: todosOsLeads } = useLeads()
   const { profiles } = useProfiles()
   const { currentUser, isAdmin } = useUser()
   const { theme } = useTheme()
   const [etapaAberta, setEtapaAberta] = useState(null)
+
+  // Archived leads (no-shows with nothing pending) shouldn't inflate or
+  // deflate funnel/performance numbers — they're set aside, not counted.
+  const leads = todosOsLeads.filter(l => !l.arquivado)
 
   const vendedores = buildDesempenho(profiles.filter(p => p.cargo === 'Vendedor'), leads, 'vendedorId')
   const agendadores = buildDesempenho(profiles.filter(p => p.cargo.includes('Agendador')), leads, 'agendadorId')

@@ -5,7 +5,7 @@ import { useToast } from './ToastContext'
 
 const LeadsContext = createContext(null)
 
-const LEAD_COLUMNS = 'id, lote_id, nome, telefone, etapa, origem, data_recebimento, vendedor_id, agendador_id'
+const LEAD_COLUMNS = 'id, lote_id, nome, telefone, etapa, origem, data_recebimento, vendedor_id, agendador_id, arquivado'
 
 function fromRow(row) {
   return {
@@ -18,6 +18,7 @@ function fromRow(row) {
     dataRecebimento: row.data_recebimento,
     vendedorId: row.vendedor_id,
     agendadorId: row.agendador_id,
+    arquivado: row.arquivado ?? false,
   }
 }
 
@@ -31,6 +32,7 @@ function toRow(lead) {
     data_recebimento: lead.dataRecebimento,
     vendedor_id: lead.vendedorId ?? null,
     agendador_id: lead.agendadorId ?? null,
+    arquivado: lead.arquivado ?? false,
   }
 }
 
@@ -125,8 +127,8 @@ export function LeadsProvider({ children }) {
     setLeads(prev => prev.filter(l => l.id !== id))
   }
 
-  function leadsByLote(loteId) {
-    return leads.filter(l => l.loteId === loteId)
+  function leadsByLote(loteId, { includeArchived = false } = {}) {
+    return leads.filter(l => l.loteId === loteId && (includeArchived || !l.arquivado))
   }
 
   return (

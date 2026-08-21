@@ -11,15 +11,18 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import { PhotoGallery } from './PhotoGallery'
 import { LeadRow } from './LeadRow'
 
-export function LoteDetailModal({ lote, leads, onClose }) {
-  const { updateLead } = useLeads()
+export function LoteDetailModal({ lote, onClose }) {
+  const { leadsByLote, updateLead } = useLeads()
   const { profiles } = useProfiles()
   const vendedores = profiles.filter(p => p.cargo === 'Vendedor')
   const agendadores = profiles.filter(p => p.cargo.includes('Agendador'))
   const { closing, requestClose } = useClosingTransition(onClose)
   useBodyScrollLock()
   const [galleryOpen, setGalleryOpen] = useState(false)
+  const [showArchived, setShowArchived] = useState(false)
   const fotos = lote.fotos ?? []
+  const leads = leadsByLote(lote.id, { includeArchived: showArchived })
+  const archivedCount = leadsByLote(lote.id, { includeArchived: true }).length - leadsByLote(lote.id).length
 
   return (
     <div className={`modal-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
@@ -89,9 +92,21 @@ export function LoteDetailModal({ lote, leads, onClose }) {
           </div>
 
           <div>
-            <h3 className="lote-detail-section-title">
-              <Users size={14} /> {leads.length} lead{leads.length !== 1 ? 's' : ''}
-            </h3>
+            <div className="lote-leads-header">
+              <h3 className="lote-detail-section-title">
+                <Users size={14} /> {leads.length} lead{leads.length !== 1 ? 's' : ''}
+              </h3>
+              {archivedCount > 0 && (
+                <label className="lote-leads-archived-toggle">
+                  <input
+                    type="checkbox"
+                    checked={showArchived}
+                    onChange={e => setShowArchived(e.target.checked)}
+                  />
+                  Mostrar arquivados ({archivedCount})
+                </label>
+              )}
+            </div>
 
             <div className="lote-leads-list">
               {leads.length === 0 && (

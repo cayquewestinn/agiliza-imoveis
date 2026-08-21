@@ -1289,6 +1289,13 @@ span.status-badge {
   margin-bottom: 0;
   cursor: pointer;
   transition: background-color 0.15s, box-shadow 0.15s;
+  /* Without these, touch browsers interpret a drag gesture as a text
+     selection (magnifier loupe + copy/paste bubble) instead of letting
+     dnd-kit's pointer sensor capture it. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .kanban-card-delete {

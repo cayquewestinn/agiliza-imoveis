@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { useClosingTransition } from '../hooks/useClosingTransition'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 export function ChangePasswordModal({ onClose }) {
   const { changePassword } = useUser()
@@ -11,6 +12,7 @@ export function ChangePasswordModal({ onClose }) {
   const [success, setSuccess] = useState(false)
   const [saving, setSaving] = useState(false)
   const { closing, requestClose } = useClosingTransition(onClose)
+  useBodyScrollLock()
 
   async function handleSubmit(e) {
     e.preventDefault()

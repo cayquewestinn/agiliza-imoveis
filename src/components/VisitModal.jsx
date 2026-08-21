@@ -5,6 +5,7 @@ import { useVisits } from '../context/VisitsContext'
 import { useProfiles } from '../context/ProfilesContext'
 import { normalizePhoneBR } from '../utils/leadHelpers'
 import { useClosingTransition } from '../hooks/useClosingTransition'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 function todayISO() {
   const d = new Date()
@@ -40,6 +41,7 @@ export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }
   const [saving, setSaving] = useState(false)
   const [conflito, setConflito] = useState(null)
   const { closing, requestClose } = useClosingTransition(onClose)
+  useBodyScrollLock()
 
   function encontrarConflito() {
     return visitas.find(v => (

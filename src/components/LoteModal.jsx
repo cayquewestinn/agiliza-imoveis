@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import { LOTE_STATUS_OPTIONS, TIPO_IMOVEL_OPTIONS } from '../utils/loteHelpers'
 import { useClosingTransition } from '../hooks/useClosingTransition'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 export function LoteModal({ lote, onClose, onSave }) {
   const isEditing = Boolean(lote)
@@ -22,6 +23,7 @@ export function LoteModal({ lote, onClose, onSave }) {
   const [comitente, setComitente] = useState(lote?.comitente ?? '')
   const [error, setError] = useState('')
   const { closing, requestClose } = useClosingTransition(onClose)
+  useBodyScrollLock()
 
   function handleSubmit(e) {
     e.preventDefault()

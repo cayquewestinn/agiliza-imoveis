@@ -7,6 +7,7 @@ import { statusToClassName, formatCurrency, formatDate } from '../utils/loteHelp
 import { useLeads } from '../context/LeadsContext'
 import { useProfiles } from '../context/ProfilesContext'
 import { useClosingTransition } from '../hooks/useClosingTransition'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import { PhotoGallery } from './PhotoGallery'
 import { LeadRow } from './LeadRow'
 
@@ -16,6 +17,7 @@ export function LoteDetailModal({ lote, leads, onClose }) {
   const vendedores = profiles.filter(p => p.cargo === 'Vendedor')
   const agendadores = profiles.filter(p => p.cargo.includes('Agendador'))
   const { closing, requestClose } = useClosingTransition(onClose)
+  useBodyScrollLock()
   const [galleryOpen, setGalleryOpen] = useState(false)
   const fotos = lote.fotos ?? []
 

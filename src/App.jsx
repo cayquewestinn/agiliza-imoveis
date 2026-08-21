@@ -16,7 +16,17 @@ import { UserProvider, useUser } from './context/UserContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { ProfilesProvider } from './context/ProfilesContext'
 import { ToastProvider } from './context/ToastContext'
+import { useBodyScrollLock } from './hooks/useBodyScrollLock'
 import './index.css'
+
+// Hooks can't be called conditionally, but AppShell itself is always
+// mounted — mount this only while the drawer is open so it shares the same
+// mount/unmount-driven lock every modal uses (and coordinates with them if
+// a modal happens to open while the drawer is still up).
+function ScrollLock() {
+  useBodyScrollLock()
+  return null
+}
 
 function AppShell() {
   const { currentUser, isAdmin, loading } = useUser()
@@ -30,17 +40,6 @@ function AppShell() {
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [sidebarOpen])
-
-  // Without this, the page behind the mobile drawer keeps scrolling under a
-  // touch drag even though the backdrop sits above it — every view "moves"
-  // while the menu is open because this is a fixed-position overlay, not a
-  // scroll container of its own.
-  useEffect(() => {
-    if (sidebarOpen) {
-      document.body.style.overflow = 'hidden'
-      return () => { document.body.style.overflow = '' }
-    }
   }, [sidebarOpen])
 
   // Swipe from the left edge to open the drawer, mirroring the native
@@ -113,7 +112,10 @@ function AppShell() {
       </button>
 
       {sidebarOpen && (
-        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+        <>
+          <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+          <ScrollLock />
+        </>
       )}
 
       <Sidebar currentView={view} setCurrentView={handleSetView} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

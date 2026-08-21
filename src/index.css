@@ -734,6 +734,11 @@ span.status-badge {
   border-bottom: 1px solid var(--rule);
   cursor: pointer;
   transition: background-color 0.15s, box-shadow 0.15s;
+  /* Same fix as .kanban-card: a tap on a text-heavy clickable div can be
+     read as a text-selection long-press on touch instead of a tap. */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .lote-card:hover {
@@ -2209,6 +2214,18 @@ select.form-input {
   .main-content {
     height: auto;
     overflow: visible;
+  }
+
+  /* Any focusable form control under 16px makes iOS Safari auto-zoom the
+     whole page — every field in the app is 0.9rem or smaller, so this
+     fired on login, search, every modal form, and the inline
+     etapa/vendedor/agendador <select>s. Bump to 16px on mobile only; the
+     desktop sizes are untouched. */
+  .form-input,
+  .search-field-input,
+  select.visit-status-select,
+  select.lote-lead-select {
+    font-size: 16px;
   }
 
   .header {

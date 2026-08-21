@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useClosingTransition } from '../hooks/useClosingTransition'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 export function PhotoGallery({ fotos, startIndex, titulo, onClose }) {
   const [index, setIndex] = useState(startIndex)
   const { closing, requestClose } = useClosingTransition(onClose)
+  useBodyScrollLock()
 
   const prev = useCallback(() => {
     setIndex(i => (i === 0 ? fotos.length - 1 : i - 1))

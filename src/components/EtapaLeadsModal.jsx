@@ -4,6 +4,7 @@ import { useLeads } from '../context/LeadsContext'
 import { useLotes } from '../context/LotesContext'
 import { useProfiles } from '../context/ProfilesContext'
 import { useClosingTransition } from '../hooks/useClosingTransition'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import { LeadRow } from './LeadRow'
 
 const PREVIEW_LIMIT = 200
@@ -15,6 +16,7 @@ export function EtapaLeadsModal({ etapa, onClose }) {
   const vendedores = profiles.filter(p => p.cargo === 'Vendedor')
   const agendadores = profiles.filter(p => p.cargo.includes('Agendador'))
   const { closing, requestClose } = useClosingTransition(onClose)
+  useBodyScrollLock()
   const [busca, setBusca] = useState('')
 
   const loteById = useMemo(() => new Map(lotes.map(l => [l.id, l])), [lotes])

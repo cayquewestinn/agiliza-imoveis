@@ -4,6 +4,7 @@ import { STATUS_OPTIONS } from '../utils/taskHelpers'
 import { useProfiles } from '../context/ProfilesContext'
 import { useUser } from '../context/UserContext'
 import { useClosingTransition } from '../hooks/useClosingTransition'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 function toInputDate(prazoBr) {
   if (!prazoBr) return ''
@@ -28,6 +29,7 @@ export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
   )
   const [error, setError] = useState('')
   const { closing, requestClose } = useClosingTransition(onClose)
+  useBodyScrollLock()
 
   function handleSubmit(e) {
     e.preventDefault()

@@ -3,6 +3,7 @@ import { Header } from '../components/Header'
 import { useLeads } from '../context/LeadsContext'
 import { useProfiles } from '../context/ProfilesContext'
 import { useUser } from '../context/UserContext'
+import { useTheme } from '../context/ThemeContext'
 import { EtapaLeadsModal } from '../components/EtapaLeadsModal'
 
 const LEAD_ETAPA_CHART = [
@@ -82,6 +83,7 @@ export function Dashboard() {
   const { leads } = useLeads()
   const { profiles } = useProfiles()
   const { currentUser, isAdmin } = useUser()
+  const { theme } = useTheme()
   const [etapaAberta, setEtapaAberta] = useState(null)
 
   const vendedores = buildDesempenho(profiles.filter(p => p.cargo === 'Vendedor'), leads, 'vendedorId')
@@ -104,6 +106,12 @@ export function Dashboard() {
     <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
       <Header title={isAdmin ? 'Painel Geral' : `Painel de ${currentUser.nome}`} />
       <div className="page-content">
+        <img
+          src={theme === 'dark' ? '/logo-agiliza.png' : '/logo-agiliza-ink.png'}
+          alt="Agiliza"
+          className="dashboard-mobile-logo"
+        />
+
         <div className="card">
           <h2 className="masthead-date">Edição de Hoje — {dataDeHoje}</h2>
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16}}>

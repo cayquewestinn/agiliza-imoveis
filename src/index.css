@@ -291,6 +291,14 @@ body {
 /* Masthead dateline — the Dashboard's "edição de hoje" banner; deliberately
    distinct from .card-title so it reads as the paper's own nameplate, not
    another section label. */
+/* Mobile-only: the sidebar (and its logo) is off-canvas by default on
+   mobile, so the app's home screen otherwise carries no brand mark until
+   the drawer is opened. Hidden on desktop, where the sidebar already
+   shows it. */
+.dashboard-mobile-logo {
+  display: none;
+}
+
 .masthead-date {
   font-family: var(--font-display);
   font-style: italic;
@@ -2215,6 +2223,12 @@ select.form-input {
 
   .page-content {
     padding: 20px;
+  }
+
+  .dashboard-mobile-logo {
+    display: block;
+    width: 140px;
+    margin: 8px auto 24px;
   }
 
   .stat-row {

@@ -50,10 +50,11 @@ export function Agenda() {
   const [selectedDate, setSelectedDate] = useState(null)
   const [popoverDate, setPopoverDate] = useState(null)
 
-  const filtered = statusFilter === 'Todas' ? visitas : visitas.filter(v => v.status === statusFilter)
-
+  // The calendar (month cells, week grid, "+N mais" popover) always shows
+  // every visit — statusFilter only narrows the day list below, so the tabs
+  // don't make the calendar itself look incomplete compared to "Todas".
   const visitasPorDia = {}
-  for (const v of filtered) {
+  for (const v of visitas) {
     if (!visitasPorDia[v.data]) visitasPorDia[v.data] = []
     visitasPorDia[v.data].push(v)
   }
@@ -163,7 +164,9 @@ export function Agenda() {
     )
   }
 
-  const visitasDoDiaSelecionado = selectedDate ? (visitasPorDia[selectedDate] ?? []) : []
+  const visitasDoDiaSelecionado = selectedDate
+    ? (visitasPorDia[selectedDate] ?? []).filter(v => statusFilter === 'Todas' || v.status === statusFilter)
+    : []
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

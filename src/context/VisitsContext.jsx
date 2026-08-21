@@ -46,6 +46,13 @@ function toRow(visita) {
   }
 }
 
+// A visit left "Agendada" past its own date/time almost always means nobody
+// showed up and nobody updated the status — auto-flip it instead of letting
+// it sit forever as if it were still upcoming.
+function isOverdueAgendada(visita) {
+  return visita.status === 'Agendada' && new Date(`${visita.data}T${visita.hora}`) < new Date()
+}
+
 const PAGE_SIZE = 1000
 
 async function fetchAllVisitas() {
@@ -78,9 +85,20 @@ export function VisitsProvider({ children }) {
       console.error('Erro ao carregar visitas:', error)
       return
     }
-    if (isActive()) {
-      setVisitas(rows.map(fromRow))
+    if (!isActive()) return
+
+    const parsed = rows.map(fromRow)
+    const overdueIds = parsed.filter(isOverdueAgendada).map(v => v.id)
+    if (overdueIds.length > 0) {
+      for (const v of parsed) {
+        if (overdueIds.includes(v.id)) v.status = 'Não Compareceu'
+      }
+      supabase.from('visitas').update({ status: 'Não Compareceu' }).in('id', overdueIds)
+        .then(({ error: updateError }) => {
+          if (updateError) console.error('Erro ao marcar visitas atrasadas como Não Compareceu:', updateError)
+        })
     }
+    setVisitas(parsed)
   }
 
   useEffect(() => {

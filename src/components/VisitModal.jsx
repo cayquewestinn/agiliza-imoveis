@@ -4,6 +4,7 @@ import { useLeads } from '../context/LeadsContext'
 import { useVisits } from '../context/VisitsContext'
 import { useProfiles } from '../context/ProfilesContext'
 import { normalizePhoneBR } from '../utils/leadHelpers'
+import { AGENDA_WEEK_HOURS, hourLabel } from '../utils/visitHelpers'
 import { useClosingTransition } from '../hooks/useClosingTransition'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
@@ -52,6 +53,27 @@ export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }
       Math.abs(toMinutes(v.hora) - toMinutes(hora)) < CONFLICT_WINDOW_MINUTES
     ))
   }
+
+  // Only offer times that are actually free for this responsável on this
+  // data — an already-booked slot (within the conflict window) never shows
+  // up as a choice, instead of letting someone pick it and then warning.
+  const horaOriginal = isEditing ? visita.hora : null
+  const baseSlots = AGENDA_WEEK_HOURS.map(hourLabel)
+  const todosOsSlots = horaOriginal && !baseSlots.includes(horaOriginal)
+    ? [...baseSlots, horaOriginal].sort()
+    : baseSlots
+  const opcoesHora = !data || !responsavelId
+    ? todosOsSlots
+    : todosOsSlots.filter(slot => (
+        slot === horaOriginal ||
+        !visitas.some(v => (
+          v.status === 'Agendada' &&
+          v.responsavelId === responsavelId &&
+          v.data === data &&
+          (!isEditing || v.id !== visita.id) &&
+          Math.abs(toMinutes(v.hora) - toMinutes(slot)) < CONFLICT_WINDOW_MINUTES
+        ))
+      ))
 
   function handleContatoChange(value) {
     setContatoOption(value)
@@ -209,18 +231,24 @@ export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }
                   className="form-input"
                   type="date"
                   value={data}
-                  onChange={e => { setConflito(null); setData(e.target.value) }}
+                  onChange={e => { setConflito(null); setData(e.target.value); setHora('') }}
                 />
               </div>
               <div className="form-group">
                 <label className="form-label" htmlFor="hora">Hora</label>
-                <input
+                <select
                   id="hora"
                   className="form-input"
-                  type="time"
                   value={hora}
                   onChange={e => { setConflito(null); setHora(e.target.value) }}
-                />
+                >
+                  <option value="">
+                    {data && responsavelId ? 'Selecione um horário disponível' : 'Selecione a data e o responsável primeiro'}
+                  </option>
+                  {opcoesHora.map(slot => (
+                    <option key={slot} value={slot}>{slot}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -230,7 +258,7 @@ export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }
                 id="responsavel"
                 className="form-input"
                 value={responsavelId}
-                onChange={e => { setConflito(null); setResponsavelId(e.target.value) }}
+                onChange={e => { setConflito(null); setResponsavelId(e.target.value); setHora('') }}
               >
                 {profiles.map(profile => (
                   <option key={profile.id} value={profile.id}>{profile.nome} — {profile.cargo}</option>

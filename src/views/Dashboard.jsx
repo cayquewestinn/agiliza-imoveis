@@ -38,6 +38,38 @@ function buildDesempenho(pessoas, leads, campo) {
     .sort((a, b) => b.leadsAtribuidos - a.leadsAtribuidos)
 }
 
+function MeuDesempenho({ meusLeads }) {
+  const convertidos = meusLeads.filter(l => l.etapa === 'Convertido')
+  const perdidos = meusLeads.filter(l => l.etapa === 'Perdido')
+  const taxa = meusLeads.length > 0 ? Math.round((convertidos.length / meusLeads.length) * 100) : 0
+
+  return (
+    <div className="card">
+      <h2 className="card-title" style={{marginBottom: 16}}>Meu Desempenho</h2>
+      <div className="table-scroll">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Leads Atribuídos</th>
+              <th>Convertidos</th>
+              <th>Perdidos</th>
+              <th>Taxa de Conversão</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="mono">{meusLeads.length}</td>
+              <td className="mono">{convertidos.length}</td>
+              <td className="mono">{perdidos.length}</td>
+              <td className="mono">{taxa}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 function DesempenhoTable({ titulo, dados }) {
   return (
     <div className="card">
@@ -90,13 +122,19 @@ export function Dashboard() {
   // deflate funnel/performance numbers — they're set aside, not counted.
   const leads = todosOsLeads.filter(l => !l.arquivado)
 
+  // Non-admins see only their own numbers, not the whole company's — the
+  // funnel above, the modal it opens, and the performance card all scope
+  // to leads where the logged-in person is the vendedor or agendador.
+  const meusLeads = leads.filter(l => l.vendedorId === currentUser.id || l.agendadorId === currentUser.id)
+  const leadsEscopo = isAdmin ? leads : meusLeads
+
   const vendedores = buildDesempenho(profiles.filter(p => p.cargo === 'Vendedor'), leads, 'vendedorId')
   const agendadores = buildDesempenho(profiles.filter(p => p.cargo.includes('Agendador')), leads, 'agendadorId')
 
-  const totalLeads = leads.length
+  const totalLeads = leadsEscopo.length
   const leadsPorEtapa = LEAD_ETAPA_CHART.map(item => ({
     ...item,
-    count: leads.filter(l => l.etapa === item.etapa).length,
+    count: leadsEscopo.filter(l => l.etapa === item.etapa).length,
   }))
   const novoItem = leadsPorEtapa.find(item => item.etapa === 'Novo')
   const etapasDeTrabalho = leadsPorEtapa.filter(item => item.etapa !== 'Novo')
@@ -164,14 +202,18 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="dashboard-row-perf">
-          <DesempenhoTable titulo="Desempenho por Vendedor" dados={vendedores} />
-          <DesempenhoTable titulo="Desempenho por Agendador" dados={agendadores} />
-        </div>
+        {isAdmin ? (
+          <div className="dashboard-row-perf">
+            <DesempenhoTable titulo="Desempenho por Vendedor" dados={vendedores} />
+            <DesempenhoTable titulo="Desempenho por Agendador" dados={agendadores} />
+          </div>
+        ) : (
+          <MeuDesempenho meusLeads={meusLeads} />
+        )}
       </div>
 
       {etapaAberta && (
-        <EtapaLeadsModal etapa={etapaAberta} onClose={() => setEtapaAberta(null)} />
+        <EtapaLeadsModal etapa={etapaAberta} leads={leadsEscopo} onClose={() => setEtapaAberta(null)} />
       )}
     </div>
   )

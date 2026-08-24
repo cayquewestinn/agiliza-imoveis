@@ -9,8 +9,8 @@ import { LeadRow } from './LeadRow'
 
 const PREVIEW_LIMIT = 200
 
-export function EtapaLeadsModal({ etapa, onClose }) {
-  const { leads, updateLead } = useLeads()
+export function EtapaLeadsModal({ etapa, leads, onClose }) {
+  const { updateLead } = useLeads()
   const { lotes } = useLotes()
   const { profiles } = useProfiles()
   const vendedores = profiles.filter(p => p.cargo === 'Vendedor')

@@ -2059,15 +2059,28 @@ select.form-input {
   margin-bottom: 16px;
 }
 
+/* Virou <button> para abrir a ficha do contato — os resets abaixo mantêm
+   exatamente a aparência que tinha como <div>. */
 .agenda-calendar-cell-item {
   display: flex;
   align-items: center;
   gap: 3px;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
   font-size: 0.64rem;
   line-height: 1.3;
   color: var(--agenda-event-ink);
   padding: 2px 5px;
   border-radius: var(--radius-sm);
+}
+
+.agenda-calendar-cell-item:hover {
+  filter: brightness(0.92);
 }
 
 .agenda-calendar-cell-item-icon {

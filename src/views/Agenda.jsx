@@ -246,13 +246,19 @@ export function Agenda() {
                       {visitasDoDia.slice(0, 2).map(v => {
                         const StatusIcon = STATUS_ICON[v.status] ?? Clock
                         return (
-                          <div className={`agenda-calendar-cell-item agenda-block-${statusToClassName(v.status)}`} key={v.id}>
+                          <button
+                            type="button"
+                            className={`agenda-calendar-cell-item agenda-block-${statusToClassName(v.status)}`}
+                            key={v.id}
+                            onClick={e => { e.stopPropagation(); setFichaVisita(v) }}
+                            title="Ver a ficha completa do contato"
+                          >
                             <StatusIcon className="agenda-calendar-cell-item-icon" size={9} />
                             <span className="mono">{v.hora}</span>
                             <span className="agenda-calendar-cell-item-name">
                               {leadInfo(v.leadId)?.nome ?? v.recepcao?.nomeCompleto ?? 'Contato'}
                             </span>
-                          </div>
+                          </button>
                         )
                       })}
                       {visitasDoDia.length > 2 && (
@@ -326,7 +332,8 @@ export function Agenda() {
                             width: `calc(${width}% - 2px)`,
                             left: `${width * col}%`,
                           }}
-                          onClick={e => { e.stopPropagation(); openEditModal(v) }}
+                          onClick={e => { e.stopPropagation(); setFichaVisita(v) }}
+                          title="Ver a ficha completa do contato"
                         >
                           <StatusIcon size={10} />
                           <span className="mono">{v.hora}</span>

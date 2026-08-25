@@ -38,6 +38,11 @@ export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }
   const [hora, setHora] = useState(visita?.hora ?? '')
   const [responsavelId, setResponsavelId] = useState(visita?.responsavelId ?? defaultResponsavelId ?? profiles[0]?.id ?? '')
   const [feedback, setFeedback] = useState(visita?.feedback ?? '')
+  // Observações vivem no lead, não na visita — ao editar, carrega o que já
+  // está gravado no contato para não sobrescrever com um campo vazio.
+  const [observacoes, setObservacoes] = useState(
+    (isEditing ? leads.find(l => l.id === visita.leadId)?.observacoes : '') ?? ''
+  )
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [conflito, setConflito] = useState(null)
@@ -82,10 +87,12 @@ export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }
       if (lead) {
         setNomeCompleto(lead.nome)
         setTelefone(lead.telefone.replace(/^55/, ''))
+        setObservacoes(lead.observacoes ?? '')
       }
     } else {
       setNomeCompleto('')
       setTelefone('')
+      setObservacoes('')
     }
   }
 
@@ -122,6 +129,9 @@ export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }
 
     if (isEditing) {
       await updateVisita(visita.id, { data, hora, responsavelId, recepcao, feedback })
+      if (visita.leadId) {
+        await updateLead(visita.leadId, { observacoes })
+      }
       setSaving(false)
       requestClose()
       return
@@ -137,6 +147,7 @@ export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }
         etapa: 'Em Visita',
         origem: 'Visita à empresa',
         dataRecebimento: todayISO(),
+        observacoes,
       })
       if (!novoLead) {
         setError('Não foi possível criar o contato. Tente novamente.')
@@ -145,7 +156,7 @@ export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }
       }
       finalLeadId = novoLead.id
     } else {
-      await updateLead(finalLeadId, { etapa: 'Em Visita' })
+      await updateLead(finalLeadId, { etapa: 'Em Visita', observacoes })
     }
 
     await addVisita({ tipo: 'empresa', loteId: null, leadId: finalLeadId, data, hora, responsavelId, recepcao, feedback })
@@ -264,6 +275,18 @@ export function VisitModal({ visita, presetData, defaultResponsavelId, onClose }
                   <option key={profile.id} value={profile.id}>{profile.nome} — {profile.cargo}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="observacoes">Observações sobre o cliente</label>
+              <textarea
+                id="observacoes"
+                className="form-input"
+                rows={3}
+                value={observacoes}
+                onChange={e => setObservacoes(e.target.value)}
+                placeholder="Ex.: Motorista de aplicativo. Procura dois dormitórios na zona sul, com entrada de trinta mil reais."
+              />
             </div>
 
             <div className="form-group">

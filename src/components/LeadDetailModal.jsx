@@ -1,6 +1,7 @@
+import { useEffect, useRef, useState } from 'react'
 import {
   X, MessageCircle, Phone, IdCard, Tag, CalendarDays, Home, MapPin,
-  UserRound, CalendarClock, MessageSquareText,
+  UserRound, CalendarClock, MessageSquareText, NotebookPen,
 } from 'lucide-react'
 import { etapaToClassName, formatPhone, whatsappLink } from '../utils/leadHelpers'
 import { formatDate } from '../utils/loteHelpers'
@@ -27,7 +28,7 @@ function Campo({ icon: Icon, rotulo, children }) {
 }
 
 export function LeadDetailModal({ leadId, visita, onClose }) {
-  const { leads } = useLeads()
+  const { leads, updateLead } = useLeads()
   const { lotes } = useLotes()
   const { visitas } = useVisits()
   const { profiles } = useProfiles()
@@ -53,6 +54,28 @@ export function LeadDetailModal({ leadId, visita, onClose }) {
   const mensagem = lote
     ? `Olá ${nome.split(' ')[0]}, tudo bem? Sou da Agiliza Imóveis e gostaria de falar sobre o imóvel ${lote.codigo}.`
     : `Olá ${nome.split(' ')[0]}, tudo bem? Sou da Agiliza Imóveis.`
+
+  // Rascunho local para não gravar a cada tecla — só salva ao sair do campo,
+  // e só se o texto mudou de fato.
+  const [rascunho, setRascunho] = useState(lead?.observacoes ?? '')
+
+  function salvarObservacoes() {
+    if (lead && rascunho !== (lead.observacoes ?? '')) {
+      updateLead(lead.id, { observacoes: rascunho })
+    }
+  }
+
+  // Rede de segurança: fechar a ficha pelo Esc ou pelo X nem sempre tira o
+  // foco do campo antes de desmontar, e uma anotação perdida em silêncio é
+  // pior do que uma gravação a mais. O ref evita depender de closure velha.
+  const pendente = useRef(null)
+  pendente.current = { lead, rascunho, updateLead }
+  useEffect(() => () => {
+    const { lead: l, rascunho: texto, updateLead: salvar } = pendente.current
+    if (l && texto !== (l.observacoes ?? '')) {
+      salvar(l.id, { observacoes: texto })
+    }
+  }, [])
 
   return (
     <div className={`modal-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
@@ -95,6 +118,23 @@ export function LeadDetailModal({ leadId, visita, onClose }) {
             <Campo icon={UserRound} rotulo="Vendedor">{vendedor?.nome || null}</Campo>
             <Campo icon={UserRound} rotulo="Agendador">{agendador?.nome || null}</Campo>
           </div>
+
+          {lead && (
+            <div>
+              <h3 className="lote-detail-section-title">
+                <NotebookPen size={14} /> Observações
+              </h3>
+              <textarea
+                className="form-input lead-detail-observacoes"
+                value={rascunho}
+                onChange={e => setRascunho(e.target.value)}
+                onBlur={salvarObservacoes}
+                rows={3}
+                placeholder="Ex.: Motorista de aplicativo. Procura dois dormitórios na zona sul, com entrada de trinta mil reais."
+                aria-label={`Observações sobre ${nome}`}
+              />
+            </div>
+          )}
 
           <div>
             <h3 className="lote-detail-section-title">

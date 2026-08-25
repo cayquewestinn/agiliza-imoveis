@@ -5,7 +5,7 @@ import { useToast } from './ToastContext'
 
 const LeadsContext = createContext(null)
 
-const LEAD_COLUMNS = 'id, lote_id, nome, telefone, etapa, origem, data_recebimento, vendedor_id, agendador_id, arquivado'
+const LEAD_COLUMNS = 'id, lote_id, nome, telefone, etapa, origem, data_recebimento, vendedor_id, agendador_id, arquivado, observacoes'
 
 function fromRow(row) {
   return {
@@ -19,6 +19,7 @@ function fromRow(row) {
     vendedorId: row.vendedor_id,
     agendadorId: row.agendador_id,
     arquivado: row.arquivado ?? false,
+    observacoes: row.observacoes ?? '',
   }
 }
 
@@ -33,6 +34,7 @@ function toRow(lead) {
     vendedor_id: lead.vendedorId ?? null,
     agendador_id: lead.agendadorId ?? null,
     arquivado: lead.arquivado ?? false,
+    observacoes: lead.observacoes || null,
   }
 }
 

@@ -155,7 +155,7 @@ export function Dashboard() {
         />
 
         <div className="card">
-          <h2 className="masthead-date">Edição de Hoje — {dataDeHoje}</h2>
+          <h2 className="masthead-date">{dataDeHoje.charAt(0).toUpperCase() + dataDeHoje.slice(1)}</h2>
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16}}>
             <h3 className="card-title" style={{margin: 0}}>Leads por Etapa</h3>
             <span className="mono" style={{fontSize: '0.8rem', color: 'var(--ink-tertiary)'}}>{totalLeads} no total</span>

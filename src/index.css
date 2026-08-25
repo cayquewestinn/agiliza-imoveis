@@ -1,110 +1,104 @@
 :root {
-  /* Seção de Editais — direction contract in index.html <!-- --> above main.jsx mount */
-  --bg-page: #e4e3dd;
-  --bg-panel: #f1f0ea;
-  --bg-panel-raised: #faf9f5;
-  --bg-inset: #dcdbd2;
+  /* Realinhamento Able Development — direction contract in index.html
+     <!-- --> above main.jsx mount. Neutral zinc base, navy identity accent. */
+  --bg-page: #ffffff;
+  --bg-panel: #fafafa;
+  --bg-panel-raised: #ffffff;
+  --bg-inset: #f1f1f3;
 
-  --ink: #1b1912;
-  --ink-secondary: #5c564a;
-  --ink-tertiary: #615a4c;
+  --ink: #18181b;
+  --ink-secondary: #71717a;
+  --ink-tertiary: #a1a1aa;
 
-  --rule: #c7c2b6;
-  --rule-strong: #7a7461;
+  --rule: #e4e4e7;
+  --rule-strong: #d4d4d8;
 
-  --accent: #1b1912;
-  --accent-hover: #000000;
-  --accent-soft: rgba(27, 25, 18, 0.08);
-
-  /* Carimbo (stamp) motif — translucent, imperfect ink, never solid.
-     Same values work on both themes: dark-mode panels are white/light too,
-     so ink-on-panel is always the near-black-on-light relationship. */
-  --stamp-ink: rgba(20, 18, 14, 0.42);
-  --stamp-ring: rgba(20, 18, 14, 0.58);
+  --accent: #13315c;
+  --accent-hover: #0d2440;
+  --accent-soft: rgba(19, 49, 92, 0.08);
 
   --status-neutral: var(--ink-secondary);
-  --status-neutral-soft: rgba(92, 86, 74, 0.1);
+  --status-neutral-soft: rgba(113, 113, 122, 0.1);
   --status-active: var(--accent);
   --status-active-soft: var(--accent-soft);
-  --status-success: #3f6b3a;
-  --status-success-soft: rgba(63, 107, 58, 0.12);
-  --status-danger: #8b3a2b;
-  --status-danger-soft: rgba(139, 58, 43, 0.12);
-  --status-warning: #7a5c1a;
-  --status-warning-soft: rgba(122, 92, 26, 0.12);
-  --status-advancing: #2e6b66;
-  --status-advancing-soft: rgba(46, 107, 102, 0.12);
+  --status-success: #15803d;
+  --status-success-soft: rgba(21, 128, 61, 0.1);
+  --status-danger: #b91c1c;
+  --status-danger-soft: rgba(185, 28, 28, 0.1);
+  --status-warning: #a15c07;
+  --status-warning-soft: rgba(161, 92, 7, 0.1);
+  --status-advancing: #0f766e;
+  --status-advancing-soft: rgba(15, 118, 110, 0.1);
 
   /* Agenda event-type color — the one deliberate, scoped exception to the
-     monochrome status system above (approved 2026-08-21, Agenda week/month
-     event blocks only). Reuses/extends the existing status hues rather than
-     inventing a new palette; nowhere outside src/views/Agenda.jsx reads
+     restrained system above (Agenda week/month event blocks only). Reuses
+     the existing status hues; nowhere outside src/views/Agenda.jsx reads
      these tokens. */
-  --agenda-agendada: #3d7ea6;
+  --agenda-agendada: var(--status-active);
   --agenda-realizada: var(--status-success);
   --agenda-nao-compareceu: var(--status-danger);
-  --agenda-remarcada: #6b6555;
-  --agenda-event-ink: #f7f6f2;
+  --agenda-remarcada: #6b7280;
+  --agenda-event-ink: #ffffff;
 
-  --shadow-sm: 0 1px 2px rgba(27, 25, 18, 0.1);
-  --shadow-md: 0 8px 20px -6px rgba(27, 25, 18, 0.22);
-  --overlay: rgba(27, 25, 18, 0.45);
+  --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.06);
+  --shadow-md: 0 12px 28px -8px rgba(24, 24, 27, 0.18);
+  --overlay: rgba(24, 24, 27, 0.45);
 
-  --radius-sm: 3px;
-  --radius-md: 4px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
   --radius-full: 9999px;
 
-  --font-display: 'Bitter', Georgia, serif;
-  --font-body: 'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  --font-label: 'Barlow Condensed', 'Barlow', sans-serif;
-  --font-mono: 'JetBrains Mono', Consolas, monospace;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-label: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Dark mode — pure monochrome (no accent, no status hues); status stays
-   readable through border-style alone, same rule the light system already
-   follows. Opt-in via the sidebar toggle, default stays light.
-   Every surface token is inverted here (page AND panels AND cards), not
-   just the page background — a "dark mode" that only blackens the page
-   shell while cards/panels stay white isn't actually dark. */
+/* Dark mode — inverted neutral scale, navy accent lightened for contrast
+   against the dark ground (kept as a real color in both themes; the
+   previous system's "monochrome dark mode" was specific to that world's
+   own brief, not this one — the Able system's identity color is core in
+   any theme). Opt-in via the sidebar toggle, default stays light. Every
+   surface token is inverted here (page AND panels AND cards), not just the
+   page background. */
 :root[data-theme="dark"] {
-  --bg-page: #000000;
-  --bg-panel: #161616;
-  --bg-panel-raised: #212121;
-  --bg-inset: #0a0a0a;
+  --bg-page: #0a0a0b;
+  --bg-panel: #161618;
+  --bg-panel-raised: #1f1f22;
+  --bg-inset: #0a0a0b;
 
-  --ink: #f2f2f2;
-  --ink-secondary: #b8b8b8;
-  --ink-tertiary: #8c8c8c;
+  --ink: #f4f4f5;
+  --ink-secondary: #a1a1aa;
+  --ink-tertiary: #71717a;
 
-  --rule: #3d3d3d;
-  --rule-strong: #5c5c5c;
+  --rule: #303033;
+  --rule-strong: #3f3f42;
 
-  --accent: #f2f2f2;
-  --accent-hover: #ffffff;
-  --accent-soft: rgba(242, 242, 242, 0.1);
+  --accent: #6f9bd6;
+  --accent-hover: #8fb3e3;
+  --accent-soft: rgba(111, 155, 214, 0.14);
 
   --status-neutral: var(--ink-secondary);
-  --status-neutral-soft: rgba(242, 242, 242, 0.06);
-  --status-active: #f2f2f2;
-  --status-active-soft: rgba(242, 242, 242, 0.08);
-  --status-success: #f2f2f2;
-  --status-success-soft: rgba(242, 242, 242, 0.06);
-  --status-danger: #f2f2f2;
-  --status-danger-soft: rgba(242, 242, 242, 0.06);
-  --status-warning: #f2f2f2;
-  --status-warning-soft: rgba(242, 242, 242, 0.06);
-  --status-advancing: #f2f2f2;
-  --status-advancing-soft: rgba(242, 242, 242, 0.06);
+  --status-neutral-soft: rgba(161, 161, 170, 0.1);
+  --status-active: var(--accent);
+  --status-active-soft: var(--accent-soft);
+  --status-success: #4ade80;
+  --status-success-soft: rgba(74, 222, 128, 0.12);
+  --status-danger: #f87171;
+  --status-danger-soft: rgba(248, 113, 113, 0.12);
+  --status-warning: #fbbf24;
+  --status-warning-soft: rgba(251, 191, 36, 0.12);
+  --status-advancing: #2dd4bf;
+  --status-advancing-soft: rgba(45, 212, 191, 0.12);
 
-  /* Same scoped exception as the light :root above, dark values. */
-  --agenda-agendada: #2e6b8c;
-  --agenda-realizada: #3f7a44;
-  --agenda-nao-compareceu: #9c4530;
-  --agenda-remarcada: #545454;
-  --agenda-event-ink: #f5f5f5;
+  --agenda-agendada: var(--status-active);
+  --agenda-realizada: var(--status-success);
+  --agenda-nao-compareceu: var(--status-danger);
+  --agenda-remarcada: #9297a3;
+  --agenda-event-ink: #0a0a0b;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 24px -6px rgba(0, 0, 0, 0.7);
+  --shadow-md: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
   --overlay: rgba(0, 0, 0, 0.65);
 }
 
@@ -239,12 +233,12 @@ body {
 }
 
 .nav-item.active {
-  background-color: var(--ink);
-  color: var(--bg-panel-raised);
+  background-color: var(--accent-soft);
+  color: var(--accent);
 }
 
 .nav-item.active .nav-icon {
-  color: var(--bg-panel-raised);
+  color: var(--accent);
 }
 
 .nav-icon {
@@ -300,15 +294,12 @@ body {
   font-family: var(--font-label);
   font-size: 0.82rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.05em;
   color: var(--ink-secondary);
   font-weight: 700;
   margin-bottom: 16px;
 }
 
-/* Masthead dateline — the Dashboard's "edição de hoje" banner; deliberately
-   distinct from .card-title so it reads as the paper's own nameplate, not
-   another section label. */
 /* Mobile-only: the sidebar (and its logo) is off-canvas by default on
    mobile, so the app's home screen otherwise carries no brand mark until
    the drawer is opened. Hidden on desktop, where the sidebar already
@@ -319,7 +310,6 @@ body {
 
 .masthead-date {
   font-family: var(--font-display);
-  font-style: italic;
   font-size: 1.15rem;
   font-weight: 600;
   letter-spacing: 0;
@@ -327,7 +317,7 @@ body {
   color: var(--ink);
   padding-bottom: 12px;
   margin-bottom: 20px;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
 }
 
 /* Dashboard stat row — one ruled line, not three boxed cards */
@@ -355,7 +345,7 @@ body {
   gap: 6px;
   font-family: var(--font-label);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   font-size: 0.78rem;
   color: var(--ink-secondary);
   font-weight: 600;
@@ -364,6 +354,7 @@ body {
 
 .stat-row-value {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 2.1rem;
   font-weight: 700;
   color: var(--ink);
@@ -494,7 +485,7 @@ body {
 .data-table th {
   text-align: left;
   padding: 10px 16px;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 1px solid var(--rule-strong);
   color: var(--ink-secondary);
   font-family: var(--font-label);
   font-weight: 700;
@@ -514,7 +505,9 @@ body {
   border-bottom: none;
 }
 
-/* Status stamps — border style carries the state, not only the ink color */
+/* Status badges — color + label carry the state; no border-style-as-mark
+   and no rotation (both were specific to the retired "Seção de Editais"
+   hand-stamped world and are dropped along with the carimbo motif). */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -522,106 +515,46 @@ body {
   padding: 3px 10px;
   border-radius: var(--radius-sm);
   font-family: var(--font-label);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   font-size: 0.76rem;
-  font-weight: 700;
-  border: 1.5px solid;
+  font-weight: 600;
+  border: 1px solid;
   line-height: 1.5;
-}
-
-/* Rotation reads as a hand-stamped mark; only static badges (not the Agenda
-   status <select>, which must stay a normal clickable control) carry it. */
-span.status-badge {
-  transform: rotate(-2deg);
-}
-
-/* Carimbo — the one signature visual device in this system: a notary/protocol
-   stamp ring, translucent ink (never solid), more crooked than a printed
-   badge because a real stamp is applied by hand. Used sparingly (lote card,
-   login, agenda "today") — this is the app's ousadia budget, not a
-   general-purpose decoration. */
-.carimbo {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  border: 2px solid var(--stamp-ring);
-  transform: rotate(-11deg);
-  pointer-events: none;
-  mix-blend-mode: multiply;
-}
-
-.carimbo::before {
-  content: '';
-  position: absolute;
-  inset: 5px;
-  border: 1px solid var(--stamp-ring);
-  border-radius: 50%;
-}
-
-.carimbo-text {
-  font-family: var(--font-label);
-  text-transform: uppercase;
-  font-size: 0.52rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  line-height: 1.2;
-  color: var(--stamp-ink);
-  text-align: center;
-}
-
-.carimbo-lote-card {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
 }
 
 .status-todo {
   background-color: var(--status-neutral-soft);
   color: var(--status-neutral);
-  border-style: solid;
-  border-color: var(--ink-tertiary);
+  border-color: transparent;
 }
 
 .status-doing {
   background-color: var(--status-active-soft);
   color: var(--status-active);
-  border-style: dashed;
-  border-color: var(--status-active);
+  border-color: transparent;
 }
 
 .status-done {
   background-color: var(--status-success-soft);
   color: var(--status-success);
-  border-style: solid;
-  border-color: var(--status-success);
+  border-color: transparent;
 }
 
 .status-late {
   background-color: var(--status-danger-soft);
   color: var(--status-danger);
-  border-style: double;
-  border-width: 3px;
-  border-color: var(--status-danger);
-  padding: 2px 9px;
+  border-color: transparent;
 }
 
 .status-leilao {
   background-color: var(--status-warning-soft);
   color: var(--status-warning);
-  border-style: dashed;
-  border-color: var(--status-warning);
+  border-color: transparent;
 }
 
 .status-proposta {
   background-color: var(--status-advancing-soft);
   color: var(--status-advancing);
-  border-style: solid;
-  border-color: var(--status-advancing);
+  border-color: transparent;
 }
 
 /* Status Tabs (filter) — section tabs, not pills */
@@ -667,6 +600,7 @@ span.status-badge {
   padding: 1px 7px;
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.72rem;
 }
 
@@ -714,44 +648,21 @@ span.status-badge {
   box-shadow: 0 0 0 1px var(--accent);
 }
 
-/* Dark mode: .status-tabs sits directly on --bg-page (black), not a white
-   panel, so it needs its own light-on-dark colors instead of the ink
-   tokens tuned for text on white surfaces. */
-:root[data-theme="dark"] .status-tab {
-  color: #a3a3a3;
-}
-
-:root[data-theme="dark"] .status-tab:hover {
-  color: #ffffff;
-}
-
-:root[data-theme="dark"] .status-tab.active {
-  color: #ffffff;
-  border-bottom-color: #ffffff;
-}
-
-:root[data-theme="dark"] .status-tab.active .status-tab-count {
-  background-color: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-}
-
-/* Lotes grid — one ruled sheet, cells divided by hairlines, not floating cards */
+/* Lotes grid */
 .lotes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  background-color: var(--bg-panel);
-  border-top: 1px solid var(--rule);
-  border-left: 1px solid var(--rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  gap: 16px;
 }
 
 .lote-card {
-  border-right: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
   cursor: pointer;
-  transition: background-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   /* Same fix as .kanban-card: a tap on a text-heavy clickable div can be
      read as a text-selection long-press on touch instead of a tap. */
   -webkit-touch-callout: none;
@@ -760,8 +671,8 @@ span.status-badge {
 }
 
 .lote-card:hover {
-  background-color: var(--bg-panel-raised);
-  box-shadow: inset 0 0 0 1.5px var(--accent);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
 }
 
 .lote-card-strip {
@@ -807,7 +718,22 @@ span.status-badge {
   background-color: rgba(0, 0, 0, 0.6);
   color: #fff;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.72rem;
+  pointer-events: none;
+}
+
+.photo-origin-tag {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  background-color: rgba(19, 49, 92, 0.82);
+  color: #fff;
+  font-family: var(--font-label);
+  font-size: 0.7rem;
+  font-weight: 600;
   pointer-events: none;
 }
 
@@ -832,6 +758,7 @@ span.status-badge {
 
 .lote-card-codigo {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.76rem;
   color: var(--ink-secondary);
   letter-spacing: 0.04em;
@@ -890,6 +817,7 @@ span.status-badge {
 
 .lote-price-value {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--ink);
@@ -911,6 +839,7 @@ span.status-badge {
   align-items: center;
   gap: 6px;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.78rem;
   color: var(--ink-secondary);
 }
@@ -1053,6 +982,31 @@ span.status-badge {
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
+  gap: 3px;
+}
+
+/* O chevron marca a etapa como editável. Herda a cor do próprio badge
+   (currentColor), então funciona em qualquer status e nos dois temas —
+   um background-image de cor fixa não sobreviveria ao modo escuro. */
+.status-caret {
+  flex-shrink: 0;
+  opacity: 0.65;
+}
+
+.status-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.status-select-wrap .status-caret {
+  position: absolute;
+  right: 7px;
+  pointer-events: none;
+}
+
+.status-select-wrap .visit-status-select {
+  padding-right: 22px;
 }
 
 /* Vendedor/Agendador assign chips — dashed border marks them as editable,
@@ -1087,7 +1041,7 @@ span.status-badge {
   font-family: inherit;
   color: var(--ink);
   background-color: var(--bg-panel);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235c564a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 6px center;
   background-size: 12px;
@@ -1127,6 +1081,7 @@ span.status-badge {
 
 .lote-lead-phone {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.72rem;
   color: var(--ink-secondary);
 }
@@ -1163,17 +1118,14 @@ span.status-badge {
 .team-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  background-color: var(--bg-panel);
-  border-top: 1px solid var(--rule);
-  border-left: 1px solid var(--rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  gap: 16px;
 }
 
 .team-card {
-  border-right: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: 20px;
 }
 
@@ -1197,6 +1149,7 @@ span.status-badge {
   background-color: var(--accent-soft);
   color: var(--accent);
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -1304,7 +1257,7 @@ span.status-badge {
 }
 
 .toggle-btn.active {
-  background: var(--ink);
+  background: var(--accent);
   color: var(--bg-panel-raised);
 }
 
@@ -1345,17 +1298,19 @@ span.status-badge {
   padding: 2px 8px;
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.72rem;
 }
 
 .kanban-card {
   position: relative;
   background-color: var(--bg-panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
   padding: 12px 14px;
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 0;
+  margin-bottom: 10px;
   cursor: pointer;
-  transition: background-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   /* Without these, touch browsers interpret a drag gesture as a text
      selection (magnifier loupe + copy/paste bubble) instead of letting
      dnd-kit's pointer sensor capture it. */
@@ -1374,12 +1329,12 @@ span.status-badge {
 }
 
 .kanban-card:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .kanban-card:hover {
-  background-color: var(--bg-panel-raised);
-  box-shadow: inset 0 0 0 1.5px var(--accent);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
 }
 
 .kanban-card-title {
@@ -1396,6 +1351,7 @@ span.status-badge {
   align-items: center;
   margin-top: 14px;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.74rem;
   color: var(--ink-tertiary);
 }
@@ -1603,6 +1559,7 @@ span.status-badge {
   transform: translateX(-50%);
   color: #fff;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8rem;
   opacity: 0.85;
 }
@@ -1648,7 +1605,7 @@ span.status-badge {
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
 }
 
 .modal-header h2 {
@@ -1730,7 +1687,7 @@ span.status-badge {
 }
 
 select.form-input {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235c564a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 32px;
@@ -1818,14 +1775,6 @@ select.form-input {
   display: block;
 }
 
-.carimbo-login {
-  position: absolute;
-  bottom: -14px;
-  right: -22px;
-  width: 56px;
-  height: 56px;
-}
-
 .login-title {
   font-family: var(--font-display);
   font-size: 1.5rem;
@@ -1902,6 +1851,7 @@ select.form-input {
   background-color: var(--accent-soft);
   color: var(--accent);
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.7rem;
   font-weight: 700;
 }
@@ -2032,6 +1982,7 @@ select.form-input {
 
 .agenda-calendar-cell-day {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.85rem;
   color: var(--ink);
   width: 24px;
@@ -2048,8 +1999,8 @@ select.form-input {
 }
 
 .agenda-calendar-cell-today .agenda-calendar-cell-day {
-  border: 1.5px solid var(--stamp-ring);
-  box-shadow: inset 0 0 0 3px var(--bg-panel-raised), inset 0 0 0 4px var(--stamp-ring);
+  border: 1.5px solid var(--accent);
+  box-shadow: inset 0 0 0 2px var(--bg-panel-raised);
 }
 
 .agenda-calendar-cell-selected {
@@ -2202,6 +2153,7 @@ select.form-input {
   padding-right: 6px;
   text-align: right;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.6rem;
   color: var(--ink-tertiary);
   transform: translateY(-6px);
@@ -2345,6 +2297,103 @@ select.form-input {
   display: flex;
   gap: 4px;
   flex-shrink: 0;
+}
+
+/* O nome na Agenda abre a ficha do contato. Sublinhado pontilhado em vez de
+   cor de link: o nome continua sendo o título da linha, não vira um link
+   azul disputando atenção com o botão primário do cabeçalho. */
+.visit-row-title-link {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--rule-strong);
+}
+
+.visit-row-title-link:hover,
+.visit-row-title-link:focus-visible {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+/* Ficha do contato */
+.lead-detail-whatsapp {
+  width: 100%;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.lead-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px 18px;
+}
+
+.lead-detail-field-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 3px;
+  color: var(--ink-secondary);
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lead-detail-field-value {
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lead-detail-lote,
+.lead-detail-visita {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.lead-detail-lote-title {
+  margin: 2px 0 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.lead-detail-visitas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lead-detail-visita {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.lead-detail-visita-quando {
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+.lead-detail-visita-resp {
+  font-size: 0.82rem;
+  color: var(--ink-secondary);
+}
+
+.lead-detail-visita-feedback {
+  flex-basis: 100%;
 }
 
 /* Mobile navigation */

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Header } from '../components/Header'
 import { VisitModal } from '../components/VisitModal'
+import { LeadDetailModal } from '../components/LeadDetailModal'
 import {
   Plus, Building2, Pencil, Trash2, MessageSquareText,
   ChevronLeft, ChevronRight, X, Clock, Check, RotateCcw,
@@ -49,6 +50,7 @@ export function Agenda() {
   const [weekAnchor, setWeekAnchor] = useState(toISODate(today))
   const [selectedDate, setSelectedDate] = useState(null)
   const [popoverDate, setPopoverDate] = useState(null)
+  const [fichaVisita, setFichaVisita] = useState(null)
 
   // The calendar (month cells, week grid, "+N mais" popover) always shows
   // every visit — statusFilter only narrows the day list below, so the tabs
@@ -127,7 +129,14 @@ export function Agenda() {
         </div>
 
         <div className="visit-row-info">
-          <div className="visit-row-title">{lead?.nome ?? visita.recepcao?.nomeCompleto ?? 'Contato'}</div>
+          <button
+            type="button"
+            className="visit-row-title visit-row-title-link"
+            onClick={() => setFichaVisita(visita)}
+            title="Ver a ficha completa do contato"
+          >
+            {lead?.nome ?? visita.recepcao?.nomeCompleto ?? 'Contato'}
+          </button>
           <div className="visit-row-subtitle">
             Visita à empresa · CPF {visita.recepcao?.cpf}
           </div>
@@ -379,6 +388,14 @@ export function Agenda() {
           presetData={selectedDate}
           defaultResponsavelId={currentUser.id}
           onClose={closeModal}
+        />
+      )}
+
+      {fichaVisita && (
+        <LeadDetailModal
+          leadId={fichaVisita.leadId}
+          visita={fichaVisita}
+          onClose={() => setFichaVisita(null)}
         />
       )}
 

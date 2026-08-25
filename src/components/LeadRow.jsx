@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MessageCircle, CheckCircle2, Archive, ArchiveRestore } from 'lucide-react'
+import { MessageCircle, CheckCircle2, Archive, ArchiveRestore, ChevronDown } from 'lucide-react'
 import { etapaToClassName, formatPhone, whatsappLink, LEAD_ETAPA_OPTIONS } from '../utils/leadHelpers'
 import { formatDate } from '../utils/loteHelpers'
 
@@ -8,6 +8,15 @@ export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showL
   const vendedor = vendedores.find(p => p.id === lead.vendedorId)
   const agendador = agendadores.find(p => p.id === lead.agendadorId)
   const isSold = lead.etapa === 'Convertido'
+
+  // Converter um lead alimenta as tabelas de comissão do Painel, e o botão fica
+  // ao lado do WhatsApp — confirma antes para não registrar uma venda por engano.
+  function marcarComoVendido() {
+    const aviso = `Confirmar a venda para ${lead.nome}?\n\nIsto marca o lead como Convertido e passa a contar nas tabelas de desempenho do Painel Geral.`
+    if (window.confirm(aviso)) {
+      updateLead(lead.id, { etapa: 'Convertido' })
+    }
+  }
 
   const mensagem = lote
     ? `Olá ${lead.nome.split(' ')[0]}, tudo bem? Sou da Agiliza Imóveis e gostaria de falar sobre o imóvel ${lote.codigo}.`
@@ -31,26 +40,31 @@ export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showL
 
       <div className="lead-row-chips">
         {editing === 'etapa' ? (
-          <select
-            className={`visit-status-select status-badge status-${etapaToClassName(lead.etapa)}`}
-            value={lead.etapa}
-            autoFocus
-            onChange={e => { updateLead(lead.id, { etapa: e.target.value }); setEditing(null) }}
-            onBlur={() => setEditing(null)}
-            aria-label={`Etapa de ${lead.nome}`}
-          >
-            {LEAD_ETAPA_OPTIONS.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
+          <span className="status-select-wrap">
+            <select
+              className={`visit-status-select status-badge status-${etapaToClassName(lead.etapa)}`}
+              value={lead.etapa}
+              autoFocus
+              onChange={e => { updateLead(lead.id, { etapa: e.target.value }); setEditing(null) }}
+              onBlur={() => setEditing(null)}
+              aria-label={`Etapa de ${lead.nome}`}
+            >
+              {LEAD_ETAPA_OPTIONS.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <ChevronDown className="status-caret" size={12} aria-hidden="true" />
+          </span>
         ) : (
           <button
             type="button"
             className={`status-badge status-chip status-${etapaToClassName(lead.etapa)}`}
             onClick={() => setEditing('etapa')}
+            title={`Etapa: ${lead.etapa}. Clique para alterar.`}
             aria-label={`Etapa de ${lead.nome}: ${lead.etapa}. Clique para alterar.`}
           >
             {lead.etapa}
+            <ChevronDown className="status-caret" size={12} aria-hidden="true" />
           </button>
         )}
 
@@ -118,9 +132,12 @@ export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showL
         <button
           type="button"
           className={`icon-btn${isSold ? ' is-sold' : ''}`}
-          onClick={() => updateLead(lead.id, { etapa: 'Convertido' })}
+          onClick={() => marcarComoVendido()}
           disabled={isSold}
           aria-disabled={isSold}
+          title={isSold
+            ? 'Lead já convertido. Para corrigir, altere o campo de etapa ao lado.'
+            : `Marcar ${lead.nome} como vendido`}
           aria-label={isSold ? `${lead.nome} já foi marcado como vendido` : `Marcar ${lead.nome} como vendido`}
         >
           <CheckCircle2 size={16} />

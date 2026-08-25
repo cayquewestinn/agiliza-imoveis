@@ -27,9 +27,6 @@ export function Login() {
             alt="Agiliza"
             className="login-brand"
           />
-          <div className="carimbo carimbo-login" aria-hidden="true">
-            <span className="carimbo-text">Acesso<br />Restrito</span>
-          </div>
         </div>
 
         <h1 className="login-title">Entrar</h1>

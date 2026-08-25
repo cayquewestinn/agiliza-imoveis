@@ -37,7 +37,9 @@ Implementation: React 19 + Vite 8 SPA, state held in-memory via React Context (T
 
 ## Brand Commitments
 
-None currently binding. A dark-editorial visual theme (colors/fonts pulled from a "23.4studios" brandbook) was previously applied to this codebase, but the user has explicitly stated that brandbook belongs to a different one of his businesses and has nothing to do with this CRM — it must not be treated as a brand commitment or design reference going forward. The current visual direction is open and due for reconsideration.
+**Binding as of 2026-08-25: the CRM's visual identity is realigned to Able Development's design-principles doc** for the public-facing Agiliza Imóveis site (`principios-de-design.html`) — the user's own company built that site, and wants the CRM and the public site to read as one brand family. Core commitments: navy `#13315C` as the single identity accent, neutral zinc/white base, Inter typeface throughout (no separate display/mono face), generous 10–12px corner radius, individual bordered cards (not hairline "ruled sheets") for grid surfaces. See `DESIGN.md` for the full system as built.
+
+This replaces the CRM's prior "Seção de Editais" newspaper-editorial identity (shipped 2026-08-16), which is now anti-reference only — do not restore its carimbo motif, border-style-as-status, badge rotation, or four-font stack (Bitter/Barlow/Barlow Condensed/JetBrains Mono). It also supersedes the earlier disavowed "23.4studios" brandbook correction (that brandbook belongs to a different one of the user's businesses and was never a valid reference).
 
 ## Evidence on Hand
 

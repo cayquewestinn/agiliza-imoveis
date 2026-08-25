@@ -38,6 +38,33 @@
         "value": "0.68rem",
         "createdAt": "2026-08-21T01:33:24.112Z",
         "reason": "novo papel real: item da previa do calendario da Agenda no desktop, adicionado como agenda-cell-item na escala do DESIGN.md"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "inter",
+        "createdAt": "2026-08-25T14:39:27.689Z",
+        "reason": "user confirmed: full realignment to Able Development's pinned design system doc, Inter replaces the old 4-font stack; DESIGN.md will be rewritten by the documenter pass at finish"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(19, 49, 92, 0.82)",
+        "createdAt": "2026-08-25T14:41:21.511Z",
+        "reason": "translucent tint of the pinned navy accent (#13315C) for a photo-overlay tag's legibility; DESIGN.md rewritten at finish by the documenter pass"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-08-25T14:50:59.454Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.6)",
+        "createdAt": "2026-08-25T14:50:59.569Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.88)",
+        "createdAt": "2026-08-25T14:50:59.679Z"
       }
     ]
   }

@@ -2410,6 +2410,52 @@ select.form-input {
   font-variant-numeric: tabular-nums;
 }
 
+/* Valor editável no lugar: sublinhado pontilhado marca que dá para clicar,
+   mesma linguagem do nome clicável na Agenda (.visit-row-title-link) — o
+   valor continua sendo o dado da ficha, não vira um botão disputando
+   atenção com o botão primário do cabeçalho. */
+.lead-detail-editavel {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--rule-strong);
+}
+
+.lead-detail-editavel:hover,
+.lead-detail-editavel:focus-visible {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+/* Um campo vazio ainda precisa ocupar área clicável — sem valor para mostrar,
+   fica o convite a preencher. */
+.lead-detail-vazio {
+  color: var(--ink-secondary);
+  font-style: italic;
+}
+
+.lead-detail-input {
+  width: 100%;
+  padding: 2px 6px;
+  font-size: 0.9rem;
+}
+
+.lead-detail-titulo-input {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
 .lead-detail-lote,
 .lead-detail-visita {
   border: 1px solid var(--rule);

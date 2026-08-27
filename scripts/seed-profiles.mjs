@@ -28,7 +28,7 @@ const EMAIL_DOMAIN = 'agiliza-imoveis.app'
 
 // Adicione aqui apenas os dados de contas NOVAS a criar — nunca inclua "senha".
 const TEAM = [
-  // { nome: 'Nome da Pessoa', cargo: 'Agendador', usuario: 'usuario', isAdmin: false },
+  { nome: 'Elias', cargo: 'Administrador/Agendador', usuario: 'elias', isAdmin: true },
 ]
 
 function gerarSenhaAleatoria() {

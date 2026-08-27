@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { MessageCircle, CheckCircle2, Archive, ArchiveRestore, ChevronDown } from 'lucide-react'
-import { etapaToClassName, formatPhone, whatsappLink, LEAD_ETAPA_OPTIONS } from '../utils/leadHelpers'
+import { etapaToClassName, formatPhone, whatsappLink, origemLabel, LEAD_ETAPA_OPTIONS } from '../utils/leadHelpers'
 import { formatDate } from '../utils/loteHelpers'
 
 export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showLote = false }) {
@@ -31,7 +31,7 @@ export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showL
         </div>
         <span className="lote-lead-phone">{formatPhone(lead.telefone)}</span>
         <span className="lote-lead-meta">
-          {lead.origem || 'Origem não informada'} · recebido em {formatDate(lead.dataRecebimento)}
+          {origemLabel(lead.origem) || 'Origem não informada'} · recebido em {formatDate(lead.dataRecebimento)}
         </span>
         {showLote && (
           <span className="lote-lead-imovel mono">{lote ? lote.codigo : 'Sem imóvel vinculado'}</span>

@@ -3,7 +3,7 @@ import {
   X, MessageCircle, Phone, IdCard, Tag, CalendarDays, Home, MapPin,
   UserRound, CalendarClock, MessageSquareText, NotebookPen,
 } from 'lucide-react'
-import { etapaToClassName, formatPhone, whatsappLink } from '../utils/leadHelpers'
+import { etapaToClassName, formatPhone, whatsappLink, origemLabel } from '../utils/leadHelpers'
 import { formatDate } from '../utils/loteHelpers'
 import { statusToClassName } from '../utils/visitHelpers'
 import { useLeads } from '../context/LeadsContext'
@@ -114,7 +114,7 @@ export function LeadDetailModal({ leadId, visita, onClose }) {
             <Campo icon={CalendarDays} rotulo="Recebido em">
               {lead?.dataRecebimento ? formatDate(lead.dataRecebimento) : null}
             </Campo>
-            <Campo icon={Tag} rotulo="Origem">{lead?.origem || null}</Campo>
+            <Campo icon={Tag} rotulo="Origem">{origemLabel(lead?.origem)}</Campo>
             <Campo icon={UserRound} rotulo="Vendedor">{vendedor?.nome || null}</Campo>
             <Campo icon={UserRound} rotulo="Agendador">{agendador?.nome || null}</Campo>
           </div>

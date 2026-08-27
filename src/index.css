@@ -185,6 +185,10 @@ body {
   display: flex;
   flex-direction: column;
   padding: 24px 16px;
+  /* A barra lateral tem altura fixa (100dvh) e o container corta o que passa
+     disso. Em telas baixas o rodape — "Trocar Senha" e o bloco do usuario —
+     ficava fora da tela sem nenhuma forma de alcanca-lo. */
+  overflow-y: auto;
 }
 
 .sidebar-logo {

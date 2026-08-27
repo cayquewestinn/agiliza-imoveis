@@ -41,6 +41,10 @@ function useEdicaoInline({
   const cancelado = useRef(false)
 
   function abrir() {
+    // Nem todo navegador dispara blur ao remover o campo que tinha o foco
+    // (o Safari do iPhone e o caso conhecido). Sem zerar aqui, um Esc deixaria
+    // a marca de cancelamento presa e a proxima edicao seria descartada.
+    cancelado.current = false
     setRascunho(paraEdicao(valor))
     setEditando(true)
   }

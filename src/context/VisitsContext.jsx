@@ -48,12 +48,15 @@ function toRow(visita) {
   }
 }
 
-// A visit left "Agendada" past its own date/time almost always means nobody
-// showed up and nobody updated the status — auto-flip it instead of letting
-// it sit forever as if it were still upcoming.
-function isOverdueAgendada(visita) {
-  return visita.status === 'Agendada' && new Date(`${visita.data}T${visita.hora}`) < new Date()
-}
+// NÃO reintroduzir um auto-flip de "Agendada" -> "Não Compareceu" aqui.
+// Existiu até 2026-08-26 e gravava a falta no banco assim que o horário de
+// início passava, sem tolerância: visita em andamento e visita que de fato
+// aconteceu (mas cujo status ninguém atualizou no mesmo dia) eram marcadas
+// como falta, o status original era sobrescrito de forma irrecuperável e o
+// lead ainda era arquivado por tabela, sumindo do funil. O sistema não sabe
+// se o cliente compareceu — quem sabe é o corretor. Visitas vencidas agora
+// aparecem como "a confirmar" (estado derivado em visitHelpers.js), cobrando
+// a confirmação sem afirmar nada.
 
 const PAGE_SIZE = 1000
 
@@ -116,18 +119,7 @@ export function VisitsProvider({ children }) {
     }
     if (!isActive()) return
 
-    const parsed = rows.map(fromRow)
-    const overdueIds = parsed.filter(isOverdueAgendada).map(v => v.id)
-    if (overdueIds.length > 0) {
-      for (const v of parsed) {
-        if (overdueIds.includes(v.id)) v.status = 'Não Compareceu'
-      }
-      supabase.from('visitas').update({ status: 'Não Compareceu' }).in('id', overdueIds)
-        .then(({ error: updateError }) => {
-          if (updateError) console.error('Erro ao marcar visitas atrasadas como Não Compareceu:', updateError)
-        })
-    }
-    setVisitas(parsed)
+    setVisitas(rows.map(fromRow))
   }
 
   useEffect(() => {

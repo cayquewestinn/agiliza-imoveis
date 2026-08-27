@@ -4,14 +4,15 @@ import { VisitModal } from '../components/VisitModal'
 import { LeadDetailModal } from '../components/LeadDetailModal'
 import {
   Plus, Building2, Pencil, Trash2, MessageSquareText,
-  ChevronLeft, ChevronRight, X, Clock, Check, RotateCcw,
+  ChevronLeft, ChevronRight, X, Clock, Check, RotateCcw, AlertCircle,
 } from 'lucide-react'
 import { useVisits } from '../context/VisitsContext'
 import { useLeads } from '../context/LeadsContext'
 import { useUser } from '../context/UserContext'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import {
-  VISITA_STATUS_OPTIONS, statusToClassName, formatDateHeading, isPast,
+  VISITA_STATUS_OPTIONS, visitaClassName, isPendenteConfirmacao,
+  formatDateHeading, isPast,
   WEEKDAY_LABELS, buildMonthGrid, formatMonthHeading, toISODate,
   AGENDA_WEEK_HOURS, buildWeekGrid, formatWeekHeading, hourLabel,
   eventTopOffset, AGENDA_WEEK_DEFAULT_EVENT_HEIGHT, clusterOverlappingVisits,
@@ -27,6 +28,13 @@ const STATUS_ICON = {
   Realizada: Check,
   'Não Compareceu': X,
   Remarcada: RotateCcw,
+}
+
+// Uma visita vencida e ainda "Agendada" mostra o alerta em vez do relógio:
+// o ícone acompanha o estado derivado, não apenas o campo status.
+function visitaIcon(visita) {
+  if (isPendenteConfirmacao(visita)) return AlertCircle
+  return STATUS_ICON[visita.status] ?? Clock
 }
 
 // Hooks can't be called conditionally, but this only renders while the
@@ -120,6 +128,7 @@ export function Agenda() {
 
   function renderVisitRow(visita) {
     const lead = leadInfo(visita.leadId)
+    const pendente = isPendenteConfirmacao(visita)
     return (
       <div className="visit-row" key={visita.id}>
         <div className="visit-row-time mono">{visita.hora}</div>
@@ -146,15 +155,21 @@ export function Agenda() {
               <span>{visita.feedback}</span>
             </div>
           )}
+          {pendente && (
+            <div className="visit-row-pendente">
+              <AlertCircle size={12} />
+              <span>O horário desta visita já passou. Confirme se o cliente compareceu.</span>
+            </div>
+          )}
         </div>
 
         <div className="visit-row-responsavel">{visita.responsavel}</div>
 
         <select
-          className={`visit-status-select status-badge status-${statusToClassName(visita.status)}`}
+          className={`visit-status-select status-badge status-${visitaClassName(visita)}`}
           value={visita.status}
           onChange={e => handleStatusChange(visita, e.target.value)}
-          aria-label="Status da visita"
+          aria-label={pendente ? 'Status da visita — pendente de confirmação' : 'Status da visita'}
         >
           {VISITA_STATUS_OPTIONS.map(opt => (
             <option key={opt} value={opt}>{opt}</option>
@@ -244,11 +259,11 @@ export function Agenda() {
                     <div className="agenda-calendar-cell-day">{cell.date.getDate()}</div>
                     <div className="agenda-calendar-cell-items">
                       {visitasDoDia.slice(0, 2).map(v => {
-                        const StatusIcon = STATUS_ICON[v.status] ?? Clock
+                        const StatusIcon = visitaIcon(v)
                         return (
                           <button
                             type="button"
-                            className={`agenda-calendar-cell-item agenda-block-${statusToClassName(v.status)}`}
+                            className={`agenda-calendar-cell-item agenda-block-${visitaClassName(v)}`}
                             key={v.id}
                             onClick={e => { e.stopPropagation(); setFichaVisita(v) }}
                             title="Ver a ficha completa do contato"
@@ -319,13 +334,13 @@ export function Agenda() {
                       <div className="agenda-week-hour-cell" key={hour} />
                     ))}
                     {laidOutVisitas.map(({ visita: v, col, colCount }) => {
-                      const StatusIcon = STATUS_ICON[v.status] ?? Clock
+                      const StatusIcon = visitaIcon(v)
                       const width = 100 / colCount
                       return (
                         <button
                           type="button"
                           key={v.id}
-                          className={`agenda-week-event agenda-block-${statusToClassName(v.status)}`}
+                          className={`agenda-week-event agenda-block-${visitaClassName(v)}`}
                           style={{
                             top: eventTopOffset(v.hora),
                             height: AGENDA_WEEK_DEFAULT_EVENT_HEIGHT,
@@ -417,10 +432,10 @@ export function Agenda() {
             </div>
             <div className="modal-body" style={{ padding: 0 }}>
               {(visitasPorDia[popoverDate] ?? []).map(v => {
-                const StatusIcon = STATUS_ICON[v.status] ?? Clock
+                const StatusIcon = visitaIcon(v)
                 return (
                   <div className="agenda-popover-row" key={v.id}>
-                    <div className={`agenda-popover-row-swatch agenda-block-${statusToClassName(v.status)}`}>
+                    <div className={`agenda-popover-row-swatch agenda-block-${visitaClassName(v)}`}>
                       <StatusIcon size={13} />
                     </div>
                     {renderVisitRow(v)}

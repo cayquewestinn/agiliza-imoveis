@@ -54,6 +54,29 @@ export function isPast(isoDate) {
   return isoDate < todayISO()
 }
 
+// Quanto tempo uma visita ocupa na agenda. O modal de marcação já reserva a
+// hora cheia (07h–19h, de hora em hora), então é esse o fim real do horário.
+export const VISITA_DURACAO_MINUTOS = 60
+
+// Uma visita que continua "Agendada" depois do horário dela NÃO prova que o
+// cliente faltou — prova apenas que ninguém atualizou o status ainda. Este é
+// um estado DERIVADO, calculado na hora de exibir e nunca gravado no banco:
+// o sistema cobra a confirmação em vez de inventar o que aconteceu.
+export function isPendenteConfirmacao(visita, agora = new Date()) {
+  if (visita.status !== 'Agendada') return false
+  const [ano, mes, dia] = visita.data.split('-').map(Number)
+  const [hora, minuto] = visita.hora.split(':').map(Number)
+  const fim = new Date(ano, mes - 1, dia, hora, minuto + VISITA_DURACAO_MINUTOS)
+  return fim < agora
+}
+
+// Sufixo de classe CSS de uma visita, já considerando a pendência. Fonte
+// única para o selo da lista, os chips do mês, os blocos da semana e o
+// popover "+N mais" — todos ficam em sincronia por construção.
+export function visitaClassName(visita, agora = new Date()) {
+  return isPendenteConfirmacao(visita, agora) ? 'pendente' : statusToClassName(visita.status)
+}
+
 export function formatDateHeading(isoDate) {
   const [year, month, day] = isoDate.split('-')
   if (isToday(isoDate)) return `Hoje · ${day}/${month}/${year}`

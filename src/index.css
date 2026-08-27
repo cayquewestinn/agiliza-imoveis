@@ -37,6 +37,7 @@
   --agenda-agendada: var(--status-active);
   --agenda-realizada: var(--status-success);
   --agenda-nao-compareceu: var(--status-danger);
+  --agenda-pendente: var(--status-warning);
   --agenda-remarcada: #6b7280;
   --agenda-event-ink: #ffffff;
 
@@ -94,6 +95,7 @@
   --agenda-agendada: var(--status-active);
   --agenda-realizada: var(--status-success);
   --agenda-nao-compareceu: var(--status-danger);
+  --agenda-pendente: var(--status-warning);
   --agenda-remarcada: #9297a3;
   --agenda-event-ink: #0a0a0b;
 
@@ -542,6 +544,15 @@ body {
 .status-late {
   background-color: var(--status-danger-soft);
   color: var(--status-danger);
+  border-color: transparent;
+}
+
+/* "A confirmar": o horário da visita passou e ninguém atualizou o status.
+   Âmbar de atenção, deliberadamente distinto do vermelho de "Não Compareceu"
+   — este estado cobra uma informação, não afirma que o cliente faltou. */
+.status-pendente {
+  background-color: var(--status-warning-soft);
+  color: var(--status-warning);
   border-color: transparent;
 }
 
@@ -2028,6 +2039,7 @@ select.form-input {
 .agenda-block-done { background: var(--agenda-realizada); border: 1px solid rgba(255, 255, 255, 0.32); }
 .agenda-block-late { background: var(--agenda-nao-compareceu); border: 3px double rgba(255, 255, 255, 0.55); }
 .agenda-block-todo { background: var(--agenda-remarcada); border: 1px solid rgba(255, 255, 255, 0.28); }
+.agenda-block-pendente { background: var(--agenda-pendente); border: 2px dotted rgba(255, 255, 255, 0.7); }
 
 .agenda-popover-row {
   display: flex;
@@ -2051,7 +2063,8 @@ select.form-input {
 .agenda-popover-row-swatch.agenda-block-doing,
 .agenda-popover-row-swatch.agenda-block-done,
 .agenda-popover-row-swatch.agenda-block-late,
-.agenda-popover-row-swatch.agenda-block-todo {
+.agenda-popover-row-swatch.agenda-block-todo,
+.agenda-popover-row-swatch.agenda-block-pendente {
   border: none;
 }
 
@@ -2286,6 +2299,25 @@ select.form-input {
 }
 
 .visit-row-feedback svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Cobrança de confirmação: mesma anatomia do .visit-row-feedback, com a cor
+   de atenção para o corretor perceber o que precisa de ação dele. */
+.visit-row-pendente {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--status-warning);
+  margin-top: 6px;
+  padding: 6px 10px;
+  background-color: var(--status-warning-soft);
+  border-radius: var(--radius-sm);
+}
+
+.visit-row-pendente svg {
   flex-shrink: 0;
   margin-top: 2px;
 }

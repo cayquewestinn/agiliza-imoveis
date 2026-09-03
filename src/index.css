@@ -624,6 +624,40 @@ body {
   color: var(--accent);
 }
 
+/* Filtro de período das tabelas de desempenho — mesma ideia das status-tabs,
+   compacto o bastante para caber ao lado do título do card. */
+.periodo-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background-color: var(--bg-inset);
+  border-radius: var(--radius-sm);
+}
+
+.periodo-tab {
+  padding: 5px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-secondary);
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.periodo-tab:hover {
+  color: var(--ink);
+}
+
+.periodo-tab.active {
+  background-color: var(--bg-panel-raised);
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
 .search-field {
   position: relative;
   margin-bottom: 20px;
@@ -798,6 +832,43 @@ body {
   margin-bottom: 12px;
 }
 
+/* Data do leilão — o prazo que torna cada lead urgente, então mais alta na
+   hierarquia do card do que a metragem ou a contagem de leads. */
+.lote-card-leilao {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.lote-card-leilao-neutro { color: var(--ink-secondary); }
+.lote-card-leilao-warning { color: var(--status-warning); }
+.lote-card-leilao-danger { color: var(--status-danger); }
+
+.lote-detail-leilao {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.lote-detail-leilao-neutro { color: var(--ink-secondary); }
+.lote-detail-leilao-warning { color: var(--status-warning); }
+.lote-detail-leilao-danger { color: var(--status-danger); }
+
+.lote-detail-comitente {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-secondary);
+  font-size: 0.82rem;
+  margin-bottom: 12px;
+}
+
 .lote-specs {
   display: flex;
   gap: 14px;
@@ -875,13 +946,21 @@ body {
 }
 
 .lote-detail-photo {
+  display: block;
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   background-color: var(--bg-inset);
+  border: none;
   border-radius: var(--radius-sm);
   overflow: hidden;
+  padding: 0;
+  font: inherit;
   cursor: pointer;
+}
+
+.lote-detail-photo:disabled {
+  cursor: default;
 }
 
 .lote-detail-photo img {
@@ -938,6 +1017,44 @@ body {
   color: var(--ink-tertiary);
   font-size: 0.76rem;
   cursor: pointer;
+}
+
+.lotes-busca-ordenacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.lotes-busca-ordenacao .search-field {
+  flex: 1 1 260px;
+}
+
+.lotes-busca-ordenacao select.form-input {
+  width: auto;
+  flex-shrink: 0;
+  padding: 9px 32px 9px 12px;
+}
+
+.leads-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.leads-filtros .form-input {
+  width: auto;
+  min-width: 180px;
+  padding: 7px 32px 7px 10px;
+  font-size: 0.82rem;
+}
+
+.leads-carregar-mais {
+  display: flex;
+  margin: 16px auto 0;
 }
 
 .lote-leads-list {
@@ -1446,6 +1563,21 @@ body {
   background-color: var(--bg-inset);
 }
 
+.btn-danger {
+  background-color: var(--status-danger);
+  color: var(--bg-panel-raised);
+  border-color: var(--status-danger);
+}
+
+.btn-danger:hover {
+  filter: brightness(0.9);
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 0.72rem;
+}
+
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -1720,6 +1852,107 @@ select.form-input {
   font-size: 0.85rem;
 }
 
+/* Fica colado ao rodapé do modal, perto do botão de envio — um erro que só
+   aparecesse no topo de um corpo com scroll poderia nunca ser visto. */
+.modal-alerta {
+  padding: 0 24px 16px;
+}
+
+.form-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: var(--ink-tertiary);
+}
+
+/* VisitModal — busca de contato existente, evitando o <select> com todos os
+   leads do banco. */
+.contato-escolhido {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--rule-strong);
+  background-color: var(--bg-inset);
+}
+
+.contato-escolhido-icone {
+  color: var(--status-success);
+  flex-shrink: 0;
+}
+
+.contato-escolhido-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.contato-escolhido-nome {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.contato-escolhido-tel {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.76rem;
+  color: var(--ink-secondary);
+}
+
+.contato-sugestoes {
+  margin-top: 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.contato-sugestao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--bg-panel-raised);
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  cursor: pointer;
+}
+
+.contato-sugestao:last-child {
+  border-bottom: none;
+}
+
+.contato-sugestao:hover {
+  background-color: var(--bg-inset);
+}
+
+.contato-sugestao-nome {
+  font-size: 0.86rem;
+  color: var(--ink);
+}
+
+.contato-sugestao-tel {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.76rem;
+  color: var(--ink-tertiary);
+}
+
+.contato-sugestao-vazia {
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  color: var(--ink-tertiary);
+  background: var(--bg-panel-raised);
+}
+
 .toast-stack {
   position: fixed;
   top: 16px;
@@ -1734,16 +1967,47 @@ select.form-input {
 .toast {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   background-color: var(--bg-panel-raised);
-  color: var(--status-danger);
-  border: 1px solid var(--status-danger);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-md);
   padding: 10px 12px;
   font-size: 0.85rem;
   animation: modal-content-in 180ms ease-out;
+}
+
+.toast-erro {
+  color: var(--status-danger);
+  border: 1px solid var(--status-danger);
+}
+
+.toast-sucesso {
+  color: var(--status-success);
+  border: 1px solid var(--status-success);
+}
+
+.toast-icon {
+  flex-shrink: 0;
+}
+
+.toast-message {
+  flex: 1;
+  color: var(--ink);
+}
+
+.toast-undo {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .form-static {
@@ -1893,7 +2157,8 @@ select.form-input {
   color: var(--ink-tertiary);
 }
 
-.sidebar-logout-btn {
+.sidebar-logout-btn,
+.sidebar-password-btn {
   background: transparent;
   border: none;
   color: var(--ink-tertiary);
@@ -1901,9 +2166,11 @@ select.form-input {
   padding: 6px;
   border-radius: var(--radius-sm);
   display: flex;
+  flex-shrink: 0;
 }
 
-.sidebar-logout-btn:hover {
+.sidebar-logout-btn:hover,
+.sidebar-password-btn:hover {
   color: var(--ink);
   background-color: var(--bg-inset);
 }
@@ -1985,6 +2252,36 @@ select.form-input {
   gap: 4px;
   cursor: pointer;
   transition: background-color 0.15s;
+}
+
+.agenda-calendar-cell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Visível o tempo todo, não só no hover — a célula é tocada no celular tanto
+   quanto clicada no desktop, e hover não existe lá. */
+.agenda-calendar-cell-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--rule-strong);
+  background: transparent;
+  color: var(--ink-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.agenda-calendar-cell-add:hover {
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .agenda-calendar-cell:hover {
@@ -2140,10 +2437,21 @@ select.form-input {
 
 .agenda-week-day-heading {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 0 10px;
+}
+
+.agenda-week-day-heading-select {
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 6px 0 10px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .agenda-week-day-heading-label {
@@ -2518,6 +2826,9 @@ select.form-input {
 
 .sidebar-backdrop {
   display: none;
+  border: none;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .sidebar-close-btn {

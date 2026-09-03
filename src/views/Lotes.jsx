@@ -5,7 +5,17 @@ import { LoteCard } from '../components/LoteCard'
 import { LayoutGrid, List, Plus, Pencil, Trash2, Search } from 'lucide-react'
 import { useLotes } from '../context/LotesContext'
 import { useLeads } from '../context/LeadsContext'
-import { LOTE_STATUS_OPTIONS, statusToClassName, formatCurrency, formatDate } from '../utils/loteHelpers'
+import {
+  LOTE_STATUS_OPTIONS, statusToClassName, formatCurrency, formatDate, diasParaLeilao,
+  leilaoUrgenciaClassName,
+} from '../utils/loteHelpers'
+
+// Leilão mais perto primeiro; o que já passou ou nunca teve data fica no
+// fim, na mesma ordem relativa entre si — ninguém precisa disso agora.
+function porProximidadeDoLeilao(a, b) {
+  const rank = dias => (dias === null ? Infinity : dias < 0 ? 1e6 - dias : dias)
+  return rank(diasParaLeilao(a.dataLeilao)) - rank(diasParaLeilao(b.dataLeilao))
+}
 
 export function Lotes() {
   const { lotes, addLote, updateLote, deleteLote } = useLotes()
@@ -13,17 +23,20 @@ export function Lotes() {
   const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list'
   const [statusFilter, setStatusFilter] = useState('Todos')
   const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState('leilao') // 'leilao' | 'recentes'
   const [editingLote, setEditingLote] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const byStatus = statusFilter === 'Todos' ? lotes : lotes.filter(l => l.status === statusFilter)
 
   const normalizedSearch = searchTerm.trim().toLowerCase()
-  const filtered = normalizedSearch === ''
+  const bySearch = normalizedSearch === ''
     ? byStatus
     : byStatus.filter(l => [l.codigo, l.titulo, l.endereco, l.bairro, l.cidade]
         .filter(Boolean)
         .some(field => field.toLowerCase().includes(normalizedSearch)))
+
+  const filtered = sortBy === 'leilao' ? [...bySearch].sort(porProximidadeDoLeilao) : bySearch
 
   function openNewLoteModal() {
     setEditingLote(null)
@@ -107,15 +120,26 @@ export function Lotes() {
           ))}
         </div>
 
-        <div className="search-field">
-          <Search size={16} className="search-field-icon" />
-          <input
-            type="text"
-            className="search-field-input"
-            placeholder="Buscar por código, título, endereço, bairro ou cidade..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
+        <div className="lotes-busca-ordenacao">
+          <div className="search-field" style={{ marginBottom: 0 }}>
+            <Search size={16} className="search-field-icon" />
+            <input
+              type="text"
+              className="search-field-input"
+              placeholder="Buscar por código, título, endereço, bairro ou cidade..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <select
+            className="form-input"
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            aria-label="Ordenar imóveis"
+          >
+            <option value="leilao">Leilão mais próximo</option>
+            <option value="recentes">Mais recentes</option>
+          </select>
         </div>
 
         {filtered.length === 0 && (
@@ -162,7 +186,9 @@ export function Lotes() {
                         {lote.status}
                       </span>
                     </td>
-                    <td className="mono">{formatDate(lote.dataLeilao)}</td>
+                    <td className={`mono lote-card-leilao-${leilaoUrgenciaClassName(lote.dataLeilao)}`}>
+                      {formatDate(lote.dataLeilao)}
+                    </td>
                     <td>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button className="icon-btn" onClick={() => openEditLoteModal(lote)} aria-label="Editar">

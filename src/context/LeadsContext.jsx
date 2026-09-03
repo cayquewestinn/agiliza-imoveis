@@ -59,7 +59,7 @@ async function fetchAllLeads() {
 
 export function LeadsProvider({ children }) {
   const { currentUser } = useUser()
-  const { showError } = useToast()
+  const { showError, showSuccess } = useToast()
   const [leads, setLeads] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -102,9 +102,19 @@ export function LeadsProvider({ children }) {
     return created
   }
 
-  async function updateLead(id, updates) {
+  // `opcoes.silencioso` cala a confirmação nas gravações que a interface já
+  // anuncia por conta própria (o desfazer do arquivamento, os avanços de
+  // etapa disparados por uma visita) — dois avisos para a mesma ação leem
+  // como duas coisas tendo acontecido.
+  async function updateLead(id, updates, opcoes = {}) {
     const current = leads.find(l => l.id === id)
+    if (!current) return
     const merged = { ...current, ...updates }
+
+    // Aplica na hora e desfaz se o banco recusar: o operador vê o chip mudar
+    // no clique, não depois da ida e volta ao Supabase.
+    setLeads(prev => prev.map(l => (l.id === id ? merged : l)))
+
     const { data, error } = await supabase
       .from('leads')
       .update(toRow(merged))
@@ -113,10 +123,12 @@ export function LeadsProvider({ children }) {
       .single()
     if (error) {
       console.error('Erro ao atualizar lead:', error)
-      showError('Não foi possível salvar as alterações do lead. Tente novamente.')
+      setLeads(prev => prev.map(l => (l.id === id ? current : l)))
+      showError('Não foi possível salvar as alterações do lead. A alteração foi desfeita.')
       return
     }
     setLeads(prev => prev.map(l => (l.id === id ? fromRow(data) : l)))
+    if (!opcoes.silencioso) showSuccess(`Lead ${merged.nome} atualizado.`)
   }
 
   async function deleteLead(id) {

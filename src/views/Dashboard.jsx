@@ -4,7 +4,7 @@ import { useLeads } from '../context/LeadsContext'
 import { useProfiles } from '../context/ProfilesContext'
 import { useUser } from '../context/UserContext'
 import { useTheme } from '../context/ThemeContext'
-import { EtapaLeadsModal } from '../components/EtapaLeadsModal'
+import { toISODate } from '../utils/visitHelpers'
 
 const LEAD_ETAPA_CHART = [
   { etapa: 'Novo', color: 'var(--status-neutral)' },
@@ -14,6 +14,25 @@ const LEAD_ETAPA_CHART = [
   { etapa: 'Convertido', color: 'var(--status-success)' },
   { etapa: 'Perdido', color: 'var(--status-danger)' },
 ]
+
+const PERIODOS_DESEMPENHO = [
+  { valor: 'mes', rotulo: 'Este mês' },
+  { valor: '90d', rotulo: 'Últimos 90 dias' },
+  { valor: 'tudo', rotulo: 'Tudo' },
+]
+
+// Taxa de conversão vitalícia não diz nada sobre "como foi este mês" — sem
+// recorte, o número só cresce e vira ruído com o tempo. Filtra por
+// dataRecebimento, o único carimbo de data que todo lead já tem.
+function filtrarPorPeriodo(leads, periodo) {
+  if (periodo === 'tudo') return leads
+  const hoje = new Date()
+  const corte = new Date(hoje)
+  if (periodo === 'mes') corte.setDate(1)
+  else corte.setDate(corte.getDate() - 90)
+  const corteISO = toISODate(corte)
+  return leads.filter(l => l.dataRecebimento && l.dataRecebimento >= corteISO)
+}
 
 function buildDesempenho(pessoas, leads, campo) {
   return pessoas
@@ -38,14 +57,38 @@ function buildDesempenho(pessoas, leads, campo) {
     .sort((a, b) => b.leadsAtribuidos - a.leadsAtribuidos)
 }
 
-function MeuDesempenho({ meusLeads }) {
-  const convertidos = meusLeads.filter(l => l.etapa === 'Convertido')
-  const perdidos = meusLeads.filter(l => l.etapa === 'Perdido')
-  const taxa = meusLeads.length > 0 ? Math.round((convertidos.length / meusLeads.length) * 100) : 0
+function FiltroPeriodo({ periodo, onChange }) {
+  return (
+    <div className="periodo-tabs">
+      {PERIODOS_DESEMPENHO.map(p => (
+        <button
+          key={p.valor}
+          type="button"
+          className={`periodo-tab ${periodo === p.valor ? 'active' : ''}`}
+          onClick={() => onChange(p.valor)}
+        >
+          {p.rotulo}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function MeuDesempenho({ meusLeads, periodo, onChangePeriodo }) {
+  const doPeriodo = filtrarPorPeriodo(meusLeads, periodo)
+  const convertidos = doPeriodo.filter(l => l.etapa === 'Convertido')
+  const perdidos = doPeriodo.filter(l => l.etapa === 'Perdido')
+  const taxa = doPeriodo.length > 0 ? Math.round((convertidos.length / doPeriodo.length) * 100) : 0
+  const leadsPorVenda = convertidos.length > 0
+    ? Math.round((doPeriodo.length / convertidos.length) * 10) / 10
+    : null
 
   return (
     <div className="card">
-      <h2 className="card-title" style={{marginBottom: 16}}>Meu Desempenho</h2>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8}}>
+        <h2 className="card-title" style={{margin: 0}}>Meu Desempenho</h2>
+        <FiltroPeriodo periodo={periodo} onChange={onChangePeriodo} />
+      </div>
       <div className="table-scroll">
         <table className="data-table">
           <thead>
@@ -54,14 +97,16 @@ function MeuDesempenho({ meusLeads }) {
               <th>Convertidos</th>
               <th>Perdidos</th>
               <th>Taxa de Conversão</th>
+              <th>Leads por Venda</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td className="mono">{meusLeads.length}</td>
+              <td className="mono">{doPeriodo.length}</td>
               <td className="mono">{convertidos.length}</td>
               <td className="mono">{perdidos.length}</td>
               <td className="mono">{taxa}%</td>
+              <td className="mono">{leadsPorVenda ?? '—'}</td>
             </tr>
           </tbody>
         </table>
@@ -70,11 +115,12 @@ function MeuDesempenho({ meusLeads }) {
   )
 }
 
-function DesempenhoTable({ titulo, dados }) {
+function DesempenhoTable({ titulo, dados, periodo, onChangePeriodo }) {
   return (
     <div className="card">
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16}}>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8}}>
         <h2 className="card-title" style={{margin: 0}}>{titulo}</h2>
+        <FiltroPeriodo periodo={periodo} onChange={onChangePeriodo} />
       </div>
       <div className="table-scroll">
         <table className="data-table">
@@ -85,6 +131,7 @@ function DesempenhoTable({ titulo, dados }) {
               <th>Convertidos</th>
               <th>Perdidos</th>
               <th>Taxa de Conversão</th>
+              <th>Leads por Venda</th>
             </tr>
           </thead>
           <tbody>
@@ -95,11 +142,12 @@ function DesempenhoTable({ titulo, dados }) {
                 <td className="mono">{d.convertidos}</td>
                 <td className="mono">{d.perdidos}</td>
                 <td className="mono">{d.taxa}%</td>
+                <td className="mono">{d.leadsPorVenda ?? '—'}</td>
               </tr>
             ))}
             {dados.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 32 }}>
+                <td colSpan={6} style={{ textAlign: 'center', color: 'var(--ink-tertiary)', padding: 32 }}>
                   Nenhum profissional cadastrado nesta função ainda.
                 </td>
               </tr>
@@ -111,12 +159,12 @@ function DesempenhoTable({ titulo, dados }) {
   )
 }
 
-export function Dashboard() {
+export function Dashboard({ onVerLeads }) {
   const { leads: todosOsLeads } = useLeads()
   const { profiles } = useProfiles()
   const { currentUser, isAdmin } = useUser()
   const { theme } = useTheme()
-  const [etapaAberta, setEtapaAberta] = useState(null)
+  const [periodo, setPeriodo] = useState('mes')
 
   // Archived leads (no-shows with nothing pending) shouldn't inflate or
   // deflate funnel/performance numbers — they're set aside, not counted.
@@ -128,8 +176,12 @@ export function Dashboard() {
   const meusLeads = leads.filter(l => l.vendedorId === currentUser.id || l.agendadorId === currentUser.id)
   const leadsEscopo = isAdmin ? leads : meusLeads
 
-  const vendedores = buildDesempenho(profiles.filter(p => p.cargo === 'Vendedor'), leads, 'vendedorId')
-  const agendadores = buildDesempenho(profiles.filter(p => p.cargo.includes('Agendador')), leads, 'agendadorId')
+  // O funil acima é sempre a foto de agora (o que está parado hoje); o
+  // recorte de período vale só para as tabelas de desempenho, que respondem
+  // "como foi este mês", não "quantos leads existem".
+  const leadsDesempenho = filtrarPorPeriodo(leads, periodo)
+  const vendedores = buildDesempenho(profiles.filter(p => p.cargo === 'Vendedor'), leadsDesempenho, 'vendedorId')
+  const agendadores = buildDesempenho(profiles.filter(p => p.cargo.includes('Agendador')), leadsDesempenho, 'agendadorId')
 
   const totalLeads = leadsEscopo.length
   const leadsPorEtapa = LEAD_ETAPA_CHART.map(item => ({
@@ -164,7 +216,7 @@ export function Dashboard() {
           <button
             type="button"
             className="dashboard-queue-callout"
-            onClick={() => setEtapaAberta('Novo')}
+            onClick={() => onVerLeads('Novo')}
             aria-label="Ver leads em Novo"
           >
             <div>
@@ -183,7 +235,7 @@ export function Dashboard() {
                   type="button"
                   className="status-chart-row"
                   key={item.etapa}
-                  onClick={() => setEtapaAberta(item.etapa)}
+                  onClick={() => onVerLeads(item.etapa)}
                   aria-label={`Ver leads em ${item.etapa}`}
                 >
                   <div className="status-chart-row-header">
@@ -204,17 +256,13 @@ export function Dashboard() {
 
         {isAdmin ? (
           <div className="dashboard-row-perf">
-            <DesempenhoTable titulo="Desempenho por Vendedor" dados={vendedores} />
-            <DesempenhoTable titulo="Desempenho por Agendador" dados={agendadores} />
+            <DesempenhoTable titulo="Desempenho por Vendedor" dados={vendedores} periodo={periodo} onChangePeriodo={setPeriodo} />
+            <DesempenhoTable titulo="Desempenho por Agendador" dados={agendadores} periodo={periodo} onChangePeriodo={setPeriodo} />
           </div>
         ) : (
-          <MeuDesempenho meusLeads={meusLeads} />
+          <MeuDesempenho meusLeads={meusLeads} periodo={periodo} onChangePeriodo={setPeriodo} />
         )}
       </div>
-
-      {etapaAberta && (
-        <EtapaLeadsModal etapa={etapaAberta} leads={leadsEscopo} onClose={() => setEtapaAberta(null)} />
-      )}
     </div>
   )
 }

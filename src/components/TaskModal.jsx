@@ -1,10 +1,8 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
 import { STATUS_OPTIONS } from '../utils/taskHelpers'
 import { useProfiles } from '../context/ProfilesContext'
 import { useUser } from '../context/UserContext'
-import { useClosingTransition } from '../hooks/useClosingTransition'
-import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { Modal } from './Modal'
 
 function toInputDate(prazoBr) {
   if (!prazoBr) return ''
@@ -28,8 +26,6 @@ export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
     isAdmin ? (task?.responsavelId ?? defaultResponsavelId ?? profiles[0]?.id ?? '') : (currentUser?.id ?? '')
   )
   const [error, setError] = useState('')
-  const { closing, requestClose } = useClosingTransition(onClose)
-  useBodyScrollLock()
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -54,15 +50,8 @@ export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
   }
 
   return (
-    <div className={`modal-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{isEditing ? 'Editar Tarefa' : 'Nova Tarefa'}</h2>
-          <button type="button" className="icon-btn" onClick={requestClose} aria-label="Fechar">
-            <X size={18} />
-          </button>
-        </div>
-
+    <Modal titulo={isEditing ? 'Editar Tarefa' : 'Nova Tarefa'} onClose={onClose}>
+      {({ requestClose }) => (
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
             {error && <div className="form-error">{error}</div>}
@@ -132,7 +121,7 @@ export function TaskModal({ task, defaultResponsavelId, onClose, onSave }) {
             <button type="submit" className="btn btn-primary">{isEditing ? 'Salvar' : 'Criar Tarefa'}</button>
           </div>
         </form>
-      </div>
-    </div>
+      )}
+    </Modal>
   )
 }

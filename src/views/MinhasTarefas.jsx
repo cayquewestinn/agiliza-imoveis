@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import {
-  DndContext, DragOverlay, PointerSensor, closestCorners, useSensor, useSensors, useDroppable,
+  DndContext, DragOverlay, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors, useDroppable,
 } from '@dnd-kit/core'
-import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import {
+  SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Header } from '../components/Header'
 import { TaskModal } from '../components/TaskModal'
@@ -93,7 +95,10 @@ export function MinhasTarefas() {
   const [draggingTask, setDraggingTask] = useState(null)
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    // Sem isso, mover um cartão entre colunas era só com mouse — o kanban
+    // inteiro ficava fora do alcance de quem navega só pelo teclado.
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
   function handleDragStart(event) {

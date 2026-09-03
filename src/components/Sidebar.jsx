@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LayoutDashboard, CheckSquare, Building2, Users, LogOut, CalendarClock, X, Sun, Moon, KeyRound } from 'lucide-react'
+import { LayoutDashboard, Contact, CheckSquare, Building2, Users, LogOut, CalendarClock, X, Sun, Moon, KeyRound } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { useTheme } from '../context/ThemeContext'
 import { initials } from '../utils/teamHelpers'
@@ -30,6 +30,14 @@ export function Sidebar({ currentView, setCurrentView, isOpen, onClose }) {
         >
           <LayoutDashboard className="nav-icon" />
           Painel Geral
+        </button>
+
+        <button
+          className={`nav-item ${currentView === 'leads' ? 'active' : ''}`}
+          onClick={() => setCurrentView('leads')}
+        >
+          <Contact className="nav-icon" />
+          Leads
         </button>
 
         <button
@@ -77,15 +85,6 @@ export function Sidebar({ currentView, setCurrentView, isOpen, onClose }) {
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
         </button>
-
-        <button
-          type="button"
-          className="theme-toggle-btn"
-          onClick={() => setShowChangePassword(true)}
-        >
-          <KeyRound size={16} />
-          Trocar Senha
-        </button>
       </div>
 
       {currentUser && (
@@ -95,6 +94,17 @@ export function Sidebar({ currentView, setCurrentView, isOpen, onClose }) {
             <div className="sidebar-user-name">{currentUser.nome}</div>
             <div className="sidebar-user-cargo">{currentUser.cargo}</div>
           </div>
+          {/* Ação da própria conta, não preferência de tela — por isso mora
+              aqui, ao lado de quem é a conta, e não junto do tema. */}
+          <button
+            type="button"
+            className="sidebar-password-btn"
+            onClick={() => setShowChangePassword(true)}
+            aria-label="Trocar senha"
+            title="Trocar senha"
+          >
+            <KeyRound size={16} />
+          </button>
           <button className="sidebar-logout-btn" onClick={logout} aria-label="Sair">
             <LogOut size={16} />
           </button>

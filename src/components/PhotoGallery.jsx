@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useClosingTransition } from '../hooks/useClosingTransition'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { useModalStackLayer } from './Modal'
 
 export function PhotoGallery({ fotos, startIndex, titulo, onClose }) {
   const [index, setIndex] = useState(startIndex)
   const { closing, requestClose } = useClosingTransition(onClose)
+  const souTopo = useModalStackLayer()
   useBodyScrollLock()
 
   const prev = useCallback(() => {
@@ -18,13 +20,16 @@ export function PhotoGallery({ fotos, startIndex, titulo, onClose }) {
 
   useEffect(() => {
     function handleKey(e) {
+      // Só reage se a galeria for a camada mais no topo — aberta de dentro
+      // de outro modal, é ela quem deve fechar com Esc, não o modal por trás.
+      if (!souTopo()) return
       if (e.key === 'Escape') requestClose()
       if (e.key === 'ArrowLeft') prev()
       if (e.key === 'ArrowRight') next()
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [fotos.length, requestClose, next, prev])
+  }, [fotos.length, requestClose, next, prev, souTopo])
 
   return (
     <div className={`gallery-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>

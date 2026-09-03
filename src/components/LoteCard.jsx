@@ -3,7 +3,9 @@ import {
   MapPin, Bed, Bath, Car, Ruler, Building2, Home, Gavel, Pencil, Trash2,
   Users, ImageOff, Images,
 } from 'lucide-react'
-import { statusToClassName, formatCurrency, formatDate } from '../utils/loteHelpers'
+import {
+  statusToClassName, formatCurrency, leilaoUrgenciaLabel, leilaoUrgenciaClassName,
+} from '../utils/loteHelpers'
 import { useLeads } from '../context/LeadsContext'
 import { LoteDetailModal } from './LoteDetailModal'
 
@@ -13,8 +15,26 @@ export function LoteCard({ lote, onEdit, onDelete }) {
   const leads = leadsByLote(lote.id)
   const fotos = lote.fotos ?? []
 
+  // O card carrega os botões de editar/excluir dentro dele — não dá para ser
+  // um <button> de verdade (botão dentro de botão é inválido). Em vez disso,
+  // ele age como um: focável e ativável por teclado, igual a um.
+  function handleKeyDown(e) {
+    if (e.target !== e.currentTarget) return
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setDetailOpen(true)
+    }
+  }
+
   return (
-    <div className="lote-card" onClick={() => setDetailOpen(true)}>
+    <div
+      className="lote-card"
+      onClick={() => setDetailOpen(true)}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver detalhes de ${lote.titulo}, ${lote.codigo}`}
+    >
       <div className="lote-card-photo">
         {fotos.length > 0 ? (
           <>
@@ -47,6 +67,13 @@ export function LoteCard({ lote, onEdit, onDelete }) {
       <div className="lote-card-body">
         <div className="lote-card-codigo">{lote.codigo}</div>
         <h3 className="lote-card-title">{lote.titulo}</h3>
+
+        {/* O leilão é o prazo que torna cada lead urgente — promovido para
+            onde o código do imóvel costumava sozinho chamar mais atenção. */}
+        <div className={`lote-card-leilao lote-card-leilao-${leilaoUrgenciaClassName(lote.dataLeilao)}`}>
+          <Gavel size={13} /> {leilaoUrgenciaLabel(lote.dataLeilao)}
+        </div>
+
         <div className="lote-card-address">
           <MapPin size={14} />
           {lote.bairro}, {lote.cidade} - {lote.uf}
@@ -67,9 +94,9 @@ export function LoteCard({ lote, onEdit, onDelete }) {
         </div>
 
         <div className="lote-card-footer">
-          <div className="lote-card-meta">
-            <Gavel size={14} /> {formatDate(lote.dataLeilao)}
-          </div>
+          {lote.comitente ? (
+            <div className="lote-card-meta">{lote.comitente}</div>
+          ) : <span />}
           <div style={{ display: 'flex', gap: 4 }}>
             <button
               className="icon-btn"

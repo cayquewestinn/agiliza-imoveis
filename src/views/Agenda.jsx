@@ -56,7 +56,9 @@ export function Agenda() {
   const [calYear, setCalYear] = useState(today.getFullYear())
   const [calMonth, setCalMonth] = useState(today.getMonth())
   const [weekAnchor, setWeekAnchor] = useState(toISODate(today))
-  const [selectedDate, setSelectedDate] = useState(null)
+  // Começa em hoje: revisar o dia — a ação mais repetida da tela — não
+  // depende mais de abrir e fechar o modal de criação só para ver a lista.
+  const [selectedDate, setSelectedDate] = useState(toISODate(today))
   const [popoverDate, setPopoverDate] = useState(null)
   const [fichaVisita, setFichaVisita] = useState(null)
 
@@ -251,12 +253,22 @@ export function Agenda() {
                   <div
                     key={cell.iso}
                     className={cellClasses}
-                    onClick={() => {
-                      setSelectedDate(cell.iso)
-                      openNewModal()
-                    }}
+                    // Clicar no dia só seleciona — abrir o formulário de nova
+                    // visita é uma ação separada, pedida pelo botão "+".
+                    onClick={() => setSelectedDate(cell.iso)}
                   >
-                    <div className="agenda-calendar-cell-day">{cell.date.getDate()}</div>
+                    <div className="agenda-calendar-cell-header">
+                      <div className="agenda-calendar-cell-day">{cell.date.getDate()}</div>
+                      <button
+                        type="button"
+                        className="agenda-calendar-cell-add"
+                        onClick={e => { e.stopPropagation(); setSelectedDate(cell.iso); openNewModal() }}
+                        aria-label={`Marcar visita em ${cell.date.getDate()}`}
+                        title="Marcar visita neste dia"
+                      >
+                        <Plus size={11} />
+                      </button>
+                    </div>
                     <div className="agenda-calendar-cell-items">
                       {visitasDoDia.slice(0, 2).map(v => {
                         const StatusIcon = visitaIcon(v)
@@ -310,8 +322,23 @@ export function Agenda() {
                   key={day.iso}
                   className={`agenda-week-day-heading ${day.iso === todayISOStr ? 'agenda-week-day-heading-today' : ''}`}
                 >
-                  <span className="agenda-week-day-heading-label">{WEEKDAY_LABELS[day.date.getDay()]}</span>
-                  <span className="agenda-week-day-heading-num mono">{day.date.getDate()}</span>
+                  <button
+                    type="button"
+                    className="agenda-week-day-heading-select"
+                    onClick={() => setSelectedDate(day.iso)}
+                  >
+                    <span className="agenda-week-day-heading-label">{WEEKDAY_LABELS[day.date.getDay()]}</span>
+                    <span className="agenda-week-day-heading-num mono">{day.date.getDate()}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="agenda-calendar-cell-add"
+                    onClick={() => { setSelectedDate(day.iso); openNewModal() }}
+                    aria-label={`Marcar visita em ${day.date.getDate()}`}
+                    title="Marcar visita neste dia"
+                  >
+                    <Plus size={11} />
+                  </button>
                 </div>
               ))}
             </div>
@@ -328,7 +355,7 @@ export function Agenda() {
                   <div
                     key={day.iso}
                     className="agenda-week-day-column"
-                    onClick={() => { setSelectedDate(day.iso); openNewModal() }}
+                    onClick={() => setSelectedDate(day.iso)}
                   >
                     {AGENDA_WEEK_HOURS.map(hour => (
                       <div className="agenda-week-hour-cell" key={hour} />

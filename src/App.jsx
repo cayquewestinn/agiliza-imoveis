@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Menu } from 'lucide-react'
 import { Sidebar } from './components/Sidebar'
 import { Dashboard } from './views/Dashboard'
+import { Leads } from './views/Leads'
 import { MinhasTarefas } from './views/MinhasTarefas'
 import { Equipe } from './views/Equipe'
 import { Lotes } from './views/Lotes'
@@ -32,6 +33,10 @@ function AppShell() {
   const { currentUser, isAdmin, loading } = useUser()
   const [currentView, setCurrentView] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  // Etapa que o funil do Painel pediu para abrir na tela de Leads — o funil
+  // continua sendo um atalho, só que agora entra na tela real em vez de um
+  // modal travado em 200 resultados.
+  const [leadsEtapaInicial, setLeadsEtapaInicial] = useState(null)
 
   useEffect(() => {
     if (!sidebarOpen) return
@@ -113,7 +118,12 @@ function AppShell() {
 
       {sidebarOpen && (
         <>
-          <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+          <button
+            type="button"
+            className="sidebar-backdrop"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Fechar menu"
+          />
           <ScrollLock />
         </>
       )}
@@ -121,7 +131,10 @@ function AppShell() {
       <Sidebar currentView={view} setCurrentView={handleSetView} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="main-content">
-        {view === 'dashboard' && <Dashboard />}
+        {view === 'dashboard' && (
+          <Dashboard onVerLeads={etapa => { setLeadsEtapaInicial(etapa); handleSetView('leads') }} />
+        )}
+        {view === 'leads' && <Leads initialEtapa={leadsEtapaInicial} />}
         {view === 'minhas-tarefas' && <MinhasTarefas />}
         {view === 'agenda' && <Agenda />}
         {view === 'equipe' && isAdmin && <Equipe />}

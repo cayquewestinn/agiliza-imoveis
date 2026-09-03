@@ -1,8 +1,6 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
 import { useUser } from '../context/UserContext'
-import { useClosingTransition } from '../hooks/useClosingTransition'
-import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { Modal } from './Modal'
 
 export function ChangePasswordModal({ onClose }) {
   const { changePassword } = useUser()
@@ -11,8 +9,6 @@ export function ChangePasswordModal({ onClose }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [saving, setSaving] = useState(false)
-  const { closing, requestClose } = useClosingTransition(onClose)
-  useBodyScrollLock()
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -36,16 +32,9 @@ export function ChangePasswordModal({ onClose }) {
   }
 
   return (
-    <div className={`modal-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Trocar Senha</h2>
-          <button type="button" className="icon-btn" onClick={requestClose} aria-label="Fechar">
-            <X size={18} />
-          </button>
-        </div>
-
-        {success ? (
+    <Modal titulo="Trocar Senha" onClose={onClose}>
+      {({ requestClose }) => (
+        success ? (
           <div className="modal-body">
             <p>Senha alterada com sucesso.</p>
           </div>
@@ -87,8 +76,8 @@ export function ChangePasswordModal({ onClose }) {
               </button>
             </div>
           </form>
-        )}
-      </div>
-    </div>
+        )
+      )}
+    </Modal>
   )
 }

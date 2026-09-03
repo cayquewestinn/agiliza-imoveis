@@ -80,7 +80,7 @@ async function fetchAllVisitas() {
 
 export function VisitsProvider({ children }) {
   const { currentUser } = useUser()
-  const { showError } = useToast()
+  const { showError, showUndo } = useToast()
   const { leads, updateLead } = useLeads()
   const [visitas, setVisitas] = useState([])
   const [loading, setLoading] = useState(true)
@@ -106,9 +106,18 @@ export function VisitsProvider({ children }) {
       const hasPending = visitas.some(v =>
         v.leadId === leadId && v.status !== 'Não Compareceu' && v.data >= todayStr
       )
-      if (!hasPending) updateLead(leadId, { arquivado: true })
+      if (!hasPending) {
+        updateLead(leadId, { arquivado: true }, { silencioso: true })
+        // Some do funil sem que ninguém tenha clicado em nada — a única
+        // automação do sistema que muta um lead sozinha precisa se anunciar,
+        // com a mesma saída de desfazer que o arquivamento manual já tem.
+        showUndo(
+          `${lead.nome} foi arquivado por falta na visita.`,
+          () => updateLead(leadId, { arquivado: false }, { silencioso: true }),
+        )
+      }
     }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- updateLead/leads change identity on every LeadsContext update; the idempotent guard above (skip already-arquivado leads) makes re-running safe instead of chasing a stable reference here
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- updateLead/leads/showUndo change identity on every render of their providers; the idempotent guard above (skip already-arquivado leads) makes re-running safe instead of chasing a stable reference here
   }, [visitas, leads])
 
   async function refetch(isActive = () => true) {

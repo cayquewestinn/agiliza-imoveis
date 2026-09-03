@@ -1,8 +1,6 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
 import { LOTE_STATUS_OPTIONS, TIPO_IMOVEL_OPTIONS } from '../utils/loteHelpers'
-import { useClosingTransition } from '../hooks/useClosingTransition'
-import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { Modal } from './Modal'
 
 export function LoteModal({ lote, onClose, onSave }) {
   const isEditing = Boolean(lote)
@@ -19,11 +17,10 @@ export function LoteModal({ lote, onClose, onSave }) {
   const [banheiros, setBanheiros] = useState(lote?.banheiros ?? 0)
   const [vagas, setVagas] = useState(lote?.vagas ?? 0)
   const [valorAvaliacao, setValorAvaliacao] = useState(lote?.valorAvaliacao ?? '')
+  const [lanceInicial, setLanceInicial] = useState(lote?.lanceInicial ?? '')
   const [dataLeilao, setDataLeilao] = useState(lote?.dataLeilao ?? '')
   const [comitente, setComitente] = useState(lote?.comitente ?? '')
   const [error, setError] = useState('')
-  const { closing, requestClose } = useClosingTransition(onClose)
-  useBodyScrollLock()
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -49,21 +46,15 @@ export function LoteModal({ lote, onClose, onSave }) {
       banheiros: Number(banheiros) || 0,
       vagas: Number(vagas) || 0,
       valorAvaliacao: Number(valorAvaliacao) || 0,
+      lanceInicial: Number(lanceInicial) || 0,
       dataLeilao,
       comitente: comitente.trim(),
     })
   }
 
   return (
-    <div className={`modal-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
-      <div className="modal modal-wide" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{isEditing ? 'Editar Imóvel' : 'Novo Imóvel'}</h2>
-          <button type="button" className="icon-btn" onClick={requestClose} aria-label="Fechar">
-            <X size={18} />
-          </button>
-        </div>
-
+    <Modal titulo={isEditing ? 'Editar Imóvel' : 'Novo Imóvel'} wide onClose={onClose}>
+      {({ requestClose }) => (
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
             {error && <div className="form-error">{error}</div>}
@@ -228,16 +219,29 @@ export function LoteModal({ lote, onClose, onSave }) {
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="valorAvaliacao">Valor de avaliação (R$)</label>
-              <input
-                id="valorAvaliacao"
-                className="form-input"
-                type="number"
-                min="0"
-                value={valorAvaliacao}
-                onChange={e => setValorAvaliacao(e.target.value)}
-              />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label" htmlFor="valorAvaliacao">Valor de avaliação (R$)</label>
+                <input
+                  id="valorAvaliacao"
+                  className="form-input"
+                  type="number"
+                  min="0"
+                  value={valorAvaliacao}
+                  onChange={e => setValorAvaliacao(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="lanceInicial">Lance inicial (R$)</label>
+                <input
+                  id="lanceInicial"
+                  className="form-input"
+                  type="number"
+                  min="0"
+                  value={lanceInicial}
+                  onChange={e => setLanceInicial(e.target.value)}
+                />
+              </div>
             </div>
 
             <div className="form-group">
@@ -257,7 +261,7 @@ export function LoteModal({ lote, onClose, onSave }) {
             <button type="submit" className="btn btn-primary">{isEditing ? 'Salvar' : 'Criar Imóvel'}</button>
           </div>
         </form>
-      </div>
-    </div>
+      )}
+    </Modal>
   )
 }

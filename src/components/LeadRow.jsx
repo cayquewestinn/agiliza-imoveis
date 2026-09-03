@@ -1,13 +1,29 @@
 import { useState } from 'react'
-import { MessageCircle, CheckCircle2, Archive, ArchiveRestore, ChevronDown } from 'lucide-react'
+import { MessageCircle, CheckCircle2, Archive, ArchiveRestore, ChevronDown, CalendarPlus } from 'lucide-react'
 import { etapaToClassName, formatPhone, whatsappLink, origemLabel, LEAD_ETAPA_OPTIONS } from '../utils/leadHelpers'
 import { formatDate } from '../utils/loteHelpers'
+import { useToast } from '../context/ToastContext'
+import { VisitModal } from './VisitModal'
 
 export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showLote = false }) {
   const [editing, setEditing] = useState(null) // null | 'etapa' | 'vendedor' | 'agendador'
+  const [marcandoVisita, setMarcandoVisita] = useState(false)
+  const { showUndo } = useToast()
   const vendedor = vendedores.find(p => p.id === lead.vendedorId)
   const agendador = agendadores.find(p => p.id === lead.agendadorId)
   const isSold = lead.etapa === 'Convertido'
+
+  // Arquivar tira a linha de todas as listas padrão de uma vez. Sem um
+  // caminho de volta imediato, um clique errado no ícone vizinho ao de venda
+  // some com o lead sem deixar rastro na tela.
+  function alternarArquivamento() {
+    const arquivando = !lead.arquivado
+    updateLead(lead.id, { arquivado: arquivando }, { silencioso: true })
+    showUndo(
+      arquivando ? `${lead.nome} foi arquivado.` : `${lead.nome} voltou para a fila.`,
+      () => updateLead(lead.id, { arquivado: !arquivando }, { silencioso: true }),
+    )
+  }
 
   // Converter um lead alimenta as tabelas de comissão do Painel, e o botão fica
   // ao lado do WhatsApp — confirma antes para não registrar uma venda por engano.
@@ -131,6 +147,15 @@ export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showL
         </a>
         <button
           type="button"
+          className="icon-btn"
+          onClick={() => setMarcandoVisita(true)}
+          title={`Marcar visita para ${lead.nome}`}
+          aria-label={`Marcar visita para ${lead.nome}`}
+        >
+          <CalendarPlus size={16} />
+        </button>
+        <button
+          type="button"
           className={`icon-btn${isSold ? ' is-sold' : ''}`}
           onClick={() => marcarComoVendido()}
           disabled={isSold}
@@ -145,12 +170,22 @@ export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showL
         <button
           type="button"
           className="icon-btn"
-          onClick={() => updateLead(lead.id, { arquivado: !lead.arquivado })}
+          onClick={alternarArquivamento}
+          title={lead.arquivado
+            ? `Desarquivar ${lead.nome}`
+            : `Arquivar ${lead.nome}. O lead sai das listas e das contagens do Painel, mas não é excluído.`}
           aria-label={lead.arquivado ? `Desarquivar ${lead.nome}` : `Arquivar ${lead.nome}`}
         >
           {lead.arquivado ? <ArchiveRestore size={16} /> : <Archive size={16} />}
         </button>
       </div>
+
+      {marcandoVisita && (
+        <VisitModal
+          leadPreselecionado={lead}
+          onClose={() => setMarcandoVisita(false)}
+        />
+      )}
     </div>
   )
 }

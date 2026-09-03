@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  X, MessageCircle, Phone, IdCard, Tag, CalendarDays, Home, MapPin,
+  MessageCircle, Phone, IdCard, Tag, CalendarDays, Home, MapPin,
   UserRound, CalendarClock, MessageSquareText, NotebookPen, ChevronDown,
 } from 'lucide-react'
 import {
@@ -12,8 +12,7 @@ import { useLeads } from '../context/LeadsContext'
 import { useLotes } from '../context/LotesContext'
 import { useVisits } from '../context/VisitsContext'
 import { useProfiles } from '../context/ProfilesContext'
-import { useClosingTransition } from '../hooks/useClosingTransition'
-import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { Modal } from './Modal'
 
 // Um campo só aparece quando tem conteúdo — uma ficha cheia de "—" esconde
 // o que realmente foi preenchido no meio do que nunca foi.
@@ -121,8 +120,6 @@ export function LeadDetailModal({ leadId, visita, onClose }) {
   const { lotes } = useLotes()
   const { visitas } = useVisits()
   const { profiles } = useProfiles()
-  const { closing, requestClose } = useClosingTransition(onClose)
-  useBodyScrollLock()
 
   const lead = leads.find(l => l.id === leadId) ?? null
   const lote = lead?.loteId ? lotes.find(l => l.id === lead.loteId) : null
@@ -178,38 +175,34 @@ export function LeadDetailModal({ leadId, visita, onClose }) {
     }
   }, [])
 
-  return (
-    <div className={`modal-overlay ${closing ? 'closing' : ''}`} onClick={requestClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          {editavel && edicaoNome.editando ? (
-            <input
-              className="form-input lead-detail-titulo-input"
-              type="text"
-              aria-label="Nome do contato"
-              {...edicaoNome.inputProps}
-            />
-          ) : (
-            <h2>
-              {editavel ? (
-                <button
-                  type="button"
-                  className="lead-detail-editavel"
-                  onClick={edicaoNome.abrir}
-                  title="Nome. Clique para alterar."
-                  aria-label={`Nome: ${nome}. Clique para alterar.`}
-                >
-                  {nome}
-                </button>
-              ) : nome}
-            </h2>
-          )}
-          <button type="button" className="icon-btn" onClick={requestClose} aria-label="Fechar">
-            <X size={18} />
+  const tituloNode = tituloId => (
+    editavel && edicaoNome.editando ? (
+      <input
+        className="form-input lead-detail-titulo-input"
+        type="text"
+        aria-label="Nome do contato"
+        {...edicaoNome.inputProps}
+      />
+    ) : (
+      <h2 id={tituloId}>
+        {editavel ? (
+          <button
+            type="button"
+            className="lead-detail-editavel"
+            onClick={edicaoNome.abrir}
+            title="Nome. Clique para alterar."
+            aria-label={`Nome: ${nome}. Clique para alterar.`}
+          >
+            {nome}
           </button>
-        </div>
+        ) : nome}
+      </h2>
+    )
+  )
 
-        <div className="modal-body">
+  return (
+    <Modal tituloNode={tituloNode} onClose={onClose}>
+      <div className="modal-body">
           {telefone && (
             <a
               className="btn btn-primary lead-detail-whatsapp"
@@ -364,8 +357,7 @@ export function LeadDetailModal({ leadId, visita, onClose }) {
               ))}
             </div>
           </div>
-        </div>
       </div>
-    </div>
+    </Modal>
   )
 }

@@ -7,7 +7,11 @@ import { toISODate } from '../utils/visitHelpers'
 
 const VisitsContext = createContext(null)
 
-const VISITA_SELECT = 'id, tipo, lote_id, lead_id, data, hora, responsavel_id, status, recepcao_nome_completo, recepcao_cpf, recepcao_telefone, feedback, profiles(nome)'
+// "profiles!responsavel_id" desambigua o embed: a coluna visitas.criado_por
+// também referencia profiles(id), então há duas relações entre visitas e
+// profiles e o PostgREST não sabe mais qual usar pro join implícito sem essa
+// anotação (erro PGRST201).
+const VISITA_SELECT = 'id, tipo, lote_id, lead_id, data, hora, responsavel_id, status, recepcao_nome_completo, recepcao_cpf, recepcao_telefone, feedback, profiles!responsavel_id(nome)'
 
 function fromRow(row) {
   const visita = {

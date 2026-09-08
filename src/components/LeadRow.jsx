@@ -3,7 +3,25 @@ import { MessageCircle, CheckCircle2, Archive, ArchiveRestore, ChevronDown } fro
 import { etapaToClassName, formatPhone, whatsappLink, origemLabel, LEAD_ETAPA_OPTIONS } from '../utils/leadHelpers'
 import { formatDate } from '../utils/loteHelpers'
 
-export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showLote = false }) {
+function LeadInfoContent({ lead, lote, showLote }) {
+  return (
+    <>
+      <div className="lote-lead-name">
+        {lead.nome}
+        {lead.arquivado && <span className="lead-archived-tag">Arquivado</span>}
+      </div>
+      <span className="lote-lead-phone">{formatPhone(lead.telefone)}</span>
+      <span className="lote-lead-meta">
+        {origemLabel(lead.origem) || 'Origem não informada'} · recebido em {formatDate(lead.dataRecebimento)}
+      </span>
+      {showLote && (
+        <span className="lote-lead-imovel mono">{lote ? lote.codigo : 'Sem imóvel vinculado'}</span>
+      )}
+    </>
+  )
+}
+
+export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showLote = false, onOpenDetail }) {
   const [editing, setEditing] = useState(null) // null | 'etapa' | 'vendedor' | 'agendador'
   const vendedor = vendedores.find(p => p.id === lead.vendedorId)
   const agendador = agendadores.find(p => p.id === lead.agendadorId)
@@ -25,16 +43,17 @@ export function LeadRow({ lead, lote, vendedores, agendadores, updateLead, showL
   return (
     <div className={`lead-row${lead.arquivado ? ' lead-row-archived' : ''}`}>
       <div className="lote-lead-info">
-        <div className="lote-lead-name">
-          {lead.nome}
-          {lead.arquivado && <span className="lead-archived-tag">Arquivado</span>}
-        </div>
-        <span className="lote-lead-phone">{formatPhone(lead.telefone)}</span>
-        <span className="lote-lead-meta">
-          {origemLabel(lead.origem) || 'Origem não informada'} · recebido em {formatDate(lead.dataRecebimento)}
-        </span>
-        {showLote && (
-          <span className="lote-lead-imovel mono">{lote ? lote.codigo : 'Sem imóvel vinculado'}</span>
+        {onOpenDetail ? (
+          <button
+            type="button"
+            className="lote-lead-info-trigger"
+            onClick={() => onOpenDetail(lead.id)}
+            aria-label={`Ver ficha de ${lead.nome}`}
+          >
+            <LeadInfoContent lead={lead} lote={lote} showLote={showLote} />
+          </button>
+        ) : (
+          <LeadInfoContent lead={lead} lote={lote} showLote={showLote} />
         )}
       </div>
 

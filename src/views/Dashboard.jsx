@@ -213,7 +213,7 @@ export function Dashboard() {
       </div>
 
       {etapaAberta && (
-        <EtapaLeadsModal etapa={etapaAberta} leads={leadsEscopo} onClose={() => setEtapaAberta(null)} />
+        <EtapaLeadsModal etapa={etapaAberta} onClose={() => setEtapaAberta(null)} />
       )}
     </div>
   )

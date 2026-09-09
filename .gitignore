@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Variáveis de ambiente (nunca versionar; .env.example fica, sem valores)
+.env
+.env.*
+!.env.example
+
+# Estado local de ferramentas (contém token de sessão da máquina)
+.impeccable/
+
+# Capturas de tela de validação: podem conter dados reais de clientes
+*-validacao.png
+Captura de tela*.png
+
+# HTML intermediário usado só para gerar o PDF do status
+STATUS-AUTOMACAO.html

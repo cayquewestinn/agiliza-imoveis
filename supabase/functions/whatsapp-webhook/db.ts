@@ -1,0 +1,189 @@
+// Funções que tocam o banco (via service_role, injetado pelo runtime de
+// Edge Functions) e as APIs externas (Meta). Separado de logica.ts
+// porque essas aqui não dá pra testar sem credenciais reais.
+
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2'
+import type { VisitaExistente } from './logica.ts'
+
+export function criarClienteSupabase(): SupabaseClient {
+  return createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  )
+}
+
+export interface Conversa {
+  id: string
+  telefone: string
+  leadId: string | null
+  historico: Array<{ role: 'user' | 'assistant'; content: string }>
+  janelaExpiraEm: string | null
+  status: string
+  visitaId: string | null
+  ultimaMensagemId: string | null
+}
+
+function fromRow(row: Record<string, unknown>): Conversa {
+  return {
+    id: row.id as string,
+    telefone: row.telefone as string,
+    leadId: (row.lead_id as string) ?? null,
+    historico: (row.historico as Conversa['historico']) ?? [],
+    janelaExpiraEm: (row.janela_expira_em as string) ?? null,
+    status: row.status as string,
+    visitaId: (row.visita_id as string) ?? null,
+    ultimaMensagemId: (row.ultima_mensagem_id as string) ?? null,
+  }
+}
+
+// Carrega a conversa pelo telefone, criando uma nova se essa for a
+// primeira mensagem dessa pessoa. Resolve lead_id por igualdade de
+// telefone (leads.telefone já vem sempre com prefixo 55, igual ao
+// wa_id da Meta). Se houver mais de um lead com o mesmo telefone, usa
+// o mais recente por data_recebimento — caso raro, não trava o fluxo.
+export async function buscarOuCriarConversa(supabase: SupabaseClient, telefone: string): Promise<Conversa> {
+  const { data: existente } = await supabase
+    .from('whatsapp_conversas')
+    .select('*')
+    .eq('telefone', telefone)
+    .maybeSingle()
+  if (existente) return fromRow(existente)
+
+  const { data: leads } = await supabase
+    .from('leads')
+    .select('id')
+    .eq('telefone', telefone)
+    .order('data_recebimento', { ascending: false })
+    .limit(1)
+  const leadId = leads?.[0]?.id ?? null
+
+  const { data: criada, error } = await supabase
+    .from('whatsapp_conversas')
+    .insert({ telefone, lead_id: leadId, historico: [], status: 'aberta' })
+    .select('*')
+    .single()
+  if (error) throw error
+  return fromRow(criada)
+}
+
+export async function atualizarConversa(
+  supabase: SupabaseClient,
+  conversaId: string,
+  updates: Partial<{
+    historico: Conversa['historico']
+    janelaExpiraEm: string
+    status: string
+    visitaId: string
+    ultimaMensagemId: string
+  }>,
+): Promise<void> {
+  const row: Record<string, unknown> = { updated_at: new Date().toISOString() }
+  if (updates.historico !== undefined) row.historico = updates.historico
+  if (updates.janelaExpiraEm !== undefined) row.janela_expira_em = updates.janelaExpiraEm
+  if (updates.status !== undefined) row.status = updates.status
+  if (updates.visitaId !== undefined) row.visita_id = updates.visitaId
+  if (updates.ultimaMensagemId !== undefined) row.ultima_mensagem_id = updates.ultimaMensagemId
+  const { error } = await supabase.from('whatsapp_conversas').update(row).eq('id', conversaId)
+  if (error) throw error
+}
+
+// --- Ferramentas que a IA usa ---
+
+export async function visitasDoResponsavelNoDia(
+  supabase: SupabaseClient,
+  responsavelId: string,
+  data: string,
+): Promise<VisitaExistente[]> {
+  const { data: rows, error } = await supabase
+    .from('visitas')
+    .select('data, hora, responsavel_id, status')
+    .eq('responsavel_id', responsavelId)
+    .eq('data', data)
+  if (error) throw error
+  return (rows ?? []).map(r => ({
+    data: r.data,
+    hora: (r.hora as string).slice(0, 5),
+    responsavelId: r.responsavel_id,
+    status: r.status,
+  }))
+}
+
+// Espelha VisitModal.jsx:150-172 — mesmo shape de visita/lead que o
+// formulário manual grava, só que com criado_por preenchido (é o que
+// distingue uma visita marcada pela IA de uma marcada por pessoa).
+export async function marcarVisita(
+  supabase: SupabaseClient,
+  params: {
+    leadId: string
+    responsavelId: string
+    data: string
+    hora: string
+    observacao?: string
+  },
+): Promise<{ visitaId: string }> {
+  const { data: visita, error } = await supabase
+    .from('visitas')
+    .insert({
+      tipo: 'empresa',
+      lote_id: null,
+      lead_id: params.leadId,
+      data: params.data,
+      hora: params.hora,
+      responsavel_id: params.responsavelId,
+      status: 'Agendada',
+      criado_por: params.responsavelId,
+      feedback: params.observacao ?? null,
+    })
+    .select('id')
+    .single()
+  if (error) throw error
+
+  const { error: erroLead } = await supabase
+    .from('leads')
+    .update({ etapa: 'Em Visita' })
+    .eq('id', params.leadId)
+  if (erroLead) throw erroLead
+
+  return { visitaId: visita.id }
+}
+
+export async function anotarObservacao(supabase: SupabaseClient, leadId: string, texto: string): Promise<void> {
+  const { data: lead, error: erroBusca } = await supabase
+    .from('leads')
+    .select('observacoes')
+    .eq('id', leadId)
+    .single()
+  if (erroBusca) throw erroBusca
+
+  const existente = (lead?.observacoes as string) ?? ''
+  const novoTexto = existente ? `${existente}\n${texto}` : texto
+
+  const { error } = await supabase.from('leads').update({ observacoes: novoTexto }).eq('id', leadId)
+  if (error) throw error
+}
+
+// --- Envio pelo Graph API da Meta ---
+//
+// Pulado (só logado) quando META_WHATSAPP_TOKEN não está configurado —
+// não existe ainda, o chip/WABA é 100% manual do usuário.
+export async function enviarMensagemWhatsapp(telefone: string, texto: string): Promise<void> {
+  const token = Deno.env.get('META_WHATSAPP_TOKEN')
+  const phoneNumberId = Deno.env.get('META_PHONE_NUMBER_ID')
+  if (!token || !phoneNumberId) {
+    console.log(`[dry-run] enviaria pro ${telefone}: ${texto}`)
+    return
+  }
+  const resposta = await fetch(`https://graph.facebook.com/v20.0/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to: telefone,
+      type: 'text',
+      text: { body: texto },
+    }),
+  })
+  if (!resposta.ok) {
+    console.error('Falha ao enviar mensagem via Graph API:', await resposta.text())
+  }
+}

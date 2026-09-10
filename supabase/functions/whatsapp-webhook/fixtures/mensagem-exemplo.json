@@ -1,0 +1,32 @@
+{
+  "entry": [
+    {
+      "id": "0",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "5511900000000",
+              "phone_number_id": "000000000000000"
+            },
+            "contacts": [
+              { "profile": { "name": "Teste Automação" }, "wa_id": "5511999999999" }
+            ],
+            "messages": [
+              {
+                "from": "5511999999999",
+                "id": "wamid.TESTE_FIXTURE_0001",
+                "timestamp": "1700000000",
+                "type": "text",
+                "text": { "body": "Oi, quero marcar uma visita" }
+              }
+            ]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ],
+  "object": "whatsapp_business_account"
+}

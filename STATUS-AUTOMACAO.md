@@ -1,4 +1,4 @@
-ss# Sistema interno Agiliza Imóveis — status do projeto
+# Sistema interno Agiliza Imóveis — status do projeto
 
 **Data:** 09/09/2026
 

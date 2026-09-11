@@ -1,7 +1,9 @@
 import { assert, assertEquals } from 'jsr:@std/assert@1'
 import {
+  escolherVendedor,
   extrairMensagem,
   horariosLivres,
+  limitesDaSemana,
   mensagemJaProcessada,
   verificarAssinatura,
 } from './logica.ts'
@@ -57,6 +59,47 @@ Deno.test('mensagemJaProcessada detecta reentrega', () => {
   assert(mensagemJaProcessada('wamid.1', 'wamid.1'))
   assert(!mensagemJaProcessada('wamid.2', 'wamid.1'))
   assert(!mensagemJaProcessada('wamid.1', null))
+})
+
+Deno.test('escolherVendedor escolhe quem tem menos visitas na semana', () => {
+  const escolhido = escolherVendedor([
+    { id: 'v1', nome: 'Bruno', visitasNaSemana: 3 },
+    { id: 'v2', nome: 'Ana', visitasNaSemana: 1 },
+    { id: 'v3', nome: 'Carla', visitasNaSemana: 5 },
+  ])
+  assertEquals(escolhido.id, 'v2')
+})
+
+Deno.test('escolherVendedor quebra empate por ordem alfabética do nome', () => {
+  const escolhido = escolherVendedor([
+    { id: 'v1', nome: 'Bruno', visitasNaSemana: 2 },
+    { id: 'v2', nome: 'Ana', visitasNaSemana: 2 },
+  ])
+  assertEquals(escolhido.id, 'v2')
+  assertEquals(escolhido.nome, 'Ana')
+})
+
+Deno.test('escolherVendedor com um único candidato devolve ele mesmo', () => {
+  const escolhido = escolherVendedor([{ id: 'v1', nome: 'Bruno', visitasNaSemana: 0 }])
+  assertEquals(escolhido.id, 'v1')
+})
+
+Deno.test('limitesDaSemana devolve segunda a domingo contendo a data de referência', () => {
+  // 2026-09-10 é quinta-feira; a semana vai de 2026-09-07 (segunda) a
+  // 2026-09-13 (domingo).
+  assertEquals(limitesDaSemana('2026-09-10'), { inicio: '2026-09-07', fim: '2026-09-13' })
+})
+
+Deno.test('limitesDaSemana na própria segunda-feira devolve ela mesma como início', () => {
+  assertEquals(limitesDaSemana('2026-09-07'), { inicio: '2026-09-07', fim: '2026-09-13' })
+})
+
+Deno.test('limitesDaSemana no domingo devolve a segunda anterior como início', () => {
+  assertEquals(limitesDaSemana('2026-09-13'), { inicio: '2026-09-07', fim: '2026-09-13' })
+})
+
+Deno.test('limitesDaSemana na segunda seguinte devolve uma semana diferente', () => {
+  assertEquals(limitesDaSemana('2026-09-14'), { inicio: '2026-09-14', fim: '2026-09-20' })
 })
 
 Deno.test('verificarAssinatura aceita assinatura correta e rejeita errada/ausente', async () => {

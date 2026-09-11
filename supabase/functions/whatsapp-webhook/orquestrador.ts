@@ -4,8 +4,15 @@
 
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import Anthropic from 'npm:@anthropic-ai/sdk@0.32'
-import { horariosLivres } from './logica.ts'
-import { anotarObservacao, marcarVisita, visitasDoResponsavelNoDia, type Conversa } from './db.ts'
+import { escolherVendedor, horariosDoExpediente, horariosLivres, limitesDaSemana } from './logica.ts'
+import {
+  anotarObservacao,
+  contagemVisitasAgendadasNaSemana,
+  listarVendedores,
+  marcarVisita,
+  visitasDoResponsavelNoDia,
+  type Conversa,
+} from './db.ts'
 
 const MODELO = 'claude-haiku-4-5'
 const MAX_ITERACOES_FERRAMENTA = 4
@@ -13,7 +20,10 @@ const MAX_ITERACOES_FERRAMENTA = 4
 // Nunca inventar horário, nunca pedir CPF (recepcao_cpf é opcional no
 // banco — quem coleta é a recepção, presencialmente), listas cabem os
 // 13 horários do expediente (07h–19h), botões do WhatsApp só cabem 3.
-function promptDeSistema(agendadorProfileId: string): string {
+// Quem atende é sempre um Vendedor (agendadores não atendem
+// presencialmente — decisão de produto), sorteado entre os livres no
+// horário; o nome vem pronto no resultado de marcar_visita.
+function promptDeSistema(): string {
   return `Você é a assistente de agendamento de visitas da Agiliza Imóveis, conversando pelo WhatsApp com um lead que já demonstrou interesse.
 
 Regras:
@@ -21,8 +31,8 @@ Regras:
 - NUNCA invente ou estime um horário livre — sempre use a ferramenta consultar_horarios_livres antes de oferecer qualquer data.
 - NUNCA peça CPF, RG ou qualquer documento — isso é coletado presencialmente na recepção.
 - Ao oferecer horários, ofereça todos os horários livres do dia perguntado, em formato de lista (o WhatsApp permite até 13 itens numa lista; nunca use botões para isso, botões cabem só 3 opções).
-- O responsável por todas as visitas é sempre o mesmo (id ${agendadorProfileId}) — nunca pergunte "com qual corretor".
-- Depois de marcar a visita com sucesso, confirme data e horário em uma frase curta.
+- Não pergunte "com qual corretor" — quem vai atender é decidido só na hora de marcar.
+- Depois de marcar a visita com sucesso, sempre informe ao lead quem vai atendê-lo, usando exatamente o nome que veio no resultado da ferramenta marcar_visita — nunca invente ou omita esse nome. Confirme data e horário na mesma frase.
 - Se algo relevante sobre a preferência do lead aparecer na conversa (tipo de imóvel, bairro, orçamento), grave com anotar_observacao.
 - Tom cordial e direto, português informal do Brasil, sem emojis em excesso.`
 }
@@ -78,6 +88,11 @@ export async function processarMensagem(
   opts: { anthropicApiKey: string; agendadorProfileId: string },
 ): Promise<ResultadoProcessamento> {
   const anthropic = new Anthropic({ apiKey: opts.anthropicApiKey })
+  // Nome do campo (opts.agendadorProfileId) e do secret (AGENDADOR_PROFILE_ID)
+  // continuam os mesmos por compatibilidade com index.ts — só o SENTIDO
+  // de uso mudou: não é mais "quem atende toda visita", é só a
+  // assinatura fixa de visitas.criado_por quando quem marcou foi a IA.
+  const criadoPorAutomacaoId = opts.agendadorProfileId
 
   const mensagens: Anthropic.MessageParam[] = [
     ...conversa.historico.map(h => ({ role: h.role, content: h.content }) as Anthropic.MessageParam),
@@ -92,7 +107,7 @@ export async function processarMensagem(
     const resposta = await anthropic.messages.create({
       model: MODELO,
       max_tokens: 1024,
-      system: promptDeSistema(opts.agendadorProfileId),
+      system: promptDeSistema(),
       tools: FERRAMENTAS,
       messages: mensagens,
     })
@@ -118,7 +133,7 @@ export async function processarMensagem(
 
     const resultadosFerramenta: Anthropic.ToolResultBlockParam[] = []
     for (const bloco of blocosDeFerramenta) {
-      const resultado = await executarFerramenta(supabase, bloco, conversa, opts.agendadorProfileId)
+      const resultado = await executarFerramenta(supabase, bloco, conversa, criadoPorAutomacaoId)
       if (resultado.visitaId) visitaIdMarcada = resultado.visitaId
       resultadosFerramenta.push({
         type: 'tool_result',
@@ -152,29 +167,69 @@ async function executarFerramenta(
   supabase: SupabaseClient,
   bloco: Anthropic.ToolUseBlock,
   conversa: Conversa,
-  agendadorProfileId: string,
+  criadoPorAutomacaoId: string,
 ): Promise<{ texto: string; visitaId?: string }> {
   const input = bloco.input as Record<string, unknown>
 
   if (bloco.name === 'consultar_horarios_livres') {
     const data = input.data as string
-    const visitas = await visitasDoResponsavelNoDia(supabase, agendadorProfileId, data)
-    const livres = horariosLivres(data, agendadorProfileId, visitas)
-    return { texto: livres.length ? livres.join(', ') : 'Nenhum horário livre nesse dia.' }
+    const vendedores = await listarVendedores(supabase)
+    if (vendedores.length === 0) {
+      return { texto: 'Nenhum vendedor disponível para atender no momento.' }
+    }
+    const visitas = await visitasDoResponsavelNoDia(supabase, vendedores.map(v => v.id), data)
+    const livresPorVendedor = new Map(vendedores.map(v => [v.id, new Set(horariosLivres(data, v.id, visitas))]))
+    // União: um horário aparece se PELO MENOS UM vendedor estiver livre
+    // nele. horariosDoExpediente() já vem em ordem cronológica.
+    const uniao = horariosDoExpediente().filter(slot =>
+      vendedores.some(v => livresPorVendedor.get(v.id)!.has(slot))
+    )
+    return { texto: uniao.length ? uniao.join(', ') : 'Nenhum horário livre nesse dia.' }
   }
 
   if (bloco.name === 'marcar_visita') {
     if (!conversa.leadId) {
       return { texto: 'Não foi possível identificar o cadastro deste contato para marcar a visita.' }
     }
+    const data = input.data as string
+    const hora = input.hora as string
+
+    const vendedores = await listarVendedores(supabase)
+    if (vendedores.length === 0) {
+      return { texto: 'Nenhum vendedor disponível para atender no momento.' }
+    }
+
+    // Recalcula quem está livre EXATAMENTE nesse horário — pode ter
+    // mudado desde a última consulta (outra conversa marcou antes).
+    const visitas = await visitasDoResponsavelNoDia(supabase, vendedores.map(v => v.id), data)
+    const livresNoHorario = vendedores.filter(v => horariosLivres(data, v.id, visitas).includes(hora))
+
+    if (livresNoHorario.length === 0) {
+      return {
+        texto: 'Esse horário acabou de ficar indisponível (outra visita foi marcada primeiro). Consulte os horários livres de novo antes de tentar marcar.',
+      }
+    }
+
+    let escolhido: { id: string; nome: string }
+    if (livresNoHorario.length === 1) {
+      escolhido = livresNoHorario[0]
+    } else {
+      const limites = limitesDaSemana(data)
+      const contagem = await contagemVisitasAgendadasNaSemana(supabase, livresNoHorario.map(v => v.id), limites)
+      escolhido = escolherVendedor(
+        livresNoHorario.map(v => ({ id: v.id, nome: v.nome, visitasNaSemana: contagem[v.id] ?? 0 })),
+      )
+    }
+
     const { visitaId } = await marcarVisita(supabase, {
       leadId: conversa.leadId,
-      responsavelId: agendadorProfileId,
-      data: input.data as string,
-      hora: input.hora as string,
+      responsavelId: escolhido.id,
+      criadoPor: criadoPorAutomacaoId,
+      data,
+      hora,
       observacao: input.observacao as string | undefined,
     })
-    return { texto: 'Visita marcada com sucesso.', visitaId }
+    return { texto: `Visita marcada com sucesso. Você será atendido(a) por ${escolhido.nome}.`, visitaId }
   }
 
   if (bloco.name === 'anotar_observacao') {

@@ -89,15 +89,32 @@ export async function atualizarConversa(
 
 // --- Ferramentas que a IA usa ---
 
+// Agendadores não atendem presencialmente — só perfis com cargo
+// 'Vendedor' atendem visita. Mesmo filtro exato de Dashboard.jsx:131
+// (profiles.filter(p => p.cargo === 'Vendedor')), pra não divergir do
+// que o resto do CRM já considera "vendedor".
+export async function listarVendedores(supabase: SupabaseClient): Promise<{ id: string; nome: string }[]> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, nome')
+    .eq('cargo', 'Vendedor')
+  if (error) throw error
+  return (data ?? []).map(r => ({ id: r.id as string, nome: r.nome as string }))
+}
+
+// Generalizada pra aceitar vários responsáveis de uma vez (antes era um
+// só) — precisa das visitas de todos os vendedores no mesmo dia pra
+// calcular a união de horários livres e, na hora de marcar, quem está
+// livre exatamente naquele horário.
 export async function visitasDoResponsavelNoDia(
   supabase: SupabaseClient,
-  responsavelId: string,
+  responsavelIds: string[],
   data: string,
 ): Promise<VisitaExistente[]> {
   const { data: rows, error } = await supabase
     .from('visitas')
     .select('data, hora, responsavel_id, status')
-    .eq('responsavel_id', responsavelId)
+    .in('responsavel_id', responsavelIds)
     .eq('data', data)
   if (error) throw error
   return (rows ?? []).map(r => ({
@@ -108,14 +125,44 @@ export async function visitasDoResponsavelNoDia(
   }))
 }
 
+// Quantas visitas 'Agendada' cada responsável já tem na semana (limites
+// de logica.ts:limitesDaSemana) — usado só pra desempate entre vendedores
+// livres no mesmo horário (ver escolherVendedor em logica.ts). Todo id
+// pedido entra no resultado, mesmo com contagem zero.
+export async function contagemVisitasAgendadasNaSemana(
+  supabase: SupabaseClient,
+  responsavelIds: string[],
+  limites: { inicio: string; fim: string },
+): Promise<Record<string, number>> {
+  const { data: rows, error } = await supabase
+    .from('visitas')
+    .select('responsavel_id')
+    .in('responsavel_id', responsavelIds)
+    .eq('status', 'Agendada')
+    .gte('data', limites.inicio)
+    .lte('data', limites.fim)
+  if (error) throw error
+  const contagem: Record<string, number> = {}
+  for (const id of responsavelIds) contagem[id] = 0
+  for (const row of rows ?? []) {
+    const id = row.responsavel_id as string
+    contagem[id] = (contagem[id] ?? 0) + 1
+  }
+  return contagem
+}
+
 // Espelha VisitModal.jsx:150-172 — mesmo shape de visita/lead que o
-// formulário manual grava, só que com criado_por preenchido (é o que
-// distingue uma visita marcada pela IA de uma marcada por pessoa).
+// formulário manual grava. `responsavelId` é o vendedor sorteado (quem
+// atende); `criadoPor` é a assinatura fixa da automação (distingue
+// "marcado pela IA" de "marcado por pessoa" em visitas.criado_por) — os
+// dois eram o mesmo valor antes da distribuição por vendedor existir, o
+// que confundia "quem atende" com "quem/o quê criou o registro".
 export async function marcarVisita(
   supabase: SupabaseClient,
   params: {
     leadId: string
     responsavelId: string
+    criadoPor: string
     data: string
     hora: string
     observacao?: string
@@ -131,7 +178,7 @@ export async function marcarVisita(
       hora: params.hora,
       responsavel_id: params.responsavelId,
       status: 'Agendada',
-      criado_por: params.responsavelId,
+      criado_por: params.criadoPor,
       feedback: params.observacao ?? null,
     })
     .select('id')

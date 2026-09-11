@@ -43,6 +43,50 @@ export function horariosLivres(data: string, responsavelId: string, visitasDoRes
   )
 }
 
+// --- Distribuição de visita entre vendedores ---
+//
+// Agendadores não atendem presencialmente (decisão de produto) — quem
+// atende é sempre um Vendedor, escolhido entre os que estão livres no
+// horário pedido. `visitas.criado_por` continua distinguindo "marcado
+// pela IA" de "marcado por pessoa" (ver AGENDADOR_PROFILE_ID em
+// orquestrador.ts), mas não determina mais quem atende.
+
+export interface CandidatoVendedor {
+  id: string
+  nome: string
+  visitasNaSemana: number
+}
+
+// Menor carga na semana vence; empate quebra por ordem alfabética do
+// nome (determinístico, sem estado). INVARIANTE: quem chama garante
+// `candidatos` não-vazio — só existem candidatos livres naquele horário
+// exato, filtrados antes de chegar aqui (ver executarFerramenta).
+export function escolherVendedor(candidatos: CandidatoVendedor[]): { id: string; nome: string } {
+  const [escolhido] = [...candidatos].sort((a, b) =>
+    a.visitasNaSemana !== b.visitasNaSemana
+      ? a.visitasNaSemana - b.visitasNaSemana
+      : a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
+  )
+  return { id: escolhido.id, nome: escolhido.nome }
+}
+
+function toISODate(data: Date): string {
+  return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`
+}
+
+// Segunda a domingo contendo a data de referência — regra de negócio
+// nova (distribuição de carga), independente da grade visual do
+// Agenda.jsx (que começa no domingo; não confundir as duas convenções).
+export function limitesDaSemana(dataReferenciaIso: string): { inicio: string; fim: string } {
+  const [y, m, d] = dataReferenciaIso.split('-').map(Number)
+  const referencia = new Date(y, m - 1, d)
+  const diaSemana = referencia.getDay() // 0=domingo ... 6=sábado
+  const deslocamentoAteSegunda = diaSemana === 0 ? 6 : diaSemana - 1
+  const segunda = new Date(y, m - 1, d - deslocamentoAteSegunda)
+  const domingo = new Date(y, m - 1, d - deslocamentoAteSegunda + 6)
+  return { inicio: toISODate(segunda), fim: toISODate(domingo) }
+}
+
 // --- Assinatura do webhook da Meta (X-Hub-Signature-256) ---
 //
 // Toda requisição POST precisa disso validado ANTES de tocar em
